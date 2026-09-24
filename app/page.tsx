@@ -74,7 +74,7 @@ export default function HomePage() {
 
       {/* Stats band */}
       <section aria-label="Coverage at a glance" className="bg-brand-900">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           <dl className="grid grid-cols-3 gap-4 sm:gap-6">
             {stats.map((s) => (
               <div key={s.label} className="flex min-w-0 flex-col">
@@ -97,7 +97,7 @@ export default function HomePage() {
       </section>
 
       {/* Explore */}
-      <section aria-label="Explore collections" className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+      <section aria-label="Explore collections" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
         <SectionHeader
           large
           title="Explore"
@@ -130,7 +130,7 @@ export default function HomePage() {
 
       {/* Popular searches */}
       <section aria-label="Popular searches" className="border-t border-line bg-white">
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <SectionHeader
             large
             title="Popular searches"
@@ -147,7 +147,7 @@ export default function HomePage() {
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {groups.map((group) => (
-              <div key={group.heading} className="rounded-xl border border-line bg-surface p-5">
+              <div key={group.heading} className="flex h-full flex-col rounded-xl border border-line bg-surface p-5">
                 <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
                   <group.icon className="h-4 w-4 text-brand-700" aria-hidden="true" />
                   {group.heading}
@@ -175,7 +175,7 @@ export default function HomePage() {
 
       {/* Sources */}
       <section aria-label="Data sources" className="border-t border-line bg-surface">
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <SectionHeader
             large
             title="Sourced, not scraped"
@@ -183,7 +183,7 @@ export default function HomePage() {
           />
           <ul className="mt-6 grid gap-4 md:grid-cols-3">
             {sources.map((s) => (
-              <li key={s.name} className="flex flex-col rounded-xl border border-line bg-white p-5">
+              <li key={s.name} className="flex h-full flex-col rounded-xl border border-line bg-white p-5">
                 <p className="text-sm font-bold text-ink">{s.name}</p>
                 <p className="mt-0.5 text-xs text-muted">{s.scope}</p>
                 <p className="mt-3 break-all rounded-md bg-surface px-2 py-1.5 font-mono text-xs text-muted">{s.endpoint}</p>

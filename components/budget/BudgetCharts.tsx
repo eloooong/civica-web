@@ -7,12 +7,16 @@ import { Bar } from "@/components/charts/bar";
 import { BarXAxis } from "@/components/charts/bar-x-axis";
 import { BarYAxis } from "@/components/charts/bar-y-axis";
 import { Grid } from "@/components/charts/grid";
+import { RingChart } from "@/components/charts/ring-chart";
+import { Ring } from "@/components/charts/ring";
+import { RingCenter } from "@/components/charts/ring-center";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import type { TooltipRow } from "@/components/charts/tooltip/tooltip-content";
 import type { DepartmentRow, ExpenseClassRow, NationalYearTotal } from "@/types/budget";
-import { formatPesoCompact, formatPesoFull, formatShare, toTrillions } from "@/lib/utils";
+import { formatPesoCompact, formatShare, toTrillions } from "@/lib/utils";
 
 const BRAND = "var(--chart-1)";
+const EXPENSE_COLORS = ["#0038A8", "#0F4FD0", "#5B8DEF", "#B9CDFD"];
 
 function ChartShell({
   title,
@@ -26,13 +30,13 @@ function ChartShell({
   children: React.ReactNode;
 }) {
   return (
-    <figure className="min-w-0 rounded-lg border border-line bg-white p-5">
+    <figure className="flex h-full min-w-0 flex-col rounded-lg border border-line bg-white p-5">
       <figcaption id={captionId} className="text-sm font-bold text-ink">
         {title}
       </figcaption>
       <p className="sr-only">{summary}</p>
       {/* Bklit charts render aria-hidden SVGs and size themselves. */}
-      <div className="mt-4" aria-hidden="true">
+      <div className="mt-4 min-h-0 flex-1" aria-hidden="true">
         {children}
       </div>
     </figure>
@@ -60,7 +64,7 @@ export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) 
       captionId="national-trend-caption"
       summary={`Enacted national budget per year. ${summary}.`}
     >
-      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="lg:min-h-[500px]">
+      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="min-h-[320px] sm:min-h-[360px]">
         <Grid horizontal />
         <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
         <BarXAxis />
@@ -115,10 +119,10 @@ export function TopDepartmentsChart({
         orientation="horizontal"
         aspectRatio="4 / 3"
         // Roomy bands on phones: 10 labels at 12px need ~30px each, but a
-        // 4/3 box only yields ~15px per band at 360px wide. The min-height
-        // overrides the aspect ratio below the sm breakpoint (ParentSize
-        // measures the real box, so bands gain the extra room).
-        className="min-h-[380px] sm:min-h-0"
+        // 4/3 box only yields ~15px per band at 360px wide. The shared
+        // minimum height keeps bands readable on phones and keeps the
+        // chart pair even on desktop (ParentSize measures the real box).
+        className="min-h-[320px] sm:min-h-[360px]"
         // Wide left gutter: axis labels truncate at 70px and right-align
         // into this gutter. The 40px default clips them past the card edge.
         margin={{ top: 16, right: 16, bottom: 32, left: 96 }}
@@ -156,7 +160,7 @@ export function DepartmentTrendChart({ totals }: { totals: NationalYearTotal[] }
       captionId="dept-trend-caption"
       summary={`Department enacted budget per year. ${summary}.`}
     >
-      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="lg:min-h-[500px]">
+      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="min-h-[320px] sm:min-h-[360px]">
         <Grid horizontal />
         <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
         <BarXAxis />
@@ -178,7 +182,7 @@ const EXPENSE_SHORT: Record<string, string> = {
   "Capital Outlays": "CO",
 };
 
-/** Expense-class mix for one fiscal year, as sorted horizontal bars. */
+/** Expense-class mix for one fiscal year, as concentric share rings. */
 export function ExpenseMixChart({
   classes,
   year,
@@ -192,10 +196,11 @@ export function ExpenseMixChart({
   const items = useMemo(
     () =>
       classes
-        .map((c) => ({
+        .map((c, i) => ({
           full: c.label,
           short: EXPENSE_SHORT[c.label] ?? c.label,
           amount: c.years[yearKey]?.amount ?? 0,
+          color: EXPENSE_COLORS[i % EXPENSE_COLORS.length]!,
         }))
         .sort((a, b) => b.amount - a.amount),
     [classes, yearKey]
@@ -209,53 +214,54 @@ export function ExpenseMixChart({
       captionId="expense-mix-caption"
       summary={`Budget by expense class for FY ${year}. ${summary}.`}
     >
-      <BarChart
-        data={items.map((d) => ({ name: d.short, amount: d.amount / 1e9 }))}
-        xDataKey="name"
-        orientation="horizontal"
-        aspectRatio="4 / 3"
-        // Same band math as the departments chart: 4 short labels need
-        // breathing room below the sm breakpoint; the gutter fits the
-        // truncated axis labels inside the chart.
-        className="min-h-[220px] sm:min-h-0"
-        margin={{ top: 16, right: 16, bottom: 32, left: 72 }}
-      >
-        <Grid vertical />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
-        <BarYAxis />
-        <ChartTooltip
-          showDatePill={false}
-          showDots={false}
-          rows={(point) => {
-            const item = items.find((d) => d.short === String(point.name));
-            const amount = item?.amount ?? 0;
-            return [
-              { color: "#0038A8", label: item?.full ?? String(point.name), value: formatPesoFull(amount) },
-              {
-                color: "#5B8DEF",
-                label: `Share of FY ${year}`,
-                value: total > 0 ? formatShare(amount / total) : "–",
-              },
-            ];
-          }}
-        />
-      </BarChart>
-      <ul className="mt-4 space-y-2.5" aria-label="Expense class breakdown">
-        {items.map((d) => (
-          <li key={d.full} className="flex items-center gap-2.5 text-sm">
-            <span
-              aria-hidden="true"
-              className="h-3 w-3 shrink-0 rounded-sm bg-brand-700"
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate font-semibold text-ink">{d.full}</span>
-              <span className="block text-xs text-muted">
-                {formatPesoCompact(d.amount)} · {total > 0 ? formatShare(d.amount / total) : "–"}
+      <div className="flex h-full flex-col items-center justify-center gap-5 sm:flex-row sm:gap-6">
+        <div className="w-full max-w-60">
+          <RingChart
+            data={items.map((d) => ({
+              label: d.short,
+              value: d.amount,
+              maxValue: total > 0 ? total : 1,
+              color: d.color,
+            }))}
+          >
+            {items.map((_, i) => (
+              <Ring key={items[i]?.short ?? i} index={i} showGlow={false} animate={!reduceMotion} />
+            ))}
+            <RingCenter>
+              {({ isHovered, label, value, data }) => {
+                const share = data.maxValue > 0 ? value / data.maxValue : 0;
+                return (
+                  <div className="text-center">
+                    <div className="text-xl font-bold tracking-tight text-ink tabular-nums">
+                      {isHovered ? formatShare(share) : `₱${toTrillions(total)}T`}
+                    </div>
+                    <div className="mt-0.5 text-xs text-muted">
+                      {isHovered ? label : `FY ${year} enacted`}
+                    </div>
+                  </div>
+                );
+              }}
+            </RingCenter>
+          </RingChart>
+        </div>
+        <ul className="w-full flex-1 space-y-2.5" aria-label="Expense class breakdown">
+          {items.map((d) => (
+            <li key={d.full} className="flex items-center gap-2.5 text-sm">
+              <span
+                aria-hidden="true"
+                className="h-3 w-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: d.color }}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-ink">{d.full}</span>
+                <span className="block text-xs text-muted">
+                  {formatPesoCompact(d.amount)} · {total > 0 ? formatShare(d.amount / total) : "–"}
+                </span>
               </span>
-            </span>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     </ChartShell>
   );
 }

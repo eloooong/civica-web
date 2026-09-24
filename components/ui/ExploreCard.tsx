@@ -18,7 +18,7 @@ export function ExploreCard({
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-xl border border-line bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
+      className="group flex h-full flex-col rounded-xl border border-line bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
     >
       <span className="flex h-10 w-10 items-center justify-center rounded-md border border-line bg-surface text-brand-700">
         <Icon className="h-5 w-5" aria-hidden="true" />

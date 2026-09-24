@@ -1,3 +1,4 @@
+import { BarChartLoading } from "@/components/charts/bar-chart-loading";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,9 +36,9 @@ export function HeaderSkeleton({ titleWidth = "w-2/3" }: { titleWidth?: string }
 /** Row of stat cards. */
 export function StatsSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="rounded-lg border border-line bg-white p-5">
+        <div key={i} className="h-full rounded-lg border border-line bg-white p-5">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="mt-3 h-8 w-32" />
           <Skeleton className="mt-2 h-3 w-40" />
@@ -107,16 +108,26 @@ export function CardsSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-/** Two chart panels side by side. */
+/** Two chart panels side by side, shaped like the real Bklit charts. */
 export function ChartsSkeleton() {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {[0, 1].map((i) => (
-        <div key={i} className="rounded-lg border border-line bg-white p-5">
-          <Skeleton className="h-4 w-56" />
-          <Skeleton className="mt-4 h-64 w-full" />
+    <div className="grid items-stretch gap-4 lg:grid-cols-2">
+      <div className="rounded-lg border border-line bg-white p-5">
+        <Skeleton className="h-4 w-56" />
+        <div className="mt-4 min-h-[320px] sm:min-h-[360px]" aria-hidden="true">
+          <BarChartLoading aspectRatio="2 / 1" className="min-h-[320px] sm:min-h-[360px]" />
         </div>
-      ))}
+      </div>
+      <div className="rounded-lg border border-line bg-white p-5">
+        <Skeleton className="h-4 w-56" />
+        <div className="mt-4 min-h-[320px] sm:min-h-[360px]" aria-hidden="true">
+          <BarChartLoading
+            aspectRatio="4 / 3"
+            className="min-h-[320px] sm:min-h-[360px]"
+            margin={{ top: 16, right: 16, bottom: 32, left: 96 }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

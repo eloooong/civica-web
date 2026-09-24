@@ -81,6 +81,13 @@ Budget charts and KPI cards use [Bklit UI](https://bklit.com) components
   typos in the `@theme inline` bridge).
 - Bklit's line chart is time-series-only (axis labels render "Jan 1" style),
   so fiscal-year trends use categorical bar charts instead.
+- Expense-class mix uses the Bklit ring chart (concentric share rings with
+  a hover-aware center total); loading routes render `BarChartLoading`
+  skeletons shaped like the real charts.
+- Chart pairs share one minimum height per row and stretch through a full
+  height flex shell, so a taller chart no longer leaves whitespace beside
+  its neighbor. KPI cards (`StatCard`, `BudgetStatCard`) all stretch to
+  equal height in shared grids.
 
 ## Known limitations (honest by design)
 

@@ -169,7 +169,7 @@ export default async function BudgetDepartmentPage({
       </div>
 
       {/* Summary statistics */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BudgetStatCard
           title={`Enacted budget · FY ${year}`}
           series={yearly_totals.map((t) => ({ year: t.year, amount: t.amount }))}
@@ -197,13 +197,13 @@ export default async function BudgetDepartmentPage({
       </div>
 
       {/* Charts */}
-      <section aria-label="Department charts" className="mt-8 grid gap-4 lg:grid-cols-2">
+      <section aria-label="Department charts" className="mt-8 grid items-stretch gap-4 lg:grid-cols-2">
         <DepartmentTrendChart totals={yearly_totals} />
         <ExpenseMixChart classes={expense_classes} year={year} />
       </section>
 
       {/* Agencies */}
-      <section aria-labelledby="agencies-heading" className="mt-10">
+      <section aria-labelledby="agencies-heading" className="mt-8">
         <SectionHeader
           title="Agencies and bureaus"
           description={`Where the FY ${year} appropriation sits within the department.`}
@@ -264,7 +264,7 @@ export default async function BudgetDepartmentPage({
       </section>
 
       {/* Programs */}
-      <section aria-labelledby="programs-heading" className="mt-10">
+      <section aria-labelledby="programs-heading" className="mt-8">
         <SectionHeader
           title="Programs and projects"
           description={

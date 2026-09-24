@@ -61,7 +61,7 @@ export function BudgetStatCard({
   const displayTrend = hover.trend ?? defaultTrend;
 
   return (
-    <Card className="w-full min-w-0 gap-0 border-line py-0 shadow-none">
+    <Card className="h-full w-full min-w-0 gap-0 border-line py-0 shadow-none">
       <CardHeader className="px-4 py-3">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted">
           {title}
