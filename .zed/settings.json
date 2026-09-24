@@ -1,0 +1,11 @@
+{
+  "assistant.version": "2",
+  "assistant.default_model": {
+    "provider": "anthropic",
+    "model": "claude-3-7-sonnet-latest"
+  },
+  "sauron.governance": {
+    "version": "1.0.0",
+    "projectName": "CivicLens"
+  }
+}

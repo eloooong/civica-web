@@ -1,0 +1,261 @@
+"use client";
+
+import { useReducedMotion } from "motion/react";
+import { useMemo } from "react";
+import { BarChart } from "@/components/charts/bar-chart";
+import { Bar } from "@/components/charts/bar";
+import { BarXAxis } from "@/components/charts/bar-x-axis";
+import { BarYAxis } from "@/components/charts/bar-y-axis";
+import { Grid } from "@/components/charts/grid";
+import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
+import type { TooltipRow } from "@/components/charts/tooltip/tooltip-content";
+import type { DepartmentRow, ExpenseClassRow, NationalYearTotal } from "@/types/budget";
+import { formatPesoCompact, formatPesoFull, formatShare, toTrillions } from "@/lib/utils";
+
+const BRAND = "var(--chart-1)";
+
+function ChartShell({
+  title,
+  captionId,
+  summary,
+  children,
+}: {
+  title: string;
+  captionId: string;
+  summary: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <figure className="min-w-0 rounded-lg border border-line bg-white p-5">
+      <figcaption id={captionId} className="text-sm font-bold text-ink">
+        {title}
+      </figcaption>
+      <p className="sr-only">{summary}</p>
+      {/* Bklit charts render aria-hidden SVGs and size themselves. */}
+      <div className="mt-4" aria-hidden="true">
+        {children}
+      </div>
+    </figure>
+  );
+}
+
+/** Bklit tooltips show raw numbers — format peso values via custom rows. */
+function pesoRow(color: string, label: string, trillions: number): TooltipRow {
+  return { color, label, value: `₱${trillions.toFixed(2)} trillion` };
+}
+
+/** National enacted budget trend, FY2020–2026. */
+export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) {
+  const reduceMotion = useReducedMotion();
+  // Stable identity: Bklit chart internals sync derived state in effects,
+  // so a fresh array every render would re-trigger them forever.
+  const data = useMemo(
+    () => totals.map((t) => ({ year: String(t.year), amount: toTrillions(t.amount) })),
+    [totals]
+  );
+  const summary = totals.map((t) => `${t.year}: ${formatPesoCompact(t.amount)}`).join("; ");
+  return (
+    <ChartShell
+      title="National budget trend (enacted GAA)"
+      captionId="national-trend-caption"
+      summary={`Enacted national budget per year. ${summary}.`}
+    >
+      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="lg:min-h-[500px]">
+        <Grid horizontal />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <BarXAxis />
+        <ChartTooltip
+          showDatePill={false}
+          rows={(point) => [
+            pesoRow("#0038A8", `FY ${String(point.year)} enacted`, Number(point.amount)),
+          ]}
+        />
+      </BarChart>
+    </ChartShell>
+  );
+}
+
+/** Short label: prefer the acronym in parentheses, else truncate. */
+export function shortDeptName(description: string): string {
+  const match = description.match(/\(([^)]+)\)/);
+  if (match) return match[1];
+  return description.length > 34 ? `${description.slice(0, 34)}…` : description;
+}
+
+/** Top departments for one fiscal year, horizontal bars. */
+export function TopDepartmentsChart({
+  departments,
+  year,
+  limit = 10,
+}: {
+  departments: DepartmentRow[];
+  year: number;
+  limit?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  const top = useMemo(
+    () =>
+      [...departments]
+        .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))
+        .slice(0, limit)
+        .map((d) => ({ name: shortDeptName(d.description), amount: toTrillions(d.amount ?? 0) }))
+        .reverse(),
+    [departments, limit]
+  );
+  const summary = top.map((t) => `${t.name}: ₱${t.amount}T`).join("; ");
+  return (
+    <ChartShell
+      title={`Largest departments · FY ${year}`}
+      captionId="top-depts-caption"
+      summary={`Largest department budgets for FY ${year}. ${summary}.`}
+    >
+      <BarChart
+        data={top}
+        xDataKey="name"
+        orientation="horizontal"
+        aspectRatio="4 / 3"
+        // Roomy bands on phones: 10 labels at 12px need ~30px each, but a
+        // 4/3 box only yields ~15px per band at 360px wide. The min-height
+        // overrides the aspect ratio below the sm breakpoint (ParentSize
+        // measures the real box, so bands gain the extra room).
+        className="min-h-[380px] sm:min-h-0"
+        // Wide left gutter: axis labels truncate at 70px and right-align
+        // into this gutter. The 40px default clips them past the card edge.
+        margin={{ top: 16, right: 16, bottom: 32, left: 96 }}
+      >
+        <Grid vertical />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <BarYAxis />
+        <ChartTooltip
+          showDatePill={false}
+          showDots={false}
+          rows={(point) => [
+            pesoRow("#0038A8", `${String(point.name)} · FY ${year}`, Number(point.amount)),
+          ]}
+        />
+      </BarChart>
+    </ChartShell>
+  );
+}
+
+/**
+ * One department's enacted budget across FY2020–2026.
+ * Rendered as categorical bars: Bklit's line chart is a time-series chart
+ * whose axis labels ("Jan 1" style) cannot represent fiscal years.
+ */
+export function DepartmentTrendChart({ totals }: { totals: NationalYearTotal[] }) {
+  const reduceMotion = useReducedMotion();
+  const data = useMemo(
+    () => totals.map((t) => ({ year: String(t.year), amount: toTrillions(t.amount) })),
+    [totals]
+  );
+  const summary = totals.map((t) => `${t.year}: ${formatPesoCompact(t.amount)}`).join("; ");
+  return (
+    <ChartShell
+      title="Budget trend (enacted GAA)"
+      captionId="dept-trend-caption"
+      summary={`Department enacted budget per year. ${summary}.`}
+    >
+      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="lg:min-h-[500px]">
+        <Grid horizontal />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <BarXAxis />
+        <ChartTooltip
+          showDatePill={false}
+          rows={(point) => [
+            pesoRow("#0038A8", `FY ${String(point.year)} enacted`, Number(point.amount)),
+          ]}
+        />
+      </BarChart>
+    </ChartShell>
+  );
+}
+
+const EXPENSE_SHORT: Record<string, string> = {
+  "Personnel Services": "PS",
+  "Maintenance and Other Operating Expenses": "MOOE",
+  "Financial Expenses": "FinEx",
+  "Capital Outlays": "CO",
+};
+
+/** Expense-class mix for one fiscal year, as sorted horizontal bars. */
+export function ExpenseMixChart({
+  classes,
+  year,
+}: {
+  classes: ExpenseClassRow[];
+  year: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  const yearKey = String(year);
+  const total = classes.reduce((sum, c) => sum + (c.years[yearKey]?.amount ?? 0), 0);
+  const items = useMemo(
+    () =>
+      classes
+        .map((c) => ({
+          full: c.label,
+          short: EXPENSE_SHORT[c.label] ?? c.label,
+          amount: c.years[yearKey]?.amount ?? 0,
+        }))
+        .sort((a, b) => b.amount - a.amount),
+    [classes, yearKey]
+  );
+  const summary = items
+    .map((d) => `${d.full}: ${formatPesoCompact(d.amount)} (${total > 0 ? formatShare(d.amount / total) : "–"})`)
+    .join("; ");
+  return (
+    <ChartShell
+      title={`Where it goes · FY ${year}`}
+      captionId="expense-mix-caption"
+      summary={`Budget by expense class for FY ${year}. ${summary}.`}
+    >
+      <BarChart
+        data={items.map((d) => ({ name: d.short, amount: d.amount / 1e9 }))}
+        xDataKey="name"
+        orientation="horizontal"
+        aspectRatio="4 / 3"
+        // Same band math as the departments chart: 4 short labels need
+        // breathing room below the sm breakpoint; the gutter fits the
+        // truncated axis labels inside the chart.
+        className="min-h-[220px] sm:min-h-0"
+        margin={{ top: 16, right: 16, bottom: 32, left: 72 }}
+      >
+        <Grid vertical />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <BarYAxis />
+        <ChartTooltip
+          showDatePill={false}
+          showDots={false}
+          rows={(point) => {
+            const item = items.find((d) => d.short === String(point.name));
+            const amount = item?.amount ?? 0;
+            return [
+              { color: "#0038A8", label: item?.full ?? String(point.name), value: formatPesoFull(amount) },
+              {
+                color: "#5B8DEF",
+                label: `Share of FY ${year}`,
+                value: total > 0 ? formatShare(amount / total) : "–",
+              },
+            ];
+          }}
+        />
+      </BarChart>
+      <ul className="mt-4 space-y-2.5" aria-label="Expense class breakdown">
+        {items.map((d) => (
+          <li key={d.full} className="flex items-center gap-2.5 text-sm">
+            <span
+              aria-hidden="true"
+              className="h-3 w-3 shrink-0 rounded-sm bg-brand-700"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold text-ink">{d.full}</span>
+              <span className="block text-xs text-muted">
+                {formatPesoCompact(d.amount)} · {total > 0 ? formatShare(d.amount / total) : "–"}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </ChartShell>
+  );
+}
