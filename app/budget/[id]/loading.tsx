@@ -4,7 +4,6 @@ import {
   HeaderSkeleton,
   LoadingShell,
   Skeleton,
-  StatsSkeleton,
   TableSkeleton,
 } from "@/components/ui/Skeleton";
 
@@ -18,7 +17,22 @@ export default function BudgetDepartmentLoading() {
           <Skeleton key={i} className="h-9 w-16" />
         ))}
       </div>
-      <StatsSkeleton count={4} />
+      <div className="space-y-4" aria-hidden="true">
+        <div className="rounded-lg border border-line bg-white p-5">
+          <Skeleton className="h-3 w-48" />
+          <Skeleton className="mt-3 h-8 w-56" />
+          <Skeleton className="mt-4 h-44 w-full" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="rounded-lg border border-line bg-white p-5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="mt-3 h-8 w-32" />
+              <Skeleton className="mt-2 h-3 w-40" />
+            </div>
+          ))}
+        </div>
+      </div>
       <ChartsSkeleton />
       <div className="space-y-3">
         <Skeleton className="h-7 w-64" />

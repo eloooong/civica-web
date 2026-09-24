@@ -168,32 +168,35 @@ export default async function BudgetDepartmentPage({
         ))}
       </div>
 
-      {/* Summary statistics */}
-      <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Summary statistics: full-width trend card, then three even stat cards */}
+      <div className="mt-6 space-y-4">
         <BudgetStatCard
           title={`Enacted budget · FY ${year}`}
           series={yearly_totals.map((t) => ({ year: t.year, amount: t.amount }))}
           defaultLabel={`Enacted GAA · FY ${year}`}
           defaultTrend={yoy}
+          chartSize="md"
         />
-        <StatCard
-          icon={Percent}
-          label="Share of national budget"
-          value={formatShare(share)}
-          hint={`of ${formatPesoCompact(nationalTotal)} enacted`}
-        />
-        <StatCard
-          icon={Building2}
-          label="Agencies / bureaus"
-          value={String(agencies.length)}
-          hint="Under this department"
-        />
-        <StatCard
-          icon={Boxes}
-          label="Programs"
-          value={programs.meta.matched !== undefined ? formatCount(programs.meta.matched) : "–"}
-          hint={`P/A/P families · FY ${year}`}
-        />
+        <div className="grid items-stretch gap-4 sm:grid-cols-3">
+          <StatCard
+            icon={Percent}
+            label="Share of national budget"
+            value={formatShare(share)}
+            hint={`of ${formatPesoCompact(nationalTotal)} enacted`}
+          />
+          <StatCard
+            icon={Building2}
+            label="Agencies / bureaus"
+            value={String(agencies.length)}
+            hint="Under this department"
+          />
+          <StatCard
+            icon={Boxes}
+            label="Programs"
+            value={programs.meta.matched !== undefined ? formatCount(programs.meta.matched) : "–"}
+            hint={`P/A/P families · FY ${year}`}
+          />
+        </div>
       </div>
 
       {/* Charts */}

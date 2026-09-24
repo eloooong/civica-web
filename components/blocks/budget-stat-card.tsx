@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { AreaChart } from "@/components/charts/area-chart";
 import { Area } from "@/components/charts/area";
 import { ChartStatFlow } from "@/components/charts/chart-stat-flow";
+import { Grid } from "@/components/charts/grid";
 import {
   Card,
   CardAction,
@@ -39,11 +40,13 @@ export function BudgetStatCard({
   series,
   defaultLabel,
   defaultTrend,
+  chartSize = "sm",
 }: {
   title: string;
   series: BudgetSeriesPoint[];
   defaultLabel: string;
   defaultTrend: number | null;
+  chartSize?: "sm" | "md" | "lg";
 }) {
   const reduceMotion = useReducedMotion();
   const [hover, setHover] = useState<StatCardHoverState>({
@@ -81,7 +84,7 @@ export function BudgetStatCard({
           valueClassName={statCardValueClassName}
         />
 
-        <StatCardChart size="sm">
+        <StatCardChart size={chartSize}>
           <AreaChart
             aspectRatio="2.5 / 1"
             className="w-full"
@@ -93,12 +96,14 @@ export function BudgetStatCard({
               formatLabel={formatStatCardYear}
               onHoverChange={setHover}
             />
+            <Grid horizontal />
             <Area
               dataKey="value"
               fill="var(--chart-1)"
               fillOpacity={0.45}
               gradientToOpacity={0}
               showHighlight
+              showMarkers
               stroke="var(--chart-1)"
               strokeWidth={2}
               animate={!reduceMotion}
