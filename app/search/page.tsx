@@ -107,7 +107,7 @@ export default async function SearchPage({
       </div>
 
       <div className="mt-6 max-w-2xl">
-        <SearchBar key={query} defaultValue={query} placeholder="Search budgets, bills, datasets…" />
+        <SearchBar key={query} defaultValue={query} />
       </div>
 
       {/* Category navigation — plain links (with aria-current), not ARIA tabs:

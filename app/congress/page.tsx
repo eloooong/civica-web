@@ -151,7 +151,7 @@ export default async function CongressPage({
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. education, flood control, 4Ps…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted/80 focus:border-brand-600"
+              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
           <div>
@@ -262,7 +262,7 @@ export default async function CongressPage({
               autoComplete="off"
               defaultValue={personQuery}
               placeholder="e.g. Dela Cruz, Santos…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted/80 focus:border-brand-600"
+              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
           <button

@@ -47,8 +47,8 @@ export function SearchBar({
           placeholder={placeholder}
           className={
             size === "lg"
-              ? "w-full rounded-lg border border-line bg-white py-4 pl-11 pr-28 text-base text-ink shadow-sm placeholder:text-muted/80 focus:border-brand-600"
-              : "w-full rounded-lg border border-line bg-white py-2.5 pl-10 pr-24 text-sm text-ink shadow-sm placeholder:text-muted/80 focus:border-brand-600"
+              ? "w-full rounded-lg border border-line bg-white py-4 pl-11 pr-28 text-base text-ink shadow-sm placeholder:text-muted focus:border-brand-600"
+              : "w-full rounded-lg border border-line bg-white py-2.5 pl-10 pr-24 text-sm text-ink shadow-sm placeholder:text-muted focus:border-brand-600"
           }
         />
         <button

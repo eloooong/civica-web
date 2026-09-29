@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Landmark } from "lucide-react";
+import { DataStatus } from "@/components/ui/DataStatus";
 
 export function Footer() {
   return (
@@ -19,9 +20,7 @@ export function Footer() {
             Philippine government data, made easier to understand. Explore
             budgets, legislation, and government datasets.
           </p>
-          <p className="mt-3 inline-flex items-center rounded-md border border-line bg-white px-2 py-1 text-xs text-muted">
-            Phase 1: illustrative placeholder data only
-          </p>
+          <DataStatus className="mt-3 text-muted" />
         </div>
         <nav aria-label="Explore">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Explore</p>
@@ -33,7 +32,7 @@ export function Footer() {
           </ul>
         </nav>
         <nav aria-label="Sources">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Future sources</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Sources</p>
           <ul className="mt-3 space-y-2 text-sm text-ink/80">
             <li>BetterGov Budget API</li>
             <li>Open Congress API</li>
