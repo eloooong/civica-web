@@ -28,3 +28,22 @@ export function formatShare(share: number): string {
 export function toTrillions(value: number): number {
   return Math.round((value / 1_000_000_000_000) * 100) / 100;
 }
+
+/** Lowercase, collapse every run of non-alphanumerics to one hyphen, trim hyphens. */
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Canonical route for one budget program (P/A/P family). */
+export function budgetProgramPath(
+  departmentId: string,
+  agencyId: string,
+  name: string,
+  year?: number
+): string {
+  const base = `/budget/${departmentId}/programs/${agencyId}/${slugify(name)}`;
+  return year === undefined ? base : `${base}?year=${year}`;
+}

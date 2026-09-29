@@ -33,11 +33,13 @@ export function PageHeader({
 }
 
 export function SectionHeader({
+  eyebrow,
   title,
   description,
   action,
   large = false,
 }: {
+  eyebrow?: string;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -46,6 +48,11 @@ export function SectionHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div className="max-w-2xl">
+        {eyebrow && (
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-brand-700">
+            {eyebrow}
+          </p>
+        )}
         <h2
           className={
             large

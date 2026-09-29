@@ -157,6 +157,144 @@ export interface ProgramsResponse {
   next_cursor: string | null;
 }
 
+/** Hierarchy levels served by GET /gaa/years/{year}/departments/{id}/children. */
+export type GaaChildLevel =
+  | "agencies"
+  | "fpaps"
+  | "operating_units"
+  | "fund_subcategories"
+  | "expenses";
+
+/**
+ * One row from the per-year hierarchy walk. Rows keep their parent-id
+ * columns so each row's id feeds the next level's parent. Code columns
+ * (fpap_code, operunit_code, fund_code, expense_code) appear only on
+ * their own level.
+ */
+export interface HierarchyRow {
+  id: string;
+  slug: string;
+  description: string;
+  department_id: string;
+  year: number;
+  line_items: number;
+  amount: number;
+  agency_id?: string;
+  fpap_id?: string;
+  operating_unit_id?: string;
+  fund_id?: string;
+  fpap_code?: string;
+  operunit_code?: string;
+  fund_code?: string;
+  expense_code?: string;
+}
+
+/** GET /gaa/years/{year}/departments/{id}/children. */
+export interface ChildrenResponse {
+  meta: {
+    dataset: "gaa";
+    currency: "PHP";
+    scale: "pesos";
+    year: number;
+    department_id: string;
+    level: GaaChildLevel;
+    parent?: string;
+    limit: number;
+    matched?: number;
+    matched_amount?: number;
+    [key: string]: unknown;
+  };
+  data: HierarchyRow[];
+  next_cursor: string | null;
+}
+
+/** One UACS object-level row from GET /gaa/departments/{id}/objects. */
+export interface ObjectRow {
+  id: string;
+  slug: string;
+  object_code: string;
+  description: string;
+  department_id: string;
+  expense_id: string;
+  fund_id: string;
+  operating_unit_id: string;
+  fpap_id: string;
+  agency_id: string;
+  years: YearMap;
+}
+
+/** GET /gaa/departments/{id}/objects. */
+export interface ObjectsResponse {
+  meta: {
+    dataset: "gaa";
+    currency: "PHP";
+    scale: "pesos";
+    year: number;
+    department_id: string;
+    limit: number;
+    matched?: number;
+    matched_amount?: number;
+    [key: string]: unknown;
+  };
+  data: ObjectRow[];
+  next_cursor: string | null;
+}
+
+/** Hearing metadata on a /hearings/search hit. */
+export interface HearingSummary {
+  video_id: string;
+  title: string;
+  agency: string | null;
+  hearing_date: string;
+  fiscal_year: string;
+  page_url: string;
+}
+
+/** One deliberation topic on a /hearings/search hit. */
+export interface HearingTopic {
+  video_id: string;
+  index: number;
+  topic: string;
+  status: string;
+  summary: string;
+  first_seconds: number;
+  timestamp: string;
+  url: string;
+  moment_count: number;
+}
+
+/** One timestamped spoken line that matched the query terms. */
+export interface HearingMoment {
+  seconds: number;
+  timestamp: string;
+  speaker?: string;
+  side?: string;
+  kind?: string;
+  said: string;
+  url: string;
+}
+
+/** One hit from GET /hearings/search. */
+export interface HearingSearchHit {
+  hearing: HearingSummary;
+  topic: HearingTopic;
+  matching_moments: HearingMoment[];
+}
+
+/** GET /hearings/search. */
+export interface HearingsSearchResponse {
+  meta: {
+    dataset: "hearings";
+    q: string;
+    terms: string[];
+    limit: number;
+    returned: number;
+    note: string;
+    [key: string]: unknown;
+  };
+  data: HearingSearchHit[];
+}
+
 export interface BudgetApiError {
   error: string;
   message: string;

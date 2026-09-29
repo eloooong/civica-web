@@ -7,24 +7,42 @@ import { SectionHeader } from "@/components/ui/PageHeader";
 import { HeroBackdrop } from "@/components/home/HeroBackdrop";
 import { PLACEHOLDER_BUDGET_TOTAL, popularSearches } from "@/lib/placeholder";
 import { formatPesoCompact } from "@/lib/utils";
-import { BUDGET_API_BASE, BUDGET_DOCS_URL } from "@/lib/api/budget";
+import { BUDGET_API_BASE, BUDGET_DOCS_URL, getNationalTotals } from "@/lib/api/budget";
 import { CONGRESS_API_BASE, CONGRESS_DOCS_URL } from "@/lib/api/congress";
 import { DATA_API_BASE, DATA_DOCS_URL } from "@/lib/api/datasets";
 
-const stats = [
-  {
+interface BudgetStat {
+  value: string;
+  label: string;
+  hint: string;
+}
+
+async function getBudgetStat(): Promise<BudgetStat> {
+  try {
+    const national = await getNationalTotals();
+    const row = national.data.find((entry) => entry.year === 2026 && entry.amount > 0);
+    if (row) {
+      return {
+        value: formatPesoCompact(row.amount),
+        label: "FY2026 national budget",
+        hint: "General Appropriations Act · live",
+      };
+    }
+  } catch {
+    // Upstream unreachable; fall through to the labeled illustrative figure.
+  }
+  return {
     value: formatPesoCompact(PLACEHOLDER_BUDGET_TOTAL),
     label: "FY2026 national budget",
-    hint: "GAA · illustrative",
-  },
-  { value: "7", label: "Fiscal years", hint: "FY2020–2026 enacted budgets" },
-  { value: "3", label: "Collections", hint: "Budget, Congress, open data" },
-];
+    hint: "General Appropriations Act · illustrative",
+  };
+}
 
-const heroSuggestionLabels = ["DPWH", "Department of Education", "Agriculture"];
-const heroSuggestions = heroSuggestionLabels
-  .map((label) => popularSearches.find((p) => p.label === label))
-  .filter((p): p is NonNullable<typeof p> => p !== undefined);
+const heroSuggestions = [
+  { label: "Flood control", href: "/search?q=flood%20control" },
+  { label: "Public schools", href: "/search?q=public%20schools" },
+  { label: "Scholarship programs", href: "/search?q=scholarship%20programs" },
+];
 
 const groups = [
   {
@@ -33,7 +51,7 @@ const groups = [
     items: popularSearches.filter((p) => p.category === "Budget"),
   },
   { heading: "Congress", icon: ScrollText, items: popularSearches.filter((p) => p.category === "Congress") },
-  { heading: "Datasets", icon: Database, items: popularSearches.filter((p) => p.category === "Data") },
+  { heading: "Government Data", icon: Database, items: popularSearches.filter((p) => p.category === "Data") },
 ];
 
 const sources = [
@@ -60,7 +78,14 @@ const sources = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const budgetStat = await getBudgetStat();
+  const stats = [
+    budgetStat,
+    { value: "7", label: "Fiscal years", hint: "FY2020–2026 enacted budgets" },
+    { value: "3", label: "Collections", hint: "Budget, Congress, Government Data" },
+  ];
+
   return (
     <>
       {/* Hero */}
@@ -69,9 +94,9 @@ export default function HomePage() {
         <div className="relative mx-auto w-full max-w-7xl px-4 pb-14 pt-16 sm:px-6 sm:pb-20 sm:pt-24">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-100">
             <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-amber-300" />
-            Civic transparency · Budget · Congress · Open data
+            Civic transparency · Budget · Congress · Government Data
           </p>
-          <h1 className="mt-6 max-w-5xl text-5xl font-extrabold leading-[1.02] tracking-tight text-white sm:text-7xl">
+          <h1 className="mt-6 max-w-5xl text-4xl font-extrabold leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-7xl">
             Philippine Government Data, Made Easier to Understand.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-brand-100 sm:text-lg sm:leading-8">
@@ -86,7 +111,7 @@ export default function HomePage() {
                 <Link
                   key={s.label}
                   href={s.href}
-                  className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 font-medium text-brand-100 transition-colors hover:border-white/50 hover:bg-white/20 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex min-h-11 items-center rounded-full border border-white/25 bg-white/10 px-3 font-medium text-brand-100 transition-colors hover:border-white/50 hover:bg-white/20 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   {s.label}
                 </Link>
@@ -122,70 +147,79 @@ export default function HomePage() {
       </section>
 
       {/* Explore */}
-      <section aria-label="Explore collections" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-        <SectionHeader
-          large
-          title="Explore"
-          description="Start from three collections of public data."
-        />
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <ExploreCard
-            icon={PhilippinePeso}
-            title="Budget"
-            description="Explore public spending and national budget data."
-            href="/budget"
-            meta="GAA FY2020–2026"
-          />
-          <ExploreCard
-            icon={ScrollText}
-            title="Congress"
-            description="Explore bills and legislative records."
-            href="/congress"
-            meta="20th Congress"
-          />
-          <ExploreCard
-            icon={Database}
-            title="Government Data"
-            description="Discover datasets published by government agencies."
-            href="/data"
-            meta="Agency datasets"
-          />
+      <section aria-label="Explore collections" className="border-b border-line bg-surface">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+          <div aria-hidden="true" className="flex h-1 w-24">
+            <span className="w-1/2 bg-brand-600" />
+            <span className="w-1/3 bg-accent-600" />
+            <span className="w-1/6 bg-amber-300" />
+          </div>
+          <div className="mt-4">
+            <SectionHeader
+              large
+              eyebrow="Start here"
+              title="Explore"
+              description="Three collections of public records, each one traceable to the API it came from."
+            />
+          </div>
+          <div className="mt-7 grid gap-4 md:grid-cols-3">
+            <ExploreCard
+              icon={PhilippinePeso}
+              title="Budget"
+              description="Explore public spending and national budget data."
+              href="/budget"
+              meta="GAA FY2020–2026"
+            />
+            <ExploreCard
+              icon={ScrollText}
+              title="Congress"
+              description="Explore bills and legislative records."
+              href="/congress"
+              meta="20th Congress"
+            />
+            <ExploreCard
+              icon={Database}
+              title="Government Data"
+              description="Discover datasets published by government agencies."
+              href="/data"
+              meta="Agency datasets"
+            />
+          </div>
         </div>
       </section>
 
       {/* Popular searches */}
-      <section aria-label="Popular searches" className="border-t border-line bg-white">
+      <section aria-label="Popular searches" className="border-b border-line bg-white">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <SectionHeader
-            large
             title="Popular searches"
             description="Examples that run as live queries across all three sources."
             action={
               <Link
                 href="/search"
-                className="inline-flex items-center gap-1 rounded-md border border-line px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-brand-200 hover:text-brand-700"
+                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-line px-3.5 text-sm font-semibold text-ink transition-colors hover:border-brand-200 hover:text-brand-700"
               >
                 Open search
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             }
           />
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-line">
             {groups.map((group) => (
-              <div key={group.heading} className="flex h-full flex-col rounded-xl border border-line bg-surface p-5">
+              <div key={group.heading} className="sm:px-6 sm:first:pl-0 sm:last:pr-0">
                 <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
                   <group.icon className="h-4 w-4 text-brand-700" aria-hidden="true" />
                   {group.heading}
-                  <span className="ml-auto rounded-full bg-white px-2 py-0.5 font-bold text-muted ring-1 ring-line">
+                  <span className="ml-auto rounded-full bg-surface px-2 py-0.5 font-bold text-muted ring-1 ring-line">
                     {group.items.length}
                   </span>
                 </h3>
-                <ul className="mt-3 space-y-1">
+                <ul className="mt-2">
                   {group.items.map((item) => (
                     <li key={item.label}>
                       <Link
                         href={item.href}
-                        className="block rounded-sm py-1.5 text-sm font-medium text-brand-700 hover:underline"
+                        className="flex min-h-11 items-center rounded-sm text-sm font-medium text-brand-700 hover:underline"
                       >
                         {item.label}
                       </Link>
@@ -199,35 +233,51 @@ export default function HomePage() {
       </section>
 
       {/* Sources */}
-      <section aria-label="Data sources" className="border-t border-line bg-surface">
+      <section aria-label="Data sources" className="bg-surface">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
           <SectionHeader
-            large
             title="Sourced, not scraped"
             description="Every record links back to the public API it came from, with a retrieval timestamp."
           />
-          <ul className="mt-6 grid gap-4 md:grid-cols-3">
+          <ul className="mt-6 border-t border-line">
             {sources.map((s) => (
-              <li key={s.name} className="flex h-full flex-col rounded-xl border border-line bg-white p-5">
-                <p className="text-sm font-bold text-ink">{s.name}</p>
-                <p className="mt-0.5 text-xs text-muted">{s.scope}</p>
-                <p className="mt-1 text-xs font-medium leading-5 text-ink/70">
-                  Records originate from {s.record}
-                </p>
-                <p className="mt-3 break-all rounded-md bg-surface px-2 py-1.5 font-mono text-xs text-muted">{s.endpoint}</p>
+              <li
+                key={s.name}
+                className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-line py-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-ink">{s.name}</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {s.scope} · Records originate from {s.record}
+                  </p>
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs font-semibold text-muted hover:text-ink">
+                      API endpoint
+                    </summary>
+                    <p className="mt-1 break-all rounded-md bg-white px-2 py-1.5 font-mono text-xs text-muted">
+                      {s.endpoint}
+                    </p>
+                  </details>
+                </div>
                 <Link
                   href={s.docs}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex w-fit items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 hover:underline"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 hover:underline"
                 >
-                  Read the docs
+                  API documentation
                   <span className="sr-only"> (opens in new tab)</span>
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </li>
             ))}
           </ul>
+          <p className="mt-6 max-w-3xl rounded-lg border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
+            CivicLens is an independent demonstration interface, not an official government
+            website. Figures are fetched from the public APIs above and cached for up to one
+            hour. When a source is unreachable, a clearly labeled illustrative figure is shown
+            instead. Verify important numbers with the source agencies.
+          </p>
         </div>
       </section>
     </>

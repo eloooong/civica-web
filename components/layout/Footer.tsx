@@ -4,7 +4,12 @@ import { DataStatus } from "@/components/ui/DataStatus";
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-surface">
+    <footer className="bg-surface">
+      <div aria-hidden="true" className="flex h-1 w-full">
+        <span className="w-1/2 bg-brand-600" />
+        <span className="w-1/3 bg-accent-600" />
+        <span className="w-1/6 bg-amber-300" />
+      </div>
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <p className="flex items-center gap-2 text-sm font-bold text-ink">
@@ -27,7 +32,7 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-sm">
             <li><Link className="text-ink/80 hover:text-brand-700 hover:underline" href="/budget">Budget</Link></li>
             <li><Link className="text-ink/80 hover:text-brand-700 hover:underline" href="/congress">Congress</Link></li>
-            <li><Link className="text-ink/80 hover:text-brand-700 hover:underline" href="/data">Government data</Link></li>
+            <li><Link className="text-ink/80 hover:text-brand-700 hover:underline" href="/data">Government Data</Link></li>
             <li><Link className="text-ink/80 hover:text-brand-700 hover:underline" href="/search">Search</Link></li>
           </ul>
         </nav>

@@ -20,7 +20,7 @@ const tabs = [
   { key: "all", label: "All", only: undefined },
   { key: "budget", label: "Budget", only: "budget" },
   { key: "bill", label: "Congress", only: "congress" },
-  { key: "dataset", label: "Data", only: "data" },
+  { key: "dataset", label: "Government Data", only: "data" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -149,7 +149,7 @@ export default async function SearchPage({
               {[
                 { heading: "Budget", items: popularSearches.filter((p) => p.category === "Budget") },
                 { heading: "Congress", items: popularSearches.filter((p) => p.category === "Congress") },
-                { heading: "Datasets", items: popularSearches.filter((p) => p.category === "Data") },
+                { heading: "Government Data", items: popularSearches.filter((p) => p.category === "Data") },
               ].map((group) => (
                 <div key={group.heading} className="rounded-lg border border-line bg-surface p-5">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
@@ -160,7 +160,7 @@ export default async function SearchPage({
                       <li key={item.label}>
                         <Link
                           href={item.href}
-                          className="rounded-sm text-sm font-medium text-brand-700 hover:underline"
+                          className="flex min-h-11 items-center rounded-sm text-sm font-medium text-brand-700 hover:underline"
                         >
                           {item.label}
                         </Link>
@@ -315,13 +315,13 @@ export default async function SearchPage({
           </div>
           <div className="rounded-lg border border-line bg-surface p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-              <Database className="h-4 w-4" aria-hidden="true" /> Government data
+              <Database className="h-4 w-4" aria-hidden="true" /> Government Data
             </p>
             <p className="mt-2 text-sm leading-6 text-ink/80">
               Browse datasets, publishers, and downloadable files.
             </p>
             <Link href="/data" className="mt-3 inline-block text-sm font-semibold text-brand-700 hover:underline">
-              Open data explorer →
+              Open Government Data explorer →
             </Link>
           </div>
         </div>

@@ -18,7 +18,7 @@ import {
   getYearBreakdown,
 } from "@/lib/api/budget";
 import { BUDGET_FISCAL_YEARS, isBudgetFiscalYear } from "@/types/budget";
-import { cn, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
+import { cn, budgetProgramPath, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
 
 const DEFAULT_YEAR = 2026;
 const PROGRAM_LIMIT = 100;
@@ -366,7 +366,17 @@ export default async function BudgetDepartmentPage({
                   {programs.data.map((p) => (
                     <tr key={p.fam_key} className="border-b border-line last:border-0 hover:bg-surface/60">
                       <td className="px-4 py-3.5">
-                        <span className="block font-semibold text-ink">{p.name}</span>
+                        <Link
+                          href={budgetProgramPath(
+                            id,
+                            p.agency_id,
+                            p.name,
+                            year !== DEFAULT_YEAR ? year : undefined
+                          )}
+                          className="block font-semibold text-ink hover:text-brand-700 hover:underline"
+                        >
+                          {p.name}
+                        </Link>
                         <span className="block text-xs text-muted">
                           {formatCount(p.years[yearKey]?.count ?? 0)} line items
                         </span>
@@ -385,7 +395,17 @@ export default async function BudgetDepartmentPage({
             <ul className="mt-4 space-y-3 sm:hidden">
               {programs.data.map((p) => (
                 <li key={p.fam_key} className="rounded-lg border border-line bg-white p-4">
-                  <p className="text-sm font-semibold text-ink">{p.name}</p>
+                  <Link
+                    href={budgetProgramPath(
+                      id,
+                      p.agency_id,
+                      p.name,
+                      year !== DEFAULT_YEAR ? year : undefined
+                    )}
+                    className="block text-sm font-semibold text-ink hover:text-brand-700 hover:underline"
+                  >
+                    {p.name}
+                  </Link>
                   <p className="mt-0.5 text-xs text-muted">
                     {formatCount(p.years[yearKey]?.count ?? 0)} line items ·{" "}
                     {agencyName.get(p.agency_id) ?? p.agency_id}

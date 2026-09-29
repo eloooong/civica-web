@@ -12,13 +12,21 @@
 import {
   isBudgetFiscalYear,
   type BudgetFiscalYear,
+  type ChildrenResponse,
   type ExpenseClassesResponse,
+  type GaaChildLevel,
   type GaaDepartmentResponse,
   type GaaDepartmentsResponse,
   type GaaNationalResponse,
   type GaaYearResponse,
+  type HierarchyRow,
+  type HearingsSearchResponse,
+  type ObjectRow,
+  type ObjectsResponse,
+  type ProgramRow,
   type ProgramsResponse,
 } from "@/types/budget";
+import { slugify } from "@/lib/utils";
 
 export const BUDGET_API_BASE = "https://budget.bettergov.ph/api/v1";
 export const BUDGET_DOCS_URL = "https://budget.bettergov.ph/docs";
@@ -159,4 +167,226 @@ export function searchPrograms(options: SearchProgramsOptions): Promise<Programs
   if (options.departmentId) params.department_id = options.departmentId;
   if (options.limit !== undefined) params.limit = options.limit;
   return fetchBudget<ProgramsResponse>("/gaa/search", params);
+}
+
+export interface GetChildrenOptions {
+  level: GaaChildLevel;
+  parent?: string;
+  includeZero?: boolean;
+  limit?: number;
+  cursor?: string;
+}
+
+/** GET /gaa/years/{year}/departments/{id}/children — one level of the GAA hierarchy. */
+export function getChildren(
+  year: number,
+  departmentId: string,
+  options: GetChildrenOptions
+): Promise<ChildrenResponse> {
+  const params: Record<string, string | number> = {
+    level: options.level,
+    limit: options.limit ?? 100,
+  };
+  if (options.parent) params.parent = options.parent;
+  if (options.includeZero) params.include_zero = 1;
+  if (options.cursor) params.cursor = options.cursor;
+  return fetchBudget<ChildrenResponse>(
+    `/gaa/years/${year}/departments/${encodeURIComponent(departmentId)}/children`,
+    params
+  );
+}
+
+export interface GetObjectsOptions {
+  year?: number;
+  agencyId?: string;
+  expenseClass?: string;
+  sort?: "amount" | "description" | "code" | "total";
+  dir?: "asc" | "desc";
+  limit?: number;
+  cursor?: string;
+}
+
+/** GET /gaa/departments/{id}/objects — UACS object-level line items. */
+export function getObjects(
+  departmentId: string,
+  options: GetObjectsOptions = {}
+): Promise<ObjectsResponse> {
+  const params: Record<string, string | number> = {};
+  if (options.year !== undefined) params.year = options.year;
+  if (options.agencyId) params.agency_id = options.agencyId;
+  if (options.expenseClass) params.expense_class = options.expenseClass;
+  if (options.sort) params.sort = options.sort;
+  if (options.dir) params.dir = options.dir;
+  if (options.limit !== undefined) params.limit = options.limit;
+  if (options.cursor) params.cursor = options.cursor;
+  return fetchBudget<ObjectsResponse>(
+    `/gaa/departments/${encodeURIComponent(departmentId)}/objects`,
+    params
+  );
+}
+
+/**
+ * GET /hearings/search — keyword search over House budget-hearing topic
+ * records (FY2027 season). All terms must match.
+ */
+export function searchHearings(
+  q: string,
+  options: { agency?: string; limit?: number } = {}
+): Promise<HearingsSearchResponse> {
+  const params: Record<string, string | number> = { q, limit: options.limit ?? 5 };
+  if (options.agency) params.agency = options.agency;
+  return fetchBudget<HearingsSearchResponse>("/hearings/search", params);
+}
+
+/** Bounded scan sizes for slug resolution (largest first, early exit). */
+const SCAN_MAX_PAGES = 6;
+const SCAN_PAGE_SIZE = 500;
+const HIERARCHY_PAGE_SIZE = 50;
+const MAX_HIERARCHY_UNITS = 3;
+const MAX_HIERARCHY_FUNDS = 6;
+const VALID_EXPENSE_CLASSES = new Set(["1", "2", "3", "6"]);
+
+/**
+ * Resolve a program's hierarchy row (FPAP id) from an agency+slug URL.
+ * Scans the agency's P/A/P rows ranked by the year's amount, so large
+ * programs resolve on the first page. Returns null past the page cap.
+ */
+export async function findFpapBySlug(
+  departmentId: string,
+  agencyId: string,
+  slug: string,
+  year: number
+): Promise<HierarchyRow | null> {
+  let cursor: string | undefined;
+  for (let page = 0; page < SCAN_MAX_PAGES; page++) {
+    const res = await getChildren(year, departmentId, {
+      level: "fpaps",
+      parent: agencyId,
+      limit: SCAN_PAGE_SIZE,
+      cursor,
+    });
+    const hit = res.data.find((row) => slugify(row.description) === slug);
+    if (hit) return hit;
+    if (!res.next_cursor) return null;
+    cursor = res.next_cursor;
+  }
+  return null;
+}
+
+/** Resolve a program family (name + 7-year figures) from an agency+slug URL. */
+export async function findFamilyBySlug(
+  departmentId: string,
+  agencyId: string,
+  slug: string,
+  year: number
+): Promise<ProgramRow | null> {
+  let cursor: string | undefined;
+  for (let page = 0; page < SCAN_MAX_PAGES; page++) {
+    const res = await getPrograms(departmentId, {
+      year,
+      agencyId,
+      limit: SCAN_PAGE_SIZE,
+      cursor,
+    });
+    const hit = res.data.find((row) => slugify(row.name) === slug);
+    if (hit) return hit;
+    if (!res.next_cursor) return null;
+    cursor = res.next_cursor;
+  }
+  return null;
+}
+
+/** Object-level rows belonging to one program, per expense class. */
+export async function findObjectsForFpap(
+  departmentId: string,
+  agencyId: string,
+  expenseClass: string,
+  fpapId: string,
+  year: number
+): Promise<ObjectRow[]> {
+  const res = await getObjects(departmentId, {
+    year,
+    agencyId,
+    expenseClass,
+    sort: "amount",
+    dir: "desc",
+    limit: SCAN_PAGE_SIZE,
+  });
+  return res.data.filter((row) => row.fpap_id === fpapId);
+}
+
+export interface ProgramHierarchy {
+  operatingUnits: HierarchyRow[];
+  funds: HierarchyRow[];
+  expenses: HierarchyRow[];
+}
+
+function dedupeRows(rows: HierarchyRow[]): HierarchyRow[] {
+  const seen = new Set<string>();
+  const out: HierarchyRow[] = [];
+  for (const row of rows) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    out.push(row);
+  }
+  return out;
+}
+
+/**
+ * Walk program → operating unit → fund → expense class for one year.
+ * Bounded: at most 3 operating units and 6 funds are expanded.
+ */
+export async function getProgramHierarchy(
+  year: number,
+  departmentId: string,
+  fpapId: string
+): Promise<ProgramHierarchy> {
+  const unitsRes = await getChildren(year, departmentId, {
+    level: "operating_units",
+    parent: fpapId,
+    limit: HIERARCHY_PAGE_SIZE,
+  });
+  const operatingUnits = unitsRes.data;
+  const fundResults = await Promise.all(
+    operatingUnits.slice(0, MAX_HIERARCHY_UNITS).map((unit) =>
+      getChildren(year, departmentId, {
+        level: "fund_subcategories",
+        parent: unit.id,
+        limit: HIERARCHY_PAGE_SIZE,
+      })
+    )
+  );
+  const funds = dedupeRows(fundResults.flatMap((r) => r.data));
+  const expenseResults = await Promise.all(
+    funds.slice(0, MAX_HIERARCHY_FUNDS).map((fund) =>
+      getChildren(year, departmentId, {
+        level: "expenses",
+        parent: fund.id,
+        limit: HIERARCHY_PAGE_SIZE,
+      })
+    )
+  );
+  return { operatingUnits, funds, expenses: dedupeRows(expenseResults.flatMap((r) => r.data)) };
+}
+
+/** Object rows for a program across up to three expense classes. */
+export async function findObjectsForProgram(
+  departmentId: string,
+  agencyId: string,
+  fpapId: string,
+  expenses: HierarchyRow[],
+  year: number
+): Promise<ObjectRow[]> {
+  const classes = [
+    ...new Set(
+      expenses
+        .map((row) => row.expense_code ?? "")
+        .filter((code) => VALID_EXPENSE_CLASSES.has(code))
+    ),
+  ].slice(0, 3);
+  if (classes.length === 0) return [];
+  const lists = await Promise.all(
+    classes.map((code) => findObjectsForFpap(departmentId, agencyId, code, fpapId, year))
+  );
+  return lists.flat();
 }

@@ -2,19 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Landmark, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/budget", label: "Budget" },
   { href: "/congress", label: "Congress" },
-  { href: "/data", label: "Data" },
+  { href: "/data", label: "Government Data" },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open = openAt === pathname;
+  const menuRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const firstLink = menuRef.current?.querySelector("a");
+    firstLink?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenAt(null);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
@@ -42,7 +59,7 @@ export function Navbar() {
             <span className="block text-[15px] font-bold tracking-tight text-ink">
               CivicLens PH
             </span>
-            <span className="hidden text-[10px] font-semibold uppercase tracking-widest text-muted sm:block">
+            <span className="hidden text-[10px] font-semibold uppercase tracking-widest text-muted lg:block">
               Government data, made understandable
             </span>
           </span>
@@ -92,17 +109,18 @@ export function Navbar() {
           <Link
             href="/search"
             aria-label="Search CivicLens"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink hover:bg-slate-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-line text-ink hover:bg-slate-50"
           >
             <Search className="h-5 w-5" aria-hidden="true" />
           </Link>
           <button
+            ref={toggleRef}
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpenAt(open ? null : pathname)}
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink hover:bg-slate-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-line text-ink hover:bg-slate-50"
           >
             {open ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -115,7 +133,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div id="mobile-menu" className="border-t border-line bg-white md:hidden">
+        <div id="mobile-menu" ref={menuRef} className="border-t border-line bg-white md:hidden">
           <ul className="mx-auto w-full max-w-7xl space-y-1 px-4 py-3 sm:px-6">
             {[{ href: "/", label: "Explore" }, ...links, { href: "/search", label: "Search" }].map(
               (link) => {
@@ -124,10 +142,10 @@ export function Navbar() {
                   <li key={link.href + link.label}>
                     <Link
                       href={link.href}
-                      onClick={() => setOpen(false)}
+                      onClick={() => setOpenAt(null)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "block rounded-md px-3 py-2.5 text-sm font-medium",
+                        "flex min-h-11 items-center rounded-md px-3 py-2.5 text-sm font-medium",
                         active
                           ? "bg-brand-50 text-brand-800"
                           : "text-ink/80 hover:bg-slate-100"

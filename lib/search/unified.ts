@@ -29,7 +29,7 @@ import {
   personFullName,
 } from "@/lib/congress";
 import { formatBytes, formatVersionDate } from "@/lib/datasets";
-import { formatPesoCompact } from "@/lib/utils";
+import { budgetProgramPath, formatPesoCompact } from "@/lib/utils";
 import type { SearchResult } from "@/types/search";
 
 export type SearchSource = "budget" | "congress" | "data";
@@ -95,7 +95,7 @@ async function searchBudgetSource(query: string, limit: number): Promise<SourceR
         amount: yearFig?.amount ?? 0,
         departmentId: p.department_id,
       },
-      url: `/budget/${p.department_id}`,
+      url: budgetProgramPath(p.department_id, p.agency_id, p.name),
     };
   });
   const total = res.meta.matched ?? res.meta.returned ?? res.data.length;
