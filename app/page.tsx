@@ -158,7 +158,7 @@ export default async function HomePage() {
           <span className="w-1/2 bg-brand-600" />
           <span className="w-1/3 bg-accent-600" />
           <span className="w-1/6 bg-amber-300" />
-          <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent motion-safe:animate-rule-sweep" />
+          <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-white/60 to-transparent motion-safe:animate-rule-sweep" />
         </div>
       </section>
 
