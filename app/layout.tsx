@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { RouteTransition } from "@/components/motion/route-transition";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -47,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Navbar />
         <main id="main" className="flex-1">
-          {children}
+          <RouteTransition>{children}</RouteTransition>
         </main>
         <Footer />
       </body>

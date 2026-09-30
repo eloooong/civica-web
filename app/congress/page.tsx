@@ -119,10 +119,10 @@ export default async function CongressPage({
 
       {/* Database stats */}
       <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard icon={ScrollText} label="Bills indexed" value={stats.total_bills.toLocaleString("en-PH")} hint="House + Senate, all congresses" />
-        <StatCard icon={FileText} label="House bills" value={stats.total_house_bills.toLocaleString("en-PH")} hint={`${stats.total_senate_bills.toLocaleString("en-PH")} Senate bills`} />
-        <StatCard icon={Users} label="Legislators" value={stats.total_people.toLocaleString("en-PH")} hint="Senators + Representatives" />
-        <StatCard icon={Landmark} label="Congresses" value={String(stats.total_congresses)} hint="8th Congress to present" />
+        <StatCard icon={ScrollText} label="Bills indexed" value={stats.total_bills.toLocaleString("en-PH")} valueNumber={stats.total_bills} hint="House + Senate, all congresses" />
+        <StatCard icon={FileText} label="House bills" value={stats.total_house_bills.toLocaleString("en-PH")} valueNumber={stats.total_house_bills} hint={`${stats.total_senate_bills.toLocaleString("en-PH")} Senate bills`} />
+        <StatCard icon={Users} label="Legislators" value={stats.total_people.toLocaleString("en-PH")} valueNumber={stats.total_people} hint="Senators + Representatives" />
+        <StatCard icon={Landmark} label="Congresses" value={String(stats.total_congresses)} valueNumber={stats.total_congresses} hint="8th Congress to present" />
       </div>
 
       {/* Bill search + filters (shareable GET form) */}

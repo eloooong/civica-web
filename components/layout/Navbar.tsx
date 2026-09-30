@@ -76,7 +76,7 @@ export function Navbar() {
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ease-institutional",
                     active
                       ? "bg-brand-50 text-brand-800"
                       : "text-ink/80 hover:bg-slate-100 hover:text-ink"
@@ -92,7 +92,7 @@ export function Navbar() {
               href="/search"
               aria-current={pathname === "/search" ? "page" : undefined}
               className={cn(
-                "ml-2 inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-semibold transition-colors",
+                "ml-2 inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-semibold transition-colors duration-150 ease-institutional",
                 pathname === "/search"
                   ? "border-brand-700 bg-brand-700 text-white"
                   : "border-brand-200 bg-white text-brand-700 hover:border-brand-600 hover:bg-brand-50"

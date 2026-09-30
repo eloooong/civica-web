@@ -36,7 +36,7 @@ export function Pagination({
   );
 
   const arrowClass =
-    "inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-white text-ink";
+    "inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-white text-ink transition-colors duration-150 ease-institutional";
   const disabledArrowClass = "opacity-40";
   const activeArrowClass = "hover:border-brand-200 hover:text-brand-700";
 
@@ -79,7 +79,7 @@ export function Pagination({
                 aria-label={`Page ${p}`}
                 aria-current={p === safePage ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 text-sm font-semibold",
+                  "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors duration-150 ease-institutional",
                   p === safePage
                     ? "border-brand-700 bg-brand-700 text-white"
                     : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"

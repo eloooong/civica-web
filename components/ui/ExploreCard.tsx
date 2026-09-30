@@ -18,9 +18,9 @@ export function ExploreCard({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded-xl border border-line bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 sm:p-7"
+      className="group flex h-full flex-col rounded-xl border border-line bg-white p-6 shadow-sm transition-[transform,border-color,box-shadow] duration-200 ease-institutional hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 sm:p-7"
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-md border border-line bg-surface text-brand-700">
+      <span className="flex h-12 w-12 items-center justify-center rounded-md border border-line bg-surface text-brand-700 transition-[background-color,border-color] duration-200 ease-institutional group-hover:border-brand-200 group-hover:bg-brand-50">
         <Icon className="h-6 w-6" aria-hidden="true" />
       </span>
       <span className="mt-5 text-xl font-bold tracking-tight text-ink sm:text-2xl">{title}</span>
@@ -31,7 +31,10 @@ export function ExploreCard({
         <span className="text-xs font-medium text-muted">{meta}</span>
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 group-hover:underline">
           Explore
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          <ArrowRight
+            className="h-4 w-4 transition-transform duration-200 ease-institutional group-hover:translate-x-1"
+            aria-hidden="true"
+          />
         </span>
       </span>
     </Link>

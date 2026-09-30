@@ -107,7 +107,7 @@ export default async function BudgetPage({
             href={y === DEFAULT_YEAR ? "/budget" : `/budget?year=${y}`}
             aria-current={y === year ? "true" : undefined}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors",
+              "rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 ease-institutional",
               y === year
                 ? "border-brand-700 bg-brand-700 text-white"
                 : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
@@ -130,12 +130,14 @@ export default async function BudgetPage({
           icon={Layers}
           label="Departments"
           value={String(departments.length)}
+          valueNumber={departments.length}
           hint={`In the FY ${year} enacted budget`}
         />
         <StatCard
           icon={Landmark}
           label="Line items"
           value={formatCount(total.line_items)}
+          valueNumber={total.line_items}
           hint="Individual spending line items"
         />
         <StatCard

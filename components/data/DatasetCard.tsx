@@ -11,7 +11,7 @@ import { formatBytes, formatVersionDate, parseTags } from "@/lib/datasets";
 export function DatasetCard({ dataset }: { dataset: Dataset }) {
   const tags = parseTags(dataset.tags).slice(0, 3);
   return (
-    <article className="flex h-full flex-col rounded-lg border border-line bg-white p-5">
+    <article className="group relative flex h-full flex-col rounded-lg border border-line bg-white p-5 transition-[transform,border-color,box-shadow] duration-200 ease-institutional hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
       <div className="flex flex-wrap gap-1.5">
         {dataset.category && <Badge tone="brand">{dataset.category.name}</Badge>}
         <Badge>
@@ -21,7 +21,7 @@ export function DatasetCard({ dataset }: { dataset: Dataset }) {
             : "Catalog record"}
         </Badge>
       </div>
-      <h3 className="mt-3 line-clamp-3 text-[15px] font-bold leading-6 text-ink">
+      <h3 className="mt-3 line-clamp-3 text-[15px] font-bold leading-6 text-ink transition-colors duration-200 ease-institutional group-hover:text-brand-800">
         {dataset.name}
       </h3>
       {dataset.description && (
@@ -46,13 +46,18 @@ export function DatasetCard({ dataset }: { dataset: Dataset }) {
           ))}
         </div>
       )}
+      {/* The overlay makes the whole card a target, which is what the hover
+          treatment on the card implies. */}
       <Link
         href={`/data/${dataset.id}`}
-        className="mt-4 inline-flex w-fit items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 hover:underline"
+        className="mt-4 inline-flex w-fit items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 after:absolute after:inset-0 after:content-['']"
         aria-label={`View dataset: ${dataset.name}`}
       >
         View dataset
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        <ArrowRight
+          className="h-4 w-4 transition-transform duration-200 ease-institutional group-hover:translate-x-1"
+          aria-hidden="true"
+        />
       </Link>
     </article>
   );

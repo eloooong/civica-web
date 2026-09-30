@@ -11,13 +11,13 @@ import { billDisplayTitle, billLabel, congressOrdinal, formatFiledDate, personFu
 export function BillCard({ bill }: { bill: BillDocument }) {
   const authors = bill.authors ?? [];
   return (
-    <article className="flex h-full flex-col rounded-lg border border-line bg-white p-5">
+    <article className="group relative flex h-full flex-col rounded-lg border border-line bg-white p-5 transition-[transform,border-color,box-shadow] duration-200 ease-institutional hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
       <div className="flex flex-wrap gap-1.5">
         <Badge tone="brand">{billLabel(bill)}</Badge>
         {bill.congress !== null && <Badge>{congressOrdinal(bill.congress)}</Badge>}
         {bill.scope && <Badge>{bill.scope}</Badge>}
       </div>
-      <h3 className="mt-3 line-clamp-4 text-[15px] font-bold leading-6 text-ink">
+      <h3 className="mt-3 line-clamp-4 text-[15px] font-bold leading-6 text-ink transition-colors duration-200 ease-institutional group-hover:text-brand-800">
         {billDisplayTitle(bill)}
       </h3>
       <div className="mt-2 flex flex-col gap-1 text-xs text-muted">
@@ -39,13 +39,18 @@ export function BillCard({ bill }: { bill: BillDocument }) {
           </span>
         )}
       </div>
+      {/* The overlay makes the whole card a target, which is what the hover
+          treatment on the card implies. */}
       <Link
         href={`/congress/bills/${bill.id}`}
-        className="mt-4 inline-flex w-fit items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 hover:underline"
+        className="mt-4 inline-flex w-fit items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 after:absolute after:inset-0 after:content-['']"
         aria-label={`View bill ${billLabel(bill)}`}
       >
         View bill
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        <ArrowRight
+          className="h-4 w-4 transition-transform duration-200 ease-institutional group-hover:translate-x-1"
+          aria-hidden="true"
+        />
       </Link>
     </article>
   );

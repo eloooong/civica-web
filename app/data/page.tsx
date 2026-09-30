@@ -158,10 +158,10 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
 
       {/* Catalog stats */}
       <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard icon={Database} label="Datasets" value={stats.total_datasets.toLocaleString("en-PH")} hint="In the catalog" />
-        <StatCard icon={HardDrive} label="Files" value={stats.total_resources.toLocaleString("en-PH")} hint={`${formatBytes(stats.total_size_bytes)} total`} />
-        <StatCard icon={Building2} label="Publishers" value={stats.total_publishers.toLocaleString("en-PH")} hint="Agencies + contributors" />
-        <StatCard icon={Tags} label="Categories" value={stats.total_categories.toLocaleString("en-PH")} hint="Browse by topic below" />
+        <StatCard icon={Database} label="Datasets" value={stats.total_datasets.toLocaleString("en-PH")} valueNumber={stats.total_datasets} hint="In the catalog" />
+        <StatCard icon={HardDrive} label="Files" value={stats.total_resources.toLocaleString("en-PH")} valueNumber={stats.total_resources} hint={`${formatBytes(stats.total_size_bytes)} total`} />
+        <StatCard icon={Building2} label="Publishers" value={stats.total_publishers.toLocaleString("en-PH")} valueNumber={stats.total_publishers} hint="Agencies + contributors" />
+        <StatCard icon={Tags} label="Categories" value={stats.total_categories.toLocaleString("en-PH")} valueNumber={stats.total_categories} hint="Browse by topic below" />
       </div>
 
       {/* Categories */}
@@ -183,7 +183,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
                   className={
                     active
                       ? "block rounded-lg border border-brand-700 bg-brand-50 px-4 py-3.5"
-                      : "block rounded-lg border border-line bg-white px-4 py-3.5 transition-colors hover:border-brand-200 hover:bg-brand-50/40"
+                      : "block rounded-lg border border-line bg-white px-4 py-3.5 transition-colors duration-200 ease-institutional hover:border-brand-200 hover:bg-brand-50/40"
                   }
                 >
                   <span className="block text-sm font-semibold text-ink">{c.name}</span>
