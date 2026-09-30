@@ -79,6 +79,22 @@ export default async function BudgetPage({
           eyebrow="Budget explorer · Live data"
           title="Budget Explorer"
           description="Explore Philippine national budget data from the enacted General Appropriations Act (FY2020–2026), down to agency and program level."
+          actions={
+            <>
+              <Link
+                href="/budget/nep"
+                className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
+              >
+                FY2027 proposed budget
+              </Link>
+              <Link
+                href="/budget/cycle"
+                className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
+              >
+                Budget execution, 2018 to 2026
+              </Link>
+            </>
+          }
         />
       </div>
 

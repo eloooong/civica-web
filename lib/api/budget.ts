@@ -13,6 +13,8 @@ import {
   isBudgetFiscalYear,
   type BudgetFiscalYear,
   type ChildrenResponse,
+  type CycleDepartmentResponse,
+  type CycleManifestResponse,
   type ExpenseClassesResponse,
   type GaaChildLevel,
   type GaaDepartmentResponse,
@@ -20,7 +22,11 @@ import {
   type GaaNationalResponse,
   type GaaYearResponse,
   type HierarchyRow,
+  type HearingTopicResponse,
   type HearingsSearchResponse,
+  type NepDimension,
+  type NepOverviewResponse,
+  type NepRollupsResponse,
   type ObjectRow,
   type ObjectsResponse,
   type ProgramRow,
@@ -236,6 +242,40 @@ export function searchHearings(
   const params: Record<string, string | number> = { q, limit: options.limit ?? 5 };
   if (options.agency) params.agency = options.agency;
   return fetchBudget<HearingsSearchResponse>("/hearings/search", params);
+}
+
+/** GET /hearings/{video_id}/topics/{index} — full deliberation record. */
+export function getHearingTopic(videoId: string, index: number): Promise<HearingTopicResponse> {
+  return fetchBudget<HearingTopicResponse>(
+    `/hearings/${encodeURIComponent(videoId)}/topics/${index}`
+  );
+}
+
+/** GET /nep/2027 — FY2027 proposal at national level, with FY2026 baseline. */
+export function getNepOverview(): Promise<NepOverviewResponse> {
+  return fetchBudget<NepOverviewResponse>("/nep/2027");
+}
+
+/** GET /nep/2027/rollups/{dimension} — one dimension rolled up nationally. */
+export function getNepRollups(
+  dimension: NepDimension,
+  options: { limit?: number } = {}
+): Promise<NepRollupsResponse> {
+  const params: Record<string, string | number> = {};
+  if (options.limit !== undefined) params.limit = options.limit;
+  return fetchBudget<NepRollupsResponse>(`/nep/2027/rollups/${dimension}`, params);
+}
+
+/** GET /budget-cycle — coverage manifest: subjects, years, stages. */
+export function getBudgetCycle(): Promise<CycleManifestResponse> {
+  return fetchBudget<CycleManifestResponse>("/budget-cycle");
+}
+
+/** GET /budget-cycle/departments/{id} — programs and facts for one subject. */
+export function getBudgetCycleDepartment(id: string): Promise<CycleDepartmentResponse> {
+  return fetchBudget<CycleDepartmentResponse>(
+    `/budget-cycle/departments/${encodeURIComponent(id)}`
+  );
 }
 
 /** Bounded scan sizes for slug resolution (largest first, early exit). */

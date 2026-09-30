@@ -14,14 +14,20 @@ import {
   BUDGET_API_BASE,
   BudgetApiError,
   getDepartment,
+  getObjects,
   getPrograms,
   getYearBreakdown,
 } from "@/lib/api/budget";
-import { BUDGET_FISCAL_YEARS, isBudgetFiscalYear } from "@/types/budget";
+import {
+  BUDGET_FISCAL_YEARS,
+  isBudgetFiscalYear,
+  type ObjectsResponse,
+} from "@/types/budget";
 import { cn, budgetProgramPath, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
 
 const DEFAULT_YEAR = 2026;
 const PROGRAM_LIMIT = 100;
+const OBJECT_LIMIT = 10;
 
 type DetailSearchParams = {
   year?: string;
@@ -74,6 +80,7 @@ export default async function BudgetDepartmentPage({
   let detail;
   let programs;
   let national;
+  let objects: ObjectsResponse | null = null;
   try {
     [detail, programs, national] = await Promise.all([
       getDepartment(id),
@@ -121,6 +128,16 @@ export default async function BudgetDepartmentPage({
     prevTotal && currentTotal && prevTotal.amount > 0
       ? ((currentTotal.amount - prevTotal.amount) / prevTotal.amount) * 100
       : null;
+
+  // Object-level rows are optional detail: the page renders without them.
+  objects = await getObjects(id, {
+    year,
+    sort: "amount",
+    dir: "desc",
+    limit: OBJECT_LIMIT,
+  }).catch(() => null);
+
+  const objectRows = objects?.data ?? [];
 
   const moreHref = programs.next_cursor
     ? (() => {
@@ -434,6 +451,72 @@ export default async function BudgetDepartmentPage({
           </>
         )}
       </section>
+
+      {/* Object-level line items */}
+      {objectRows.length > 0 && (
+        <section aria-labelledby="objects-heading" className="mt-8">
+          <SectionHeader
+            title="Largest line items"
+            description={
+              objects?.meta.matched !== undefined
+                ? `Top ${objectRows.length} of ${formatCount(objects.meta.matched)} UACS object rows totaling ${formatPesoCompact(objects.meta.matched_amount ?? 0)} in FY ${year}.`
+                : `UACS object-level rows for FY ${year}, the finest detail the GAA publishes.`
+            }
+          />
+          <h2 id="objects-heading" className="sr-only">
+            Largest line items
+          </h2>
+          <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+            <table className="w-full min-w-[640px] border-collapse bg-white text-left text-sm">
+              <caption className="sr-only">
+                Largest UACS line items of {department.description} in FY {year}
+              </caption>
+              <thead>
+                <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+                  <th scope="col" className="px-4 py-3 font-semibold">Object code</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Description</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">FY {year}</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Share of dept.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {objectRows.map((row) => {
+                  const amount = row.years[yearKey]?.amount ?? 0;
+                  return (
+                    <tr key={row.id} className="border-b border-line last:border-0 hover:bg-surface/60">
+                      <td className="px-4 py-3 font-mono text-xs text-muted">{row.object_code}</td>
+                      <td className="px-4 py-3.5 font-medium text-ink">{row.description}</td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold tabular-nums text-ink">
+                        {formatPesoFull(amount)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-muted tabular-nums">
+                        {yearAmount > 0 ? formatShare(amount / yearAmount) : "–"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <ul className="mt-4 space-y-3 sm:hidden">
+            {objectRows.map((row) => {
+              const amount = row.years[yearKey]?.amount ?? 0;
+              return (
+                <li key={row.id} className="rounded-lg border border-line bg-white p-4">
+                  <p className="text-sm font-semibold text-ink">{row.description}</p>
+                  <p className="mt-0.5 font-mono text-xs text-muted">{row.object_code}</p>
+                  <div className="mt-2 flex items-baseline justify-between gap-2">
+                    <p className="text-sm font-bold tabular-nums text-ink">{formatPesoFull(amount)}</p>
+                    <p className="text-xs text-muted">
+                      FY {year} · {yearAmount > 0 ? formatShare(amount / yearAmount) : "–"} of dept.
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <div className="mt-8">
         <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/departments/${id}`} />

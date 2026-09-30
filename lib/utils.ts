@@ -24,6 +24,18 @@ export function formatShare(share: number): string {
   return `${(share * 100).toFixed(2)}%`;
 }
 
+/** Signed compact peso change, for example +₱1.2B or -₱36.2M. */
+export function formatPesoDelta(value: number): string {
+  const sign = value < 0 ? "-" : "+";
+  return `${sign}${formatPesoCompact(Math.abs(value))}`;
+}
+
+/** Signed percent with one decimal, for example +10.9% or -30.4%. */
+export function formatPctDelta(value: number): string {
+  const sign = value < 0 ? "-" : "+";
+  return `${sign}${Math.abs(value).toFixed(1)}%`;
+}
+
 /** Trillions with 2 decimals, for chart axes (e.g. 6.79). */
 export function toTrillions(value: number): number {
   return Math.round((value / 1_000_000_000_000) * 100) / 100;

@@ -15,6 +15,7 @@ import {
   findFpapBySlug,
   findObjectsForProgram,
   getDepartment,
+  getHearingTopic,
   getProgramHierarchy,
   searchHearings,
 } from "@/lib/api/budget";
@@ -22,6 +23,7 @@ import {
   BUDGET_FISCAL_YEARS,
   isBudgetFiscalYear,
   type HearingSearchHit,
+  type HearingTopicDetail,
   type HierarchyRow,
   type ObjectRow,
 } from "@/types/budget";
@@ -309,6 +311,15 @@ export default async function BudgetProgramPage({
         ).catch(() => [])
       : [];
 
+  // Full deliberation records for each matched hearing topic (optional).
+  const hearingRecords = await Promise.all(
+    hearingHits.map((hit) =>
+      getHearingTopic(hit.hearing.video_id, hit.topic.index)
+        .then((res) => res.data)
+        .catch(() => null as HearingTopicDetail | null)
+    )
+  );
+
   const backHref = departmentHref(id, year);
 
   return (
@@ -569,36 +580,167 @@ export default async function BudgetProgramPage({
         <section aria-labelledby="hearings-heading" className="mt-8">
           <SectionHeader
             title="Related discussion in House budget hearings"
-            description="Matched by keyword against the FY2027 House Committee on Appropriations record. These are related topics, not references to this specific program."
+            description="Matched by keyword against the FY2027 House Committee on Appropriations record. These are related topics, not references to this specific program. Summaries are machine-generated from the hearing transcript."
           />
           <h2 id="hearings-heading" className="sr-only">
             Related discussion in House budget hearings
           </h2>
           <ul className="mt-4 space-y-3">
-            {hearingHits.map((hit) => (
-              <li key={`${hit.hearing.video_id}-${hit.topic.index}`} className="rounded-lg border border-line bg-white p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Gavel className="h-4 w-4 text-brand-700" aria-hidden="true" />
-                  <a
-                    href={hit.topic.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-semibold text-brand-700 hover:underline"
-                  >
-                    {hit.topic.topic}
-                    <span className="sr-only"> (opens in a new tab)</span>
-                  </a>
-                  <Badge>{hit.topic.status}</Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted">
-                  {hit.hearing.title} · {hit.hearing.hearing_date} · FY {hit.hearing.fiscal_year} ·{" "}
-                  {hit.topic.timestamp}
-                </p>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/80">
-                  {hit.topic.summary}
-                </p>
-              </li>
-            ))}
+            {hearingHits.map((hit, index) => {
+              const record = hearingRecords[index];
+              const moments = hit.matching_moments.slice(0, 2);
+              const figures = (record?.figures ?? []).slice(0, 4);
+              const actions = (record?.actions ?? []).slice(0, 3);
+              const positions = (record?.positions ?? []).slice(0, 3);
+              return (
+                <li
+                  key={`${hit.hearing.video_id}-${hit.topic.index}`}
+                  className="rounded-lg border border-line bg-white p-4"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Gavel className="h-4 w-4 text-brand-700" aria-hidden="true" />
+                    <a
+                      href={hit.topic.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-semibold text-brand-700 hover:underline"
+                    >
+                      {hit.topic.topic}
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                    <Badge>{hit.topic.status}</Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-muted">
+                    {hit.hearing.title} · {hit.hearing.hearing_date} · FY {hit.hearing.fiscal_year} ·{" "}
+                    {hit.topic.timestamp}
+                  </p>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/80">
+                    {hit.topic.summary}
+                  </p>
+
+                  {moments.length > 0 && (
+                    <ul className="mt-3 space-y-2 border-l-2 border-brand-200 pl-3">
+                      {moments.map((moment) => (
+                        <li key={`${moment.seconds}-${moment.url}`}>
+                          <blockquote className="text-sm leading-6 text-ink/80">
+                            &ldquo;{moment.said}&rdquo;
+                          </blockquote>
+                          <p className="mt-0.5 text-xs text-muted">
+                            {moment.speaker ? `${moment.speaker} · ` : ""}
+                            <a
+                              href={moment.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-semibold text-brand-700 hover:underline"
+                            >
+                              {moment.timestamp}
+                              <span className="sr-only"> (opens in a new tab)</span>
+                            </a>
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {record && (record.question || record.agency_position || record.outcome) && (
+                    <details className="mt-3 rounded-md border border-line bg-surface/60 p-3">
+                      <summary className="cursor-pointer text-sm font-semibold text-brand-700">
+                        Deliberation record
+                      </summary>
+                      <div className="mt-3 space-y-3 text-sm leading-6">
+                        {record.question && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Question at issue
+                            </p>
+                            <p className="mt-1 text-ink/80">{record.question}</p>
+                          </div>
+                        )}
+                        {record.agency_position && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Agency position
+                            </p>
+                            <p className="mt-1 text-ink/80">{record.agency_position}</p>
+                          </div>
+                        )}
+                        {record.outcome && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Outcome
+                            </p>
+                            <p className="mt-1 text-ink/80">{record.outcome}</p>
+                          </div>
+                        )}
+                        {figures.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Figures mentioned
+                            </p>
+                            <ul className="mt-1 space-y-1">
+                              {figures.map((figure) => (
+                                <li
+                                  key={`${figure.url}-${figure.amount_text}`}
+                                  className="flex flex-wrap items-baseline gap-x-2"
+                                >
+                                  <span className="font-semibold tabular-nums text-ink">
+                                    {figure.amount_text}
+                                  </span>
+                                  <span className="text-muted">{figure.what}</span>
+                                  {figure.url && (
+                                    <a
+                                      href={figure.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs font-semibold text-brand-700 hover:underline"
+                                    >
+                                      {figure.timestamp}
+                                      <span className="sr-only"> (opens in a new tab)</span>
+                                    </a>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {actions.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Commitments and requests
+                            </p>
+                            <ul className="mt-1 list-disc space-y-1 pl-5">
+                              {actions.map((action) => (
+                                <li key={`${action.url}-${action.kind}`}>
+                                  <span className="text-ink/80">{action.action}</span>{" "}
+                                  <span className="text-xs text-muted">
+                                    ({action.kind.replace(/_/g, " ")}, {action.who})
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {positions.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                              Positions taken
+                            </p>
+                            <ul className="mt-1 space-y-1">
+                              {positions.map((position) => (
+                                <li key={`${position.who}-${position.position.slice(0, 40)}`}>
+                                  <span className="font-semibold text-ink">{position.who}:</span>{" "}
+                                  <span className="text-ink/80">{position.position}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -616,7 +758,11 @@ export default async function BudgetProgramPage({
 
       <div className="mt-8">
         <SourceAttribution
-          endpoint={`${BUDGET_API_BASE}/gaa/years/${year}/departments/${id}/children · ${BUDGET_API_BASE}/gaa/departments/${id}/programs`}
+          endpoint={[
+            `${BUDGET_API_BASE}/gaa/years/${year}/departments/${id}/children`,
+            `${BUDGET_API_BASE}/gaa/departments/${id}/programs`,
+            ...(hearingHits.length > 0 ? [`${BUDGET_API_BASE}/hearings/search`] : []),
+          ].join(" · ")}
         />
       </div>
     </div>

@@ -300,6 +300,256 @@ export interface BudgetApiError {
   message: string;
 }
 
+/**
+ * NEP (National Expenditure Program): the FY2027 proposal as submitted to
+ * Congress, paired against the FY2026 enacted baseline. Amounts are pesos.
+ */
+
+/** One dimension row (expense class, region, fund) with its FY2026 baseline. */
+export interface NepRollupRow {
+  code: string;
+  description: string | null;
+  extra: string | null;
+  count: number;
+  amount: number;
+  base_amount: number;
+  delta: number;
+  pct: number;
+}
+
+/** One NEP department row, including section and hierarchy counts. */
+export interface NepDepartmentRow {
+  id: string;
+  slug: string;
+  description: string;
+  source_description: string;
+  source_department_code: string;
+  section: string;
+  line_items: number;
+  amount: number;
+  base_amount: number;
+  delta: number;
+  pct: number;
+  agencies: number;
+  programs: number;
+  activities: number;
+  operating_units: number;
+  objects: number;
+  regions: number;
+}
+
+/** One top-ranked NEP program row. */
+export interface NepProgramRow {
+  department_id: string;
+  code: string;
+  description: string;
+  extra: string | null;
+  count: number;
+  amount: number;
+  base_amount: number;
+  delta: number;
+  pct: number;
+}
+
+export interface NepNational {
+  line_items: number;
+  amount: number;
+  base_amount: number;
+  delta: number;
+  pct: number;
+}
+
+export type NepDimension =
+  | "agency"
+  | "program"
+  | "expense_class"
+  | "fund"
+  | "region"
+  | "object"
+  | "operating_unit"
+  | "division";
+
+/** GET /nep/2027 — national overview with FY2026 comparison. */
+export interface NepOverviewResponse {
+  meta: {
+    dataset: "nep";
+    fiscal_year: number;
+    baseline_year: number;
+    currency: "PHP";
+    scale: "pesos";
+    generated_at: string;
+    source_file: string;
+    [key: string]: unknown;
+  };
+  data: {
+    national: NepNational;
+    departments: NepDepartmentRow[];
+    expense_classes: NepRollupRow[];
+    regions: NepRollupRow[];
+    top_funds: NepRollupRow[];
+    top_programs: NepProgramRow[];
+    top_movers_up: NepDepartmentRow[];
+    top_movers_down: NepDepartmentRow[];
+  };
+}
+
+/** GET /nep/2027/rollups/{dimension} and /departments/{id}/rollups/{dimension}. */
+export interface NepRollupsResponse {
+  meta: {
+    dataset: "nep";
+    fiscal_year: number;
+    baseline_year: number;
+    currency: "PHP";
+    scale: "pesos";
+    dimension: NepDimension;
+    limit: number;
+    [key: string]: unknown;
+  };
+  data: NepRollupRow[];
+}
+
+/**
+ * Budget cycle workbook: Current New Appropriations only, FY2018–FY2026,
+ * from proposal through disbursement. Narrower than the GAA series.
+ */
+
+export type CycleStage =
+  | "nep"
+  | "gaa"
+  | "authorized_appropriation"
+  | "adjusted_appropriation"
+  | "adjusted_allotment"
+  | "obligations"
+  | "disbursements";
+
+export type CycleExpenseClass = "ps" | "mooe" | "finex" | "co" | "total";
+
+/** One covered source subject (usually one department's Office of the Secretary). */
+export interface CycleSubject {
+  subject_id: string;
+  source_sheet: string;
+  display_name: string;
+  is_primary_subject: number;
+  canonical_portal_department_id: string | null;
+  canonical_portal_agency_id: string | null;
+  source_pairs: string[];
+  coverage: Record<string, number[]>;
+}
+
+export interface CycleManifestMeta {
+  dataset: "budget-cycle";
+  currency: "PHP";
+  scale: "pesos";
+  generated_at: string;
+  source_filename: string;
+  source_sha256: string;
+  scope: string;
+  units: string;
+  years: number[];
+  stages: CycleStage[];
+  expense_classes: CycleExpenseClass[];
+  [key: string]: unknown;
+}
+
+/** GET /budget-cycle — coverage manifest for all source subjects. */
+export interface CycleManifestResponse {
+  meta: CycleManifestMeta;
+  data: {
+    note: string;
+    subjects: CycleSubject[];
+  };
+}
+
+/** One program in the workbook, with the source-to-portal crosswalk. */
+export interface CycleProgram {
+  source_row_id: string;
+  subject_id: string;
+  source_department_code: string;
+  source_department_name: string;
+  source_agency_code: string;
+  source_agency_name: string;
+  source_pap_code: string;
+  source_pap_label: string;
+  canonical_portal_fpap_id: string | null;
+  portal_pap_label: string | null;
+  match_method: string | null;
+  match_confidence: string | null;
+}
+
+/** One workbook fact: program x fiscal year x stage x expense class. */
+export interface CycleFact {
+  source_row_id: string;
+  fiscal_year: number;
+  stage: CycleStage;
+  expense_class: CycleExpenseClass;
+  amount: number;
+}
+
+/** GET /budget-cycle/departments/{id} — programs and facts for one subject. */
+export interface CycleDepartmentResponse {
+  meta: CycleManifestMeta & {
+    department_id: string;
+    counts: { programs: number; facts: number };
+  };
+  data: {
+    programs: CycleProgram[];
+    facts: CycleFact[];
+  };
+}
+
+/**
+ * Hearing deliberation record. Machine-generated from the transcript:
+ * question at issue, positions, figures as spoken, actions, outcome.
+ */
+
+export interface HearingPosition {
+  who: string;
+  position: string;
+}
+
+export interface HearingFigure {
+  amount_text: string;
+  amount: number | null;
+  what: string;
+  speaker?: string;
+  seconds?: number;
+  timestamp?: string;
+  url: string;
+}
+
+export interface HearingAction {
+  action: string;
+  kind: string;
+  who: string;
+  seconds?: number;
+  timestamp?: string;
+  url: string;
+}
+
+/** GET /hearings/{video_id}/topics/{index} — full record for one topic. */
+export interface HearingTopicDetail extends HearingTopic {
+  question: string | null;
+  agency_position: string | null;
+  outcome: string | null;
+  timeline_sections: number[];
+  positions: HearingPosition[];
+  figures: HearingFigure[];
+  actions: HearingAction[];
+  thread: HearingMoment[];
+}
+
+/** GET /hearings/{video_id}/topics/{index}. */
+export interface HearingTopicResponse {
+  meta: {
+    dataset: "hearings";
+    currency: string;
+    scale: string;
+    video_id: string;
+    [key: string]: unknown;
+  };
+  data: HearingTopicDetail;
+}
+
 /** Normalized summary used by the explorer UI. */
 export interface BudgetSummary {
   fiscalYear: number;
