@@ -95,7 +95,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-hero">
         <HeroBackdrop />
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-14 pt-16 sm:px-6 sm:pb-20 sm:pt-24">
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24">
           <Reveal delay={0.05}>
             <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-100">
               <span
@@ -106,20 +106,20 @@ export default async function HomePage() {
             </p>
           </Reveal>
           <Reveal delay={0.11}>
-            <h1 className="mt-6 max-w-5xl text-4xl font-extrabold leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 max-w-5xl text-[2.125rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl sm:leading-[1.04] lg:text-7xl">
               Philippine Government Data, Made Easier to Understand.
             </h1>
           </Reveal>
           <Reveal delay={0.17}>
             <p className="mt-4 max-w-2xl text-base leading-7 text-brand-100 sm:text-lg sm:leading-8">
-              Explore budgets, legislation, and government datasets in one accessible place.
-              Free to use, no account needed.
+              Explore budgets, legislation, and government datasets in one accessible place built
+              for the public. Free to use, no account needed.
             </p>
           </Reveal>
           <Reveal delay={0.23}>
             <div className="mt-7 max-w-2xl">
               <SearchBar size="lg" />
-              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-brand-200">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-brand-100">
                 <span>Try searching:</span>
                 {heroSuggestions.map((s) => (
                   <Link
@@ -131,7 +131,7 @@ export default async function HomePage() {
                   </Link>
                 ))}
               </div>
-              <DataStatus className="mt-3 text-brand-200" />
+              <DataStatus className="mt-3 text-brand-100" />
             </div>
           </Reveal>
         </div>
@@ -164,7 +164,7 @@ export default async function HomePage() {
 
       {/* Explore */}
       <section aria-label="Explore collections" className="border-b border-line bg-surface">
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
           <Reveal>
             <div aria-hidden="true" className="flex h-1 w-24 overflow-hidden">
               <span className="w-1/2 bg-brand-600" />
@@ -214,7 +214,7 @@ export default async function HomePage() {
 
       {/* Popular searches */}
       <section aria-label="Popular searches" className="border-b border-line bg-white">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
           <Reveal>
             <SectionHeader
               title="Popular searches"
@@ -230,13 +230,17 @@ export default async function HomePage() {
               }
             />
           </Reveal>
-          <RevealGroup className="mt-6 grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-line">
+          <RevealGroup className="mt-6 grid gap-4 md:grid-cols-3">
             {groups.map((group, i) => (
-              <RevealItem key={group.heading} index={i} className="sm:px-6 sm:first:pl-0 sm:last:pr-0">
+              <RevealItem
+                key={group.heading}
+                index={i}
+                className="rounded-lg border border-line bg-surface p-5"
+              >
                 <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                  <group.icon className="h-4 w-4 text-brand-700" aria-hidden="true" />
-                  {group.heading}
-                  <span className="ml-auto rounded-full bg-surface px-2 py-0.5 font-bold text-muted ring-1 ring-line">
+                  <group.icon className="h-4 w-4 shrink-0 text-brand-700" aria-hidden="true" />
+                  <span className="min-w-0 flex-1">{group.heading}</span>
+                  <span className="rounded-full bg-white px-2 py-0.5 font-bold text-muted tabular-nums ring-1 ring-line">
                     {group.items.length}
                   </span>
                 </h3>
@@ -260,43 +264,39 @@ export default async function HomePage() {
 
       {/* Sources */}
       <section aria-label="Data sources" className="bg-surface">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
           <Reveal>
             <SectionHeader
               title="Sourced, not scraped"
               description="Every record links back to the public API it came from, with a retrieval timestamp."
             />
           </Reveal>
-          <RevealGroup as="ul" className="mt-6 border-t border-line">
+          <RevealGroup as="ul" className="mt-6 grid gap-4 md:grid-cols-3">
             {sources.map((s, i) => (
               <RevealItem
                 as="li"
                 key={s.name}
                 index={i}
-                className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-line py-4"
+                className="flex flex-col rounded-lg border border-line bg-white p-5"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-ink">{s.name}</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {s.scope} · Records originate from {s.record}
-                  </p>
-                  <details className="mt-2">
-                    <summary className="cursor-pointer text-xs font-semibold text-muted transition-colors duration-150 ease-institutional hover:text-ink">
-                      API endpoint
-                    </summary>
-                    <p className="mt-1 break-all rounded-md bg-white px-2 py-1.5 font-mono text-xs text-muted">
-                      {s.endpoint}
-                    </p>
-                  </details>
-                </div>
+                <p className="text-sm font-bold text-ink">{s.name}</p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                  {s.scope}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-muted">
+                  Records originate from {s.record}.
+                </p>
+                <p className="mt-3 break-all rounded-md bg-surface px-2.5 py-2 font-mono text-[11px] leading-4 text-muted">
+                  {s.endpoint}
+                </p>
                 <Link
                   href={s.docs}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-11 items-center gap-1 rounded-sm text-sm font-semibold text-brand-700 transition-colors duration-150 ease-institutional hover:text-brand-800"
+                  className="mt-auto inline-flex min-h-11 w-fit items-center gap-1 rounded-sm pt-3 text-sm font-semibold text-brand-700 transition-colors duration-150 ease-institutional hover:text-brand-800"
                 >
-                  API documentation
-                  <span className="sr-only"> (opens in new tab)</span>
+                  Read the docs
+                  <span className="sr-only"> for {s.name} (opens in new tab)</span>
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </RevealItem>

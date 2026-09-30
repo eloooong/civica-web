@@ -260,7 +260,12 @@ export default async function ContractorsPage({
               {result.page} of {result.totalPages}
             </p>
 
-            <div className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label="Contractors by awarded flood control contract value, scrollable table"
+              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+            >
               <table className="w-full min-w-[880px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   Contractors by awarded flood control contract value
@@ -333,6 +338,10 @@ export default async function ContractorsPage({
                     <dt className="text-muted">Awarded amount</dt>
                     <dd className="text-right font-semibold tabular-nums text-ink">
                       {formatPesoFull(Math.round(c.totalCost))}
+                    </dd>
+                    <dt className="text-muted">Approved budget</dt>
+                    <dd className="text-right tabular-nums text-ink">
+                      {formatPesoFull(Math.round(c.totalAbc))}
                     </dd>
                     <dt className="text-muted">Regions</dt>
                     <dd className="text-right tabular-nums text-ink">{formatCount(c.regions)}</dd>

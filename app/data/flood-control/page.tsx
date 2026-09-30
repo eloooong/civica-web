@@ -380,7 +380,12 @@ export default async function FloodControlPage({
               {result.page} of {result.totalPages}
             </p>
 
-            <div className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label="Flood control contracts with contractor, approved budget, and awarded amount, scrollable table"
+              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+            >
               <table className="w-full min-w-[960px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   Flood control contracts with contractor, approved budget, and awarded amount
@@ -445,7 +450,12 @@ export default async function FloodControlPage({
                   </p>
                   <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <dt className="text-muted">Contract</dt>
-                    <dd className="text-right font-mono text-ink">{c.contractId}</dd>
+                    <dd className="text-right font-mono text-ink">
+                      {c.contractId}
+                      <span className="mt-0.5 block text-[11px] not-italic text-muted">
+                        {c.startDate} to {c.completionDate || "not recorded"}
+                      </span>
+                    </dd>
                     <dt className="text-muted">Approved budget</dt>
                     <dd className="text-right tabular-nums text-ink">{formatPesoFull(Math.round(c.abc))}</dd>
                     <dt className="text-muted">Contract amount</dt>

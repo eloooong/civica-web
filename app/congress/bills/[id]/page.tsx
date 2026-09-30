@@ -81,7 +81,7 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
       />
 
       <div className="mt-4">
-        <PageHeader eyebrow={`${billLabel(bill)} · Legislative record`} title={billDisplayTitle(bill)} />
+        <PageHeader size="compact" eyebrow={`${billLabel(bill)} · Legislative record`} title={billDisplayTitle(bill)} />
         <div className="mt-4 flex flex-wrap gap-1.5">
           <Badge tone="brand">{bill.subtype === "SB" ? "Senate Bill" : "House Bill"}</Badge>
           {bill.congress !== null && <Badge>{congressOrdinal(bill.congress)}</Badge>}

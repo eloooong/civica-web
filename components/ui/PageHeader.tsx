@@ -7,12 +7,18 @@ export function PageHeader({
   description,
   actions,
   className,
+  size = "default",
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   actions?: ReactNode;
   className?: string;
+  /**
+   * `compact` is for dense record pages that sit under breadcrumbs: the title
+   * steps down so it does not compete with the record name underneath it.
+   */
+  size?: "default" | "compact";
 }) {
   return (
     <div className={cn("max-w-3xl", className)}>
@@ -21,11 +27,18 @@ export function PageHeader({
           {eyebrow}
         </p>
       )}
-      <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+      <h1
+        className={cn(
+          "font-bold tracking-tight text-ink",
+          size === "compact" ? "mt-1 text-2xl sm:text-3xl" : "mt-1 text-3xl sm:text-4xl"
+        )}
+      >
         {title}
       </h1>
       {description && (
-        <p className="mt-3 text-base leading-7 text-muted">{description}</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+          {description}
+        </p>
       )}
       {actions && <div className="mt-5 flex flex-wrap gap-3">{actions}</div>}
     </div>

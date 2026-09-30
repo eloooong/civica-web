@@ -107,7 +107,12 @@ export function BudgetExplorer({
           />
         </div>
       ) : (
-        <div className="mt-3 overflow-x-auto rounded-lg border border-line">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label={`Enacted national budget allocations by department for FY ${year}, scrollable table`}
+          className="mt-3 overflow-x-auto rounded-lg border border-line"
+        >
           <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               Enacted national budget allocations by department for FY {year}

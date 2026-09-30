@@ -99,7 +99,7 @@ export default async function PersonDetailPage({
       />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-        <PageHeader eyebrow="Legislator profile · Live data" title={name} />
+        <PageHeader size="compact" eyebrow="Legislator profile · Live data" title={name} />
         {latest && <Badge tone="brand">{latest.position} · {latest.congress_ordinal} Congress</Badge>}
       </div>
 
@@ -139,7 +139,12 @@ export default async function PersonDetailPage({
             />
           </div>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-lg border border-line">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label={`Congresses served by ${name}, scrollable table`}
+            className="mt-4 overflow-x-auto rounded-lg border border-line"
+          >
             <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">Congresses served by {name}</caption>
               <thead>

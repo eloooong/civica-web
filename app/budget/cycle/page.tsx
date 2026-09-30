@@ -341,7 +341,12 @@ export default async function BudgetCyclePage({
           </div>
         ) : (
           <>
-            <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label={`${subjectName} programs by budget stage in FY ${year}, scrollable table`}
+              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+            >
               <table className="w-full min-w-[860px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   {subjectName} programs by budget stage in FY {year}
@@ -499,7 +504,12 @@ function manifestView(manifest: CycleManifestResponse) {
         <h2 id="coverage-heading" className="sr-only">
           Covered subjects
         </h2>
-        <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label="Subjects covered by the budget cycle workbook and their year coverage, scrollable table"
+          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+        >
           <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               Subjects covered by the budget cycle workbook and their year coverage
@@ -562,6 +572,9 @@ function manifestView(manifest: CycleManifestResponse) {
                 <p className="mt-2 text-xs text-muted">
                   Enacted {rangeLabel(subject.coverage.gaa)} · obligations{" "}
                   {rangeLabel(subject.coverage.obligations)}
+                </p>
+                <p className="mt-0.5 font-mono text-xs text-muted">
+                  Source sheet {subject.source_sheet}
                 </p>
               </li>
             );

@@ -25,7 +25,12 @@ function changeCell(delta: number, pct: number): string {
 function RollupTable({ caption, rows }: { caption: string; rows: NepRollupRow[] }) {
   const total = rows.reduce((sum, row) => sum + row.amount, 0);
   return (
-    <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-white">
+    <div
+      tabIndex={0}
+      role="region"
+      aria-label={`${caption}, scrollable table`}
+      className="mt-4 overflow-x-auto rounded-lg border border-line bg-white"
+    >
       <table className="w-full min-w-[560px] border-collapse text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead>
@@ -70,7 +75,12 @@ function RollupTable({ caption, rows }: { caption: string; rows: NepRollupRow[] 
 function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
   return (
     <>
-      <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="FY2027 proposed budget by department with change against FY2026, scrollable table"
+        className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+      >
         <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
           <caption className="sr-only">
             FY2027 proposed budget by department with change against FY2026
@@ -134,6 +144,9 @@ function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
             <p className="mt-2 text-sm font-bold tabular-nums text-ink">
               {formatPesoFull(row.amount)}{" "}
               <span className="font-normal text-muted">· {changeCell(row.delta, row.pct)}</span>
+            </p>
+            <p className="mt-1 text-xs tabular-nums text-muted">
+              FY2026 enacted {formatPesoFull(row.base_amount)}
             </p>
           </li>
         ))}

@@ -158,6 +158,7 @@ export default async function BudgetDepartmentPage({
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
+          size="compact"
           eyebrow={`Department ${department.id} · Live data`}
           title={department.description}
           description={`Enacted General Appropriations Act budgets, agencies, programs, and expense classes, FY2020–2026.`}
@@ -231,7 +232,12 @@ export default async function BudgetDepartmentPage({
         <h2 id="agencies-heading" className="sr-only">
           Agencies and bureaus
         </h2>
-        <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label={`${department.description} agencies with FY ${year} enacted amounts, scrollable table`}
+          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+        >
           <table className="w-full min-w-[560px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               {department.description} agencies with FY {year} enacted amounts
@@ -366,7 +372,12 @@ export default async function BudgetDepartmentPage({
           </div>
         ) : (
           <>
-            <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label={`Programs of ${department.description} in FY ${year}${q ? ` matching ${q}` : ""}, scrollable table`}
+              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+            >
               <table className="w-full min-w-[640px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   Programs of {department.description} in FY {year}
@@ -466,7 +477,12 @@ export default async function BudgetDepartmentPage({
           <h2 id="objects-heading" className="sr-only">
             Largest line items
           </h2>
-          <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label={`Largest line items of ${department.description} in FY ${year}, scrollable table`}
+            className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+          >
             <table className="w-full min-w-[560px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
                 Largest line items of {department.description} in FY {year}

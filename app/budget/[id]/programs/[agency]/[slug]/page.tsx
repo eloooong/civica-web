@@ -335,6 +335,7 @@ export default async function BudgetProgramPage({
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
+          size="compact"
           eyebrow={`${agencyName} · Live data`}
           title={name}
           description={`How this program's enacted appropriation is administered: hierarchy, multi-year history, and object-level detail from the General Appropriations Act.`}
@@ -477,7 +478,12 @@ export default async function BudgetProgramPage({
           Appropriation history
         </h2>
         {familyRow !== null ? (
-          <div className="mt-4 overflow-x-auto rounded-lg border border-line">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label={`${name} appropriation history, FY2020 to FY2026, scrollable table`}
+            className="mt-4 overflow-x-auto rounded-lg border border-line"
+          >
             <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
                 {name} appropriation history, FY2020 to FY2026
@@ -541,7 +547,12 @@ export default async function BudgetProgramPage({
           <h2 id="objects-heading" className="sr-only">
             Spending categories
           </h2>
-          <div className="mt-4 overflow-x-auto rounded-lg border border-line">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label={`Spending categories for ${name} in FY ${year}, scrollable table`}
+            className="mt-4 overflow-x-auto rounded-lg border border-line"
+          >
             <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">Spending categories for {name} in FY {year}</caption>
               <thead>

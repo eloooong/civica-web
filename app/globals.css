@@ -115,6 +115,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* The navbar is sticky and 65px tall (1px rule + h-16). Without this, an
+     in-page anchor or the skip link lands underneath it. */
+  scroll-padding-top: 5rem;
 }
 
 body {
