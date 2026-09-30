@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
+import { AlertTriangle, Inbox } from "lucide-react";
+import Loader from "@/components/kokonutui/loader";
 
 export function EmptyState({
   title,
@@ -68,10 +69,9 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
     <div
       role="status"
       aria-live="polite"
-      className="flex flex-col items-center rounded-lg border border-line bg-white px-6 py-12 text-center"
+      className="flex flex-col items-center rounded-lg border border-line bg-white"
     >
-      <Loader2 className="h-6 w-6 animate-spin text-brand-700" aria-hidden="true" />
-      <p className="mt-3 text-sm font-medium text-muted">{label}</p>
+      <Loader className="p-10" size="sm" title={label} />
     </div>
   );
 }

@@ -1,22 +1,19 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import BackgroundPaths from "@/components/kokonutui/background-paths";
 
 /**
- * Homepage hero backdrop: a ledger grid and a soft glow, both drifting with
- * the scroll.
+ * Homepage hero backdrop, in three layers: a drifting KokonutUI path layer,
+ * a ledger grid, and a soft glow. The grid and the glow drift with scroll.
  *
- * The ambient loops are CSS keyframes rather than Motion animations on
- * purpose. A Motion `animate` prop is materialised into inline styles during
- * server rendering, and those styles do not reliably match the first client
- * render once the motion preference is taken into account, which produces a
- * hydration mismatch. CSS emits no inline style at all, so the server and
- * client agree by construction, and the existing reduced-motion block in
- * globals.css already switches the loops off.
- *
- * Only the scroll parallax stays in Motion, because it genuinely needs a
- * scroll position. It resolves to zero on both the server and the first
- * client render, so it stays in agreement.
+ * The ambient loops are CSS keyframes or guarded KokonutUI components rather
+ * than Motion `animate` props on this element. A Motion `animate` prop is
+ * materialised into inline styles during server rendering, and those styles
+ * do not reliably match the first client render once the motion preference
+ * is taken into account, which produces a hydration mismatch. Only the scroll
+ * parallax stays in Motion, because it genuinely needs a scroll position. It
+ * resolves to zero on both the server and the first client render.
  *
  * The grid travels exactly one tile per loop, so the pattern has no seam.
  */
@@ -30,6 +27,8 @@ export function HeroBackdrop() {
 
   return (
     <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+      <BackgroundPaths />
+
       <motion.div
         style={{ y: gridY }}
         className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_70%_80%_at_50%_20%,black_30%,transparent_75%)] motion-safe:animate-grid-drift"

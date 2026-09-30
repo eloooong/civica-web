@@ -20,6 +20,9 @@ const eslintConfig = defineConfig([
     // Reviewed on install; our stricter rules don't apply to it.
     "components/charts/**",
     "components/shimmering-text.tsx",
+    // Vendored KokonutUI registry code, adapted on install to honour the
+    // reduced-motion and server-rendering contracts. See each file's header.
+    "components/kokonutui/**",
   ]),
 ]);
 
