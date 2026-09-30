@@ -387,7 +387,7 @@ export default async function BudgetProgramPage({
           icon={List}
           label="Line items"
           value={formatCount(lineItems)}
-          hint={`UACS rows funded in FY ${year}`}
+          hint={`Line items funded in FY ${year}`}
         />
         <StatCard
           icon={Percent}
@@ -535,19 +535,18 @@ export default async function BudgetProgramPage({
       {objectRows.length > 0 && (
         <section aria-labelledby="objects-heading" className="mt-8">
           <SectionHeader
-            title="Object breakdown"
-            description={`UACS expense objects behind the FY ${year} figure, the finest detail the GAA publishes.`}
+            title="What the money buys"
+            description={`Spending categories behind the FY ${year} figure, the finest detail the GAA publishes.`}
           />
           <h2 id="objects-heading" className="sr-only">
-            Object breakdown
+            Spending categories
           </h2>
           <div className="mt-4 overflow-x-auto rounded-lg border border-line">
-            <table className="w-full min-w-[520px] border-collapse bg-white text-left text-sm">
-              <caption className="sr-only">UACS objects for {name} in FY {year}</caption>
+            <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
+              <caption className="sr-only">Spending categories for {name} in FY {year}</caption>
               <thead>
                 <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-                  <th scope="col" className="px-4 py-3 font-semibold">Object code</th>
-                  <th scope="col" className="px-4 py-3 font-semibold">Description</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Spending category</th>
                   <th scope="col" className="px-4 py-3 text-right font-semibold">First funded</th>
                   <th scope="col" className="px-4 py-3 text-right font-semibold">FY {year}</th>
                 </tr>
@@ -558,7 +557,6 @@ export default async function BudgetProgramPage({
                   const firstFunded = firstFundedYear(row);
                   return (
                     <tr key={row.id} className="border-b border-line last:border-0">
-                      <td className="px-4 py-3 font-mono text-xs text-muted">{row.object_code}</td>
                       <td className="px-4 py-3 font-medium text-ink">{row.description}</td>
                       <td className="px-4 py-3 text-right text-muted">
                         {firstFunded ? `FY ${firstFunded}` : "–"}

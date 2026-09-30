@@ -136,7 +136,7 @@ export default async function BudgetPage({
           icon={Landmark}
           label="Line items"
           value={formatCount(total.line_items)}
-          hint="UACS object-level rows"
+          hint="Individual spending line items"
         />
         <StatCard
           icon={TrendingUp}

@@ -9,7 +9,17 @@ import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://civiclens.ph";
   const now = new Date();
-  const routes = ["/", "/search", "/budget", "/budget/nep", "/budget/cycle", "/congress", "/data"];
+  const routes = [
+    "/",
+    "/search",
+    "/budget",
+    "/budget/nep",
+    "/budget/cycle",
+    "/congress",
+    "/data",
+    "/data/flood-control",
+    "/data/contractors",
+  ];
   return routes.map((route) => ({
     url: `${base}${route}`,
     lastModified: now,

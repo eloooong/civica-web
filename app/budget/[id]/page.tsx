@@ -459,22 +459,21 @@ export default async function BudgetDepartmentPage({
             title="Largest line items"
             description={
               objects?.meta.matched !== undefined
-                ? `Top ${objectRows.length} of ${formatCount(objects.meta.matched)} UACS object rows totaling ${formatPesoCompact(objects.meta.matched_amount ?? 0)} in FY ${year}.`
-                : `UACS object-level rows for FY ${year}, the finest detail the GAA publishes.`
+                ? `Top ${objectRows.length} of ${formatCount(objects.meta.matched)} line items totaling ${formatPesoCompact(objects.meta.matched_amount ?? 0)} in FY ${year}.`
+                : `Individual line items for FY ${year}, the finest detail the GAA publishes.`
             }
           />
           <h2 id="objects-heading" className="sr-only">
             Largest line items
           </h2>
           <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block">
-            <table className="w-full min-w-[640px] border-collapse bg-white text-left text-sm">
+            <table className="w-full min-w-[560px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
-                Largest UACS line items of {department.description} in FY {year}
+                Largest line items of {department.description} in FY {year}
               </caption>
               <thead>
                 <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-                  <th scope="col" className="px-4 py-3 font-semibold">Object code</th>
-                  <th scope="col" className="px-4 py-3 font-semibold">Description</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">What the money buys</th>
                   <th scope="col" className="px-4 py-3 text-right font-semibold">FY {year}</th>
                   <th scope="col" className="px-4 py-3 text-right font-semibold">Share of dept.</th>
                 </tr>
@@ -484,7 +483,6 @@ export default async function BudgetDepartmentPage({
                   const amount = row.years[yearKey]?.amount ?? 0;
                   return (
                     <tr key={row.id} className="border-b border-line last:border-0 hover:bg-surface/60">
-                      <td className="px-4 py-3 font-mono text-xs text-muted">{row.object_code}</td>
                       <td className="px-4 py-3.5 font-medium text-ink">{row.description}</td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold tabular-nums text-ink">
                         {formatPesoFull(amount)}
@@ -504,7 +502,6 @@ export default async function BudgetDepartmentPage({
               return (
                 <li key={row.id} className="rounded-lg border border-line bg-white p-4">
                   <p className="text-sm font-semibold text-ink">{row.description}</p>
-                  <p className="mt-0.5 font-mono text-xs text-muted">{row.object_code}</p>
                   <div className="mt-2 flex items-baseline justify-between gap-2">
                     <p className="text-sm font-bold tabular-nums text-ink">{formatPesoFull(amount)}</p>
                     <p className="text-xs text-muted">

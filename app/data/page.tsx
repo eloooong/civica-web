@@ -133,11 +133,27 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Government Data" }]} />
       <div className="mt-4">
-        <PageHeader
-          eyebrow="Data explorer · Live data"
-          title="Government Data"
-          description="Discover datasets published by Philippine government agencies: budgets, elections, procurement, and more."
-        />
+          <PageHeader
+            eyebrow="Data explorer · Live data"
+            title="Government Data"
+            description="Discover datasets published by Philippine government agencies: budgets, elections, procurement, and more."
+            actions={
+              <>
+                <Link
+                  href="/data/flood-control"
+                  className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
+                >
+                  Flood control contracts
+                </Link>
+                <Link
+                  href="/data/contractors"
+                  className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
+                >
+                  Public contractors
+                </Link>
+              </>
+            }
+          />
       </div>
 
       {/* Catalog stats */}
