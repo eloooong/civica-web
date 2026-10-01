@@ -256,7 +256,6 @@ export default async function BudgetDepartmentPage({
                   <tr key={a.id} className="border-b border-line last:border-0 hover:bg-surface/60">
                     <td className="px-4 py-3.5">
                       <span className="block font-semibold text-ink">{a.description}</span>
-                      <span className="block font-mono text-xs text-muted">{a.id}</span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink">
                       {formatPesoFull(amount)}
@@ -276,7 +275,6 @@ export default async function BudgetDepartmentPage({
             return (
               <li key={a.id} className="rounded-lg border border-line bg-white p-4">
                 <p className="text-sm font-semibold text-ink">{a.description}</p>
-                <p className="mt-0.5 font-mono text-xs text-muted">{a.id}</p>
                 <div className="mt-2 flex items-baseline justify-between gap-2">
                   <p className="text-sm font-bold tabular-nums text-ink">{formatPesoFull(amount)}</p>
                   <p className="text-xs text-muted">
@@ -405,9 +403,6 @@ export default async function BudgetDepartmentPage({
                         >
                           {p.name}
                         </Link>
-                        <span className="block text-xs text-muted">
-                          {formatCount(p.years[yearKey]?.count ?? 0)} line items
-                        </span>
                       </td>
                       <td className="px-4 py-3.5 text-muted">
                         {agencyName.get(p.agency_id) ?? p.agency_id}
@@ -435,7 +430,6 @@ export default async function BudgetDepartmentPage({
                     {p.name}
                   </Link>
                   <p className="mt-0.5 text-xs text-muted">
-                    {formatCount(p.years[yearKey]?.count ?? 0)} line items ·{" "}
                     {agencyName.get(p.agency_id) ?? p.agency_id}
                   </p>
                   <p className="mt-2 text-sm font-bold tabular-nums text-ink">

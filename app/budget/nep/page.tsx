@@ -108,7 +108,7 @@ function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
                     <span className="block font-semibold text-ink">{row.description}</span>
                   )}
                   <span className="block text-xs text-muted">
-                    {formatCount(row.line_items)} line items · {formatCount(row.programs)} programs
+                    {formatCount(row.programs)} programs
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink tabular-nums">
@@ -139,7 +139,7 @@ function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
               <p className="text-sm font-semibold text-ink">{row.description}</p>
             )}
             <p className="mt-0.5 text-xs text-muted">
-              {formatCount(row.line_items)} line items · {formatCount(row.programs)} programs
+              {formatCount(row.programs)} programs
             </p>
             <p className="mt-2 text-sm font-bold tabular-nums text-ink">
               {formatPesoFull(row.amount)}{" "}
@@ -257,7 +257,7 @@ export default async function NepPage() {
           icon={Landmark}
           label={`Proposed total · FY ${meta.fiscal_year}`}
           value={formatPesoCompact(national.amount)}
-          hint={`${formatCount(national.line_items)} line items proposed`}
+          hint="Subject to congressional enactment"
         />
         <StatCard
           icon={Percent}
@@ -344,7 +344,7 @@ export default async function NepPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink">{row.description}</p>
                   <p className="text-xs text-muted tabular-nums">
-                    {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)}) · {row.count} line items
+                    {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)})
                   </p>
                 </div>
                 <span className="shrink-0 text-sm font-bold tabular-nums text-ink">
@@ -371,7 +371,7 @@ export default async function NepPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink">{row.description ?? row.code}</p>
                   <p className="text-xs text-muted tabular-nums">
-                    {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)}) · {formatCount(row.count)} line items
+                    {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)})
                   </p>
                 </div>
                 <span className="shrink-0 text-sm font-bold tabular-nums text-ink">

@@ -183,13 +183,11 @@ function ChainRow({
   name,
   amount,
   depth,
-  code,
 }: {
   label: string;
   name: string;
   amount: number;
   depth: number;
-  code?: string;
 }) {
   const indent = ["pl-4", "pl-8", "pl-12", "pl-16", "pl-20"][Math.min(depth, 4)];
   return (
@@ -202,7 +200,6 @@ function ChainRow({
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</p>
         <p className="mt-0.5 text-sm font-medium text-ink">{name}</p>
-        {code && <p className="font-mono text-xs text-muted">{code}</p>}
       </div>
       <p className="whitespace-nowrap text-sm font-semibold tabular-nums text-ink">
         {formatPesoFull(amount)}
@@ -427,7 +424,6 @@ export default async function BudgetProgramPage({
               name={agencyName}
               amount={agencyRow?.years[yearKey]?.amount ?? 0}
               depth={1}
-              code={agency}
             />
             {hierarchy.operatingUnits.slice(0, MAX_CHAIN_ROWS).map((unit) => (
               <ChainRow
@@ -436,7 +432,6 @@ export default async function BudgetProgramPage({
                 name={unit.description}
                 amount={unit.amount}
                 depth={2}
-                code={unit.operunit_code}
               />
             ))}
             {hierarchy.funds.slice(0, MAX_CHAIN_ROWS).map((fund) => (
@@ -446,7 +441,6 @@ export default async function BudgetProgramPage({
                 name={fund.description}
                 amount={fund.amount}
                 depth={3}
-                code={fund.fund_code}
               />
             ))}
             {hierarchy.expenses.slice(0, MAX_CHAIN_ROWS).map((expense) => (
@@ -456,7 +450,6 @@ export default async function BudgetProgramPage({
                 name={expense.description}
                 amount={expense.amount}
                 depth={4}
-                code={expense.expense_code}
               />
             ))}
           </ol>

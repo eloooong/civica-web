@@ -132,9 +132,6 @@ export function BudgetExplorer({
                 <tr key={d.id} className="border-b border-line last:border-0 hover:bg-surface/60">
                   <td className="px-4 py-3.5">
                     <span className="block font-semibold text-ink">{d.description}</span>
-                    <span className="block font-mono text-xs text-muted">
-                      Code {d.id} · {(d.line_items ?? 0).toLocaleString("en-PH")} line items
-                    </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink">
                     {formatPesoCompact(d.amount ?? 0)}
