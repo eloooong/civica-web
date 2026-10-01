@@ -710,8 +710,22 @@ export default async function BudgetProgramPage({
                     </ul>
                   )}
 
-                  {record && (record.question || record.agency_position || record.outcome) && (
-                    <HearingRecord record={record} />
+                  {/* Same gate as the hearing page: any part of the record
+                      counts, so a topic carrying only figures and an outcome is
+                      not hidden. */}
+                  {record && (
+                    record.question ||
+                    record.agency_position ||
+                    record.outcome ||
+                    record.positions.length > 0 ||
+                    record.figures.length > 0 ||
+                    record.actions.length > 0
+                  ) && (
+                    <HearingRecord
+                      record={record}
+                      transcriptHref={`/budget/hearings/${encodeURIComponent(hit.hearing.video_id)}/transcript?t=${hit.topic.first_seconds}`}
+                      timelineHref={`/budget/hearings/${encodeURIComponent(hit.hearing.video_id)}/timeline`}
+                    />
                   )}
                 </li>
               );

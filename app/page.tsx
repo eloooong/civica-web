@@ -97,16 +97,7 @@ export default async function HomePage() {
         <HeroBackdrop />
         <div className="relative mx-auto w-full max-w-7xl px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24">
           <Reveal delay={0.05}>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-100">
-              <span
-                aria-hidden="true"
-                className="inline-block h-2 w-2 rounded-full bg-amber-300 animate-live-pulse"
-              />
-              Civic transparency · Budget · Congress · Government Data
-            </p>
-          </Reveal>
-          <Reveal delay={0.11}>
-            <h1 className="mt-6 max-w-5xl text-[2.125rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl sm:leading-[1.04] lg:text-7xl">
+            <h1 className="max-w-5xl text-[2.125rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl sm:leading-[1.04] lg:text-7xl">
               Philippine Government Data, Made Easier to Understand.
             </h1>
           </Reveal>

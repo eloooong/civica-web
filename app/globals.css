@@ -33,7 +33,6 @@
   --animate-grid-drift: grid-drift 26s linear infinite;
   --animate-glow-breathe: glow-breathe 16s var(--ease-standard) infinite;
   --animate-rule-sweep: rule-sweep 5.5s var(--ease-standard) infinite;
-  --animate-live-pulse: live-pulse 2.4s var(--ease-standard) infinite;
 
   /* One tile per loop, so the ledger grid has no visible seam. The tile size
      here has to stay equal to the bg-[size:44px_44px] on the element. */
@@ -70,15 +69,6 @@
     }
   }
 
-  @keyframes live-pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgb(252 211 77 / 0.65);
-    }
-    70%,
-    100% {
-      box-shadow: 0 0 0 8px rgb(252 211 77 / 0);
-    }
-  }
 }
 
 :root {

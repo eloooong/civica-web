@@ -309,8 +309,21 @@ export default async function HearingPage({
                     {topic.outcome}
                   </p>
                 )}
-                {(topic.question || topic.agency_position || topic.positions.length > 0) && (
-                  <HearingRecord record={topic} />
+                {/* Any part of the record counts. The question, position, and
+                    positions above are the ones the source reliably fills, so
+                    gating on those alone would hide a record that carries only
+                    figures and an outcome. */}
+                {(topic.question ||
+                  topic.agency_position ||
+                  topic.outcome ||
+                  topic.positions.length > 0 ||
+                  topic.figures.length > 0 ||
+                  topic.actions.length > 0) && (
+                  <HearingRecord
+                    record={topic}
+                    transcriptHref={`/budget/hearings/${encodedId}/transcript?t=${topic.first_seconds}`}
+                    timelineHref={`/budget/hearings/${encodedId}/timeline`}
+                  />
                 )}
               </li>
             ))}
