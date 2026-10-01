@@ -75,7 +75,7 @@ async function fetchBudget<T>(path: string, params?: Record<string, string | num
   try {
     res = await fetch(endpoint, {
       next: { revalidate: BUDGET_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "CivicLens-PH/1.0 (+https://civiclens.ph)" },
+      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
     });
   } catch {
     throw new BudgetApiError(

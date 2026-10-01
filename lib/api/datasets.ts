@@ -72,7 +72,7 @@ async function fetchData<T>(
   try {
     res = await fetch(endpoint, {
       next: { revalidate: DATA_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "CivicLens-PH/1.0 (+https://civiclens.ph)" },
+      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
     });
   } catch {
     throw new DataApiError(
@@ -229,7 +229,7 @@ export async function getResourcePreview(resource: DatasetResource): Promise<Res
     const res = await fetch(resource.download_url, {
       headers: {
         Range: `bytes=0-${PREVIEW_FETCH_BYTES - 1}`,
-        "User-Agent": "CivicLens-PH/1.0 (+https://civiclens.ph)",
+        "User-Agent": "Civica-PH/1.0 (+https://civica.ph)",
       },
       signal: AbortSignal.timeout(8000),
       next: { revalidate: DATA_REVALIDATE_SECONDS },

@@ -83,7 +83,7 @@ Budget charts and KPI cards use [Bklit UI](https://bklit.com) components
   where Bklit needs them (`cn`) and intentionally different otherwise.
 - One vendor import was fixed: `chart-loading-label.tsx` referenced a
   non-existent `../components/shimmering-text` path.
-- `--chart-*` CSS variables in `app/globals.css` are mapped to the CivicLens
+- `--chart-*` CSS variables in `app/globals.css` are mapped to the Civica
   brand palette (including a fix to the registry's `var(----chart-*)`
   typos in the `@theme inline` bridge).
 - Bklit's line chart is time-series-only (axis labels render "Jan 1" style),

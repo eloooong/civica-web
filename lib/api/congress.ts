@@ -68,7 +68,7 @@ async function fetchCongress<T>(
   try {
     res = await fetch(endpoint, {
       next: { revalidate: CONGRESS_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "CivicLens-PH/1.0 (+https://civiclens.ph)" },
+      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
     });
   } catch {
     throw new CongressApiError(

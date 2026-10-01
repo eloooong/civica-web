@@ -103,7 +103,7 @@ export const getFloodContracts = cache(async (): Promise<FloodContract[]> => {
   try {
     res = await fetch(endpoint, {
       next: { revalidate: DATA_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "CivicLens-PH/1.0 (+https://civiclens.ph)" },
+      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
       signal: AbortSignal.timeout(90_000),
     });
   } catch {

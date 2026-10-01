@@ -1,7 +1,7 @@
 import type { Transition } from "motion/react";
 
 /**
- * CivicLens motion tokens.
+ * Civica motion tokens.
  *
  * The character is restrained institutional: short travel distances, no
  * bounce, no overshoot, and no looping motion on anything a reader has to

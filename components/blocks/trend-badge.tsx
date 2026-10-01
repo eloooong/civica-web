@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
-/** YoY/period trend badge. Uses the CivicLens badge + Lucide icons. */
+  /** YoY/period trend badge. Uses the Civica badge + Lucide icons. */
 export function TrendBadge({
   value,
   className,

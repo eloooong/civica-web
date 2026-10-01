@@ -7,7 +7,7 @@ import type { MetadataRoute } from "next";
  * the explorer pages listed here.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://civiclens.ph";
+  const base = "https://civica.ph";
   const now = new Date();
   const routes = [
     "/",

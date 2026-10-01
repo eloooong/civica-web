@@ -1,6 +1,6 @@
-# CivicLens PH — Implementation Plan
+# Civica PH — Implementation Plan
 
-> **CivicLens PH** is a Philippine government data explorer inspired by the clean, accessible design language of BetterGov.PH. It brings together public budget data, congressional information, and government datasets into one searchable platform.
+> **Civica PH** is a Philippine government data explorer inspired by the clean, accessible design language of BetterGov.PH. It brings together public budget data, congressional information, and government datasets into one searchable platform.
 
 ---
 
@@ -10,12 +10,12 @@
 
 > **Explore Philippine Government Data. Understand where public money goes, what Congress is doing, and what government datasets are available.**
 
-CivicLens PH should feel like a **BetterGov sibling**, not a clone.
+Civica PH should feel like a **BetterGov sibling**, not a clone.
 
 ### Core sections
 
 ```text
-CivicLens PH
+Civica PH
 
 Explore
 ├── Budget
@@ -30,7 +30,7 @@ Tools
 └── Compare
 
 About
-└── About CivicLens
+└── About Civica
 ```
 
 ---
@@ -52,13 +52,13 @@ The UI should be visually close to BetterGov.PH:
 - Strong search experience
 - Clear source attribution
 
-### CivicLens visual direction
+### Civica visual direction
 
 The interface should be more data-oriented while retaining BetterGov's clean civic feel.
 
 ```text
 ┌────────────────────────────────────────────────────┐
-│ 🇵🇭 CivicLens PH     Explore  Budget  Congress     │
+│ 🇵🇭 Civica PH     Explore  Budget  Congress     │
 │                                      Search 🔍     │
 ├────────────────────────────────────────────────────┤
 │                                                    │
@@ -593,7 +593,7 @@ Frontend
 Next.js / React
        │
        ↓
-CivicLens API
+Civica API
        │
  ┌─────┼────────────┐
  ↓     ↓            ↓
@@ -603,7 +603,7 @@ API    API          API
 
 ## Why have a backend?
 
-It allows CivicLens to:
+It allows Civica to:
 
 - Normalize API responses
 - Cache API calls
@@ -671,7 +671,7 @@ Meilisearch
 # 15. Project Folder Structure
 
 ```text
-civiclens-ph/
+civica-web/
 │
 ├── app/
 │   ├── page.tsx
@@ -962,7 +962,7 @@ Features:
 
 ---
 
-# 22. Phase 5 — CivicLens Search
+# 22. Phase 5 — Civica Search
 
 Combine all data sources.
 
@@ -991,7 +991,7 @@ Basic Education Statistics
 DepEd
 ```
 
-At this point the application becomes **CivicLens**, rather than three unrelated API demonstrations.
+At this point the application becomes **Civica**, rather than three unrelated API demonstrations.
 
 ---
 
@@ -1115,7 +1115,7 @@ Metadata
 
 # 25. BetterGov-Inspired UX Requirements
 
-CivicLens should prioritize:
+Civica should prioritize:
 
 ## Accessibility
 
@@ -1140,7 +1140,7 @@ Content
 Mobile:
 
 ```text
-☰ CivicLens PH        🔍
+☰ Civica PH        🔍
 ────────────────────────────
 Content
 ```
@@ -1234,7 +1234,7 @@ The core data-exploration experience should work before adding these.
 # 29. Final MVP Architecture
 
 ```text
-                    CIVICLENS PH
+                    CIVICA PH
                          │
        ┌─────────────────┼─────────────────┐
        ↓                 ↓                 ↓
@@ -1256,7 +1256,7 @@ The core data-exploration experience should work before adding these.
 
 ```text
 ┌──────────────────────────────────────────────────┐
-│ 🇵🇭 CivicLens PH     Explore  Budget  Congress  │
+│ 🇵🇭 Civica PH     Explore  Budget  Congress  │
 │                                  Data     Search │
 ├──────────────────────────────────────────────────┤
 │                                                  │
@@ -1299,10 +1299,10 @@ The core data-exploration experience should work before adding these.
 
 # 31. Target End State
 
-CivicLens PH should ultimately become:
+Civica PH should ultimately become:
 
 ```text
-                 CIVICLENS PH
+                 CIVICA PH
                       │
         ┌─────────────┼─────────────┐
         ↓             ↓             ↓
@@ -1324,6 +1324,6 @@ CivicLens PH should ultimately become:
 
 The key product distinction is:
 
-> **Do not clone BetterGov.PH. Use its visual language and UX philosophy, while making CivicLens specifically about discovering, connecting, and understanding Philippine government data.**
+> **Do not clone BetterGov.PH. Use its visual language and UX philosophy, while making Civica specifically about discovering, connecting, and understanding Philippine government data.**
 
 This makes the project a stronger portfolio piece because it demonstrates **Next.js/React, TypeScript, API integration, data normalization, search, caching, PostgreSQL, visualization, responsive design, accessibility, and public-sector open-data engineering** without needing to turn the entire project into an AI application.

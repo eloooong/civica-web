@@ -32,7 +32,7 @@ export interface BudgetSeriesPoint {
 /**
  * KPI card with an area sparkline of the yearly series and a trend badge.
  * Hovering the sparkline swaps the headline value/label/trend to that year.
- * Follows the Bklit stat-card-area block pattern, themed for CivicLens.
+ * Follows the Bklit stat-card-area block pattern, themed for Civica.
  *
  * `selectedYear` pins the card to one year of the series: the sparkline keeps
  * that year's dot enlarged when the pointer is away, and the resting value is

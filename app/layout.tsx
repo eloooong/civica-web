@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   description:
     "Explore Philippine budgets, legislation, and government datasets in one accessible place.",
-  metadataBase: new URL("https://civiclens.ph"),
+  metadataBase: new URL("https://civica.ph"),
   openGraph: {
     title: "Civica",
     description: "Philippine government data, made easier to understand.",

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Figure wrapper shared by every CivicLens chart: a visible title, a
+ * Figure wrapper shared by every Civica chart: a visible title, a
  * screen-reader summary of what the chart says, and the chart itself marked
  * decorative because the summary and the adjacent tables carry the numbers.
  *
