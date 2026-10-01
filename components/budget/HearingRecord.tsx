@@ -83,8 +83,8 @@ export function HearingRecord({
               Commitments and requests
             </p>
             <ul className="mt-1 list-disc space-y-1 pl-5">
-              {actions.map((action) => (
-                <li key={action.url}>
+              {actions.map((action, i) => (
+                <li key={`${action.url}-${action.kind}-${i}`}>
                   <span className="text-ink/80">{action.action}</span>{" "}
                   <span className="text-xs text-muted">
                     ({action.kind.replace(/_/g, " ")}, {action.who})

@@ -91,6 +91,17 @@ function activeHrefFor(pathname: string): string | null {
 }
 
 /**
+ * Resting span of the three lines in the 24 unit box, and the longer hover
+ * span. Two units of margin are left at each end, one of which the round cap
+ * eats, so the grown line never touches the edge of the box and no clipping
+ * happens at the extremes of the stroke.
+ */
+const LINE_IN = 4;
+const LINE_OUT = 20;
+const LINE_IN_HOVER = 2.5;
+const LINE_OUT_HOVER = 21.5;
+
+/**
  * Three lines that become a cross.
  *
  * The top and bottom lines travel to the middle and rotate 45 degrees in
@@ -99,6 +110,10 @@ function activeHrefFor(pathname: string): string | null {
  * the centre of the 24 pixel box, which is why the origin is pinned and the
  * box is set to the view box rather than each line's own bounds.
  *
+ * Hover grows the lines outward from the centre. The growth moves the line ends
+ * rather than scaling the line, because a horizontal scale stretches the round
+ * stroke caps into ovals, and the ends still sit inside the view box.
+ *
  * `initial={false}` means the server renders the closed pose and the first
  * client render agrees, so there is no hydration mismatch and the lines do not
  * animate in on arrival.
@@ -106,47 +121,61 @@ function activeHrefFor(pathname: string): string | null {
 function MenuMorph({ open }: { open: boolean }) {
   const transition = tween(0.22);
   return (
-    <svg
+    <motion.svg
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
+      width="24"
+      height="24"
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
       strokeLinecap="round"
       aria-hidden="true"
+      animate={open ? "open" : "closed"}
+      whileHover="hover"
     >
       <motion.line
-        x1="4"
-        y1="12"
-        x2="20"
-        y2="12"
+        x1={LINE_IN}
+        y1={6}
+        x2={LINE_OUT}
+        y2={6}
         initial={false}
-        animate={{ scaleX: open ? 0 : 1, opacity: open ? 0 : 1 }}
+        variants={{
+          closed: { y1: 6, y2: 6, rotate: 0 },
+          open: { y1: 12, y2: 12, rotate: 45 },
+          hover: { x1: LINE_IN_HOVER, x2: LINE_OUT_HOVER },
+        }}
         style={{ transformOrigin: "12px 12px", transformBox: "view-box" }}
         transition={transition}
       />
       <motion.line
-        x1="4"
-        y1={open ? 12 : 6}
-        x2="20"
-        y2={open ? 12 : 6}
+        x1={LINE_IN}
+        y1={12}
+        x2={LINE_OUT}
+        y2={12}
         initial={false}
-        animate={{ rotate: open ? 45 : 0 }}
+        variants={{
+          closed: { scaleX: 1, opacity: 1 },
+          open: { scaleX: 0, opacity: 0 },
+          hover: { x1: LINE_IN_HOVER, x2: LINE_OUT_HOVER },
+        }}
         style={{ transformOrigin: "12px 12px", transformBox: "view-box" }}
         transition={transition}
       />
       <motion.line
-        x1="4"
-        y1={open ? 12 : 18}
-        x2="20"
-        y2={open ? 12 : 18}
+        x1={LINE_IN}
+        y1={18}
+        x2={LINE_OUT}
+        y2={18}
         initial={false}
-        animate={{ rotate: open ? -45 : 0 }}
+        variants={{
+          closed: { y1: 18, y2: 18, rotate: 0 },
+          open: { y1: 12, y2: 12, rotate: -45 },
+          hover: { x1: LINE_IN_HOVER, x2: LINE_OUT_HOVER },
+        }}
         style={{ transformOrigin: "12px 12px", transformBox: "view-box" }}
         transition={transition}
       />
-    </svg>
+    </motion.svg>
   );
 }
 
@@ -379,7 +408,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           aria-expanded={open}
           aria-controls="site-drawer"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
         >
           <MenuMorph open={open} />
         </button>
@@ -408,9 +437,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
             toggleRef.current?.focus();
           }}
           aria-label="Close menu"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
+          className="inline-flex h-12 w-12 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
         >
-          <X className="h-5 w-5" aria-hidden="true" />
+          <X className="h-6 w-6" aria-hidden="true" />
         </button>
         <div className="mt-4">
           <NavTree
