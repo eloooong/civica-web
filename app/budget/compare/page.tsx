@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Scale } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
+import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
 import { CompareChart, type CompareSeries } from "@/components/budget/CompareChart";
@@ -233,6 +234,7 @@ export default async function ComparePage({
       <Breadcrumbs
         items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "Compare" }]}
       />
+      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/compare" />
 
       <div className="mt-4">
         <PageHeader

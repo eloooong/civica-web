@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Building2, Database, HardDrive, Tags } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
+import { SectionNav, DATA_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -132,27 +133,12 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Government Data" }]} />
+      <SectionNav section="Data" links={DATA_SECTIONS} current="/data" />
       <div className="mt-4">
           <PageHeader
             eyebrow="Data explorer · Live data"
             title="Government Data"
             description="Discover datasets published by Philippine government agencies: budgets, elections, procurement, and more."
-            actions={
-              <>
-                <Link
-                  href="/data/flood-control"
-                  className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
-                >
-                  Flood control contracts
-                </Link>
-                <Link
-                  href="/data/contractors"
-                  className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
-                >
-                  Public contractors
-                </Link>
-              </>
-            }
           />
       </div>
 

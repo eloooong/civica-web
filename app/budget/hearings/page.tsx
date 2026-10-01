@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Gavel, ScrollText } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
+import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -154,19 +155,13 @@ export default async function HearingsPage({
         ]}
       />
 
+      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/hearings" />
+
       <div className="mt-4">
         <PageHeader
           eyebrow="Budget hearings · Live data"
           title="House budget hearings"
           description={`Every Committee on Appropriations hearing on the FY2027 proposed budget, with the topic record the Committee built from each stream: the question at issue, what was said, the figures as spoken, and where each item landed. ${formatCount(hearings.length)} hearings, ${formatCount(topicTotal)} topics.`}
-          actions={
-            <Link
-              href="/budget"
-              className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
-            >
-              Back to the budget explorer
-            </Link>
-          }
         />
       </div>
 
