@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowDownWideNarrow, Search } from "lucide-react";
+import { ArrowDownWideNarrow, ChevronRight, Search } from "lucide-react";
 import type { DepartmentRow } from "@/types/budget";
 import { formatPesoCompact, formatShare } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/States";
@@ -12,6 +12,12 @@ type SortKey = "amount-desc" | "amount-asc" | "name-asc";
 /**
  * Client-side explorer table. Receives server-fetched, year-scoped department
  * rows via props — it never calls the API itself.
+ *
+ * The department name is the row's only link, so the table spends its width
+ * on the name, the amount, and the share instead of a per-row "View" column.
+ * The share reads twice: as a percentage, and as a bar scaled to the largest
+ * department in the current result set, which is what makes the ranking
+ * scannable without a separate chart.
  */
 export function BudgetExplorer({
   departments,
@@ -46,6 +52,14 @@ export function BudgetExplorer({
     }
     return sorted;
   }, [departments, query, sort]);
+
+  // Bars are scaled to the biggest row on screen, not to 100% of the national
+  // total: the top department is only about a tenth of it, so absolute bars
+  // would all look empty.
+  const maxShare = useMemo(
+    () => rows.reduce((max, d) => Math.max(max, d.share ?? 0), 0),
+    [rows]
+  );
 
   return (
     <div>
@@ -113,43 +127,64 @@ export function BudgetExplorer({
           aria-label={`Enacted national budget allocations by department for FY ${year}, scrollable table`}
           className="mt-3 overflow-x-auto rounded-lg border border-line"
         >
-          <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
+          <table className="w-full min-w-[420px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               Enacted national budget allocations by department for FY {year}
             </caption>
             <thead>
               <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-                <th scope="col" className="px-4 py-3 font-semibold">Department</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">FY {year}</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Share</th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  <span className="sr-only">Details</span>
-                </th>
+                <th scope="col" className="px-4 py-2.5 font-semibold">Department</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-semibold">FY {year}</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Share</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((d) => (
-                <tr key={d.id} className="border-b border-line last:border-0 hover:bg-surface/60">
-                  <td className="px-4 py-3.5">
-                    <span className="block font-semibold text-ink">{d.description}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink">
-                    {formatPesoCompact(d.amount ?? 0)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right text-muted">
-                    {d.share !== undefined ? formatShare(d.share) : "–"}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right">
-                    <Link
-                      href={`/budget/${d.id}`}
-                      className="rounded-sm text-sm font-semibold text-brand-700 hover:underline"
-                      aria-label={`View ${d.description} budget details`}
-                    >
-                      View →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {rows.map((d) => {
+                const share = d.share ?? 0;
+                const barWidth =
+                  maxShare > 0 ? Math.max((share / maxShare) * 100, 3) : 0;
+                return (
+                  <tr
+                    key={d.id}
+                    className="group border-b border-line last:border-0 hover:bg-surface/60"
+                  >
+                    <td className="px-4 py-2.5">
+                      <Link
+                        href={`/budget/${d.id}`}
+                        className="inline-flex items-center gap-0.5 font-semibold text-ink transition-colors duration-150 hover:text-brand-700 hover:underline group-hover:text-brand-700"
+                      >
+                        {d.description}
+                        <ChevronRight
+                          aria-hidden="true"
+                          className="h-3.5 w-3.5 shrink-0 text-brand-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                        />
+                        <span className="sr-only">
+                          budget details for FY {year}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-ink">
+                      {formatPesoCompact(d.amount ?? 0)}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center justify-end gap-2.5">
+                        <span
+                          aria-hidden="true"
+                          className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-line sm:block"
+                        >
+                          <span
+                            className="block h-full rounded-full bg-brand-700/70"
+                            style={{ width: `${barWidth}%` }}
+                          />
+                        </span>
+                        <span className="w-14 shrink-0 text-right tabular-nums text-muted">
+                          {d.share !== undefined ? formatShare(d.share) : "–"}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
