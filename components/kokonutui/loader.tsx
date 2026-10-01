@@ -32,7 +32,7 @@
  * `Ring`. The geometry and timing of each ring are unchanged.
  */
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -67,8 +67,6 @@ export default function Loader({
   className,
   ...props
 }: LoaderProps) {
-  const reducedMotion = useReducedMotion() ?? false;
-
   const sizeConfig = {
     sm: {
       container: "size-20",
@@ -99,13 +97,16 @@ export default function Loader({
    * Timing only. Keeping `duration` and `repeat` as the sole variables is
    * what guarantees the server and client agree on the rendered frame.
    */
-  const loop = (duration: number, ease: "linear" | [number, number, number, number] = "linear") =>
-    reducedMotion ? { duration: 0, repeat: 0 } : { duration, repeat: Number.POSITIVE_INFINITY, ease };
+  const loop = (duration: number, ease: "linear" | [number, number, number, number] = "linear") => ({
+    duration,
+    repeat: Number.POSITIVE_INFINITY,
+    ease,
+  });
 
   return (
     <div className={cn("flex flex-col items-center justify-center gap-6 p-6", className)} {...props}>
       <motion.div
-        animate={reducedMotion ? { scale: 1 } : { scale: [1, 1.02, 1] }}
+        animate={{ scale: [1, 1.02, 1] }}
         className={cn("relative", config.container)}
         transition={loop(4, [0.4, 0, 0.6, 1])}
       >

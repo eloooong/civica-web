@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, useReducedMotion } from "motion/react";
+import { animate } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ChartPhase } from "./chart-phase";
 import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
@@ -35,7 +35,6 @@ function tweenDomains({
   destination,
   durationMs,
   enabled,
-  reducedMotion,
   animatedRef,
   setAnimatedByAxis,
   onSettled,
@@ -43,7 +42,6 @@ function tweenDomains({
   destination: Record<string, YDomain>;
   durationMs: number;
   enabled: boolean;
-  reducedMotion: boolean | null;
   animatedRef: { current: Record<string, YDomain> };
   setAnimatedByAxis: (domains: Record<string, YDomain>) => void;
   onSettled?: () => void;
@@ -53,7 +51,7 @@ function tweenDomains({
     return;
   }
 
-  if (!enabled || reducedMotion) {
+  if (!enabled) {
     snapDomains(destination, setAnimatedByAxis, animatedRef);
     onSettled?.();
     return;
@@ -130,7 +128,6 @@ export function useAnimatedYDomains({
   onSettled,
   tweenOnTargetChange = false,
 }: UseAnimatedYDomainsOptions): Record<string, YDomain> {
-  const reducedMotion = useReducedMotion();
   const destinationByAxis = resolveAnimatedYDestinationDomains(
     chartPhase,
     skeletonByAxis,
@@ -189,14 +186,13 @@ export function useAnimatedYDomains({
       destination: destinationRef.current,
       durationMs,
       enabled,
-      reducedMotion,
       animatedRef,
       setAnimatedByAxis,
       onSettled: settle,
     });
 
     return () => control?.stop();
-  }, [chartPhase, durationMs, enabled, reducedMotion]);
+  }, [chartPhase, durationMs, enabled]);
 
   const targetSignature = JSON.stringify(targetByAxis);
   const prevTargetSignatureRef = useRef(targetSignature);
@@ -219,7 +215,6 @@ export function useAnimatedYDomains({
         destination: targetRef.current,
         durationMs,
         enabled,
-        reducedMotion,
         animatedRef,
         setAnimatedByAxis,
         onSettled: () => onSettledRef.current?.(),
@@ -233,7 +228,6 @@ export function useAnimatedYDomains({
     chartPhase,
     durationMs,
     enabled,
-    reducedMotion,
     targetSignature,
     tweenOnTargetChange,
   ]);

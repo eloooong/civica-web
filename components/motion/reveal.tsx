@@ -13,16 +13,12 @@ import {
   type Ref,
   type RefObject,
 } from "react";
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useInView } from "motion/react";
 import type { TargetAndTransition, Transition } from "motion/react";
 import { DURATION_BASE, EASE_INSTITUTIONAL, REVEAL_DISTANCE, REVEAL_STAGGER } from "./tokens";
 
 /**
  * Scroll and mount reveals.
- *
- * Contract for reduced motion: a reader who asks for less motion sees every
- * element in its final state, permanently, with no transforms and no opacity
- * animation. There is no "shortened" variant of a reveal.
  *
  * Contract for the server: markup renders in the visible state. Hiding is
  * armed in a layout effect, so crawlers, no-JS readers, and the first paint
@@ -101,7 +97,6 @@ function RevealInner({
   innerRef: RefObject<Element | null>;
   children: ReactNode;
 }) {
-  const reduceMotion = useReducedMotion();
   const [armed, setArmed] = useState(false);
 
   useArmingEffect(() => {
@@ -114,7 +109,7 @@ function RevealInner({
   // element is free to sit hidden until it scrolls into view. The layout
   // effect means that switch lands before the browser paints, so no frame is
   // ever wasted drawing content that is about to disappear.
-  const visible = reduceMotion || !armed || active;
+  const visible = !armed || active;
   const Tag = TAGS[as]!;
 
   return (
@@ -150,7 +145,6 @@ export interface RevealProps {
 export function Reveal({ as = "div", className, style, delay = 0, amount = 0.05, children }: RevealProps) {
   const ref = useRef<Element>(null);
   const inView = useInView(ref, { once: true, amount });
-  const reduceMotion = useReducedMotion();
 
   return (
     <RevealInner
@@ -158,7 +152,7 @@ export function Reveal({ as = "div", className, style, delay = 0, amount = 0.05,
       className={className}
       style={style}
       delay={delay}
-      active={!reduceMotion && inView}
+      active={inView}
       innerRef={ref}
     >
       {children}
@@ -182,11 +176,10 @@ export interface RevealGroupProps {
 export function RevealGroup({ as = "div", className, style, amount = 0.05, children }: RevealGroupProps) {
   const ref = useRef<Element>(null);
   const inView = useInView(ref, { once: true, amount });
-  const reduceMotion = useReducedMotion();
   const Tag = TAGS[as]!;
 
   return (
-    <RevealGroupContext.Provider value={{ active: !reduceMotion && inView }}>
+    <RevealGroupContext.Provider value={{ active: inView }}>
       <Tag ref={ref} className={className} style={style}>
         {children}
       </Tag>
@@ -211,8 +204,7 @@ export function RevealItem({ as = "div", className, style, index = 0, delay, chi
   const ref = useRef<Element>(null);
   // Standalone use outside a group still works: watch the item itself.
   const inView = useInView(ref, { once: true, amount: 0.05 });
-  const reduceMotion = useReducedMotion();
-  const active = group ? group.active : !reduceMotion && inView;
+  const active = group ? group.active : inView;
 
   return (
     <RevealInner

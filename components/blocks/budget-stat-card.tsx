@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import { AreaChart } from "@/components/charts/area-chart";
 import { Area } from "@/components/charts/area";
@@ -48,7 +47,6 @@ export function BudgetStatCard({
   defaultTrend: number | null;
   chartSize?: "sm" | "md" | "lg";
 }) {
-  const reduceMotion = useReducedMotion();
   const [hover, setHover] = useState<StatCardHoverState>({
     value: null,
     label: null,
@@ -106,7 +104,7 @@ export function BudgetStatCard({
               showMarkers
               stroke="var(--chart-1)"
               strokeWidth={2}
-              animate={!reduceMotion}
+              animate
             />
           </AreaChart>
         </StatCardChart>

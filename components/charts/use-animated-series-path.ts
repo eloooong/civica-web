@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, useReducedMotion } from "motion/react";
+import { animate } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
 import {
@@ -39,7 +39,6 @@ export function useAnimatedSeriesPath({
   innerWidth,
   enabled,
 }: UseAnimatedSeriesPathOptions) {
-  const reducedMotion = useReducedMotion();
   const [animatedPoints, setAnimatedPoints] = useState<
     SeriesPathPoint[] | null
   >(null);
@@ -81,7 +80,6 @@ export function useAnimatedSeriesPath({
   useEffect(() => {
     const shouldAnimate =
       enabled &&
-      !reducedMotion &&
       chartPhase === "ready" &&
       durationMs > 0 &&
       renderData.length > 0;
@@ -143,7 +141,6 @@ export function useAnimatedSeriesPath({
     chartPhase,
     durationMs,
     enabled,
-    reducedMotion,
     renderData,
     xAccessor,
     xScale,

@@ -2,10 +2,9 @@
 
 import { scaleLinear } from "@visx/scale";
 import { AreaClosed, LinePath } from "@visx/shape";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import {
   useCallback,
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -215,7 +214,6 @@ export function LineLoadingSweep({
   durationSeconds = DEFAULT_SWEEP_DURATION_S,
 }: LineLoadingSweepProps) {
   const { innerWidth, innerHeight } = useChartStable();
-  const reduceMotion = useReducedMotion();
   const reactId = useId();
   const chartId = `line-sweep-${reactId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const isLoop = mode === "loop";
@@ -232,14 +230,6 @@ export function LineLoadingSweep({
     () => getSkeletonHeights(pointCount, tick),
     [pointCount, tick]
   );
-
-  // With reduced motion there is no fade to await, so signal the handoff
-  // immediately or the phase machine would stall mid-transition.
-  useEffect(() => {
-    if (reduceMotion && !isLoop) {
-      onTransitionComplete?.();
-    }
-  }, [reduceMotion, isLoop, onTransitionComplete]);
 
   if (innerWidth <= 0 || innerHeight <= 0 || heights.length < 2) {
     return null;
@@ -294,15 +284,6 @@ export function LineLoadingSweep({
       />
     </linearGradient>
   ) : null;
-
-  if (reduceMotion) {
-    return (
-      <>
-        {areaGradient ? <defs>{areaGradient}</defs> : null}
-        {silhouette}
-      </>
-    );
-  }
 
   const maskUrl = `url(#${chartId}-mask)`;
   const defs = (
@@ -434,7 +415,6 @@ export function BarLoadingSkeleton({
   barFraction = DEFAULT_BAR_FRACTION,
   durationSeconds = DEFAULT_SWEEP_DURATION_S,
 }: BarLoadingSkeletonProps) {
-  const reduceMotion = useReducedMotion();
   const reactId = useId();
   const chartId = `bar-sweep-${reactId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const [tick, setTick] = useState(0);
@@ -464,10 +444,6 @@ export function BarLoadingSkeleton({
       signs={signs}
     />
   );
-
-  if (reduceMotion) {
-    return bars;
-  }
 
   return (
     <>

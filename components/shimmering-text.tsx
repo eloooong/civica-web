@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, type Variants } from "motion/react";
 import { type ComponentProps, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
@@ -35,8 +35,7 @@ export function ShimmeringText({
   className,
   ...props
 }: ShimmeringTextProps) {
-  const reducedMotion = useReducedMotion();
-  const stopped = isStopped || paused || reducedMotion === true;
+  const stopped = isStopped || paused;
 
   const createCharVariants = useCallback(
     (charIndex: number): Variants => ({

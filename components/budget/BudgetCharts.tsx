@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 import { BarChart } from "@/components/charts/bar-chart";
 import { Bar } from "@/components/charts/bar";
@@ -46,7 +45,6 @@ function pesoRow(color: string, label: string, trillions: number): TooltipRow {
 
 /** National enacted budget trend, FY2020–2026. */
 export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) {
-  const reduceMotion = useReducedMotion();
   // Stable identity: Bklit chart internals sync derived state in effects,
   // so a fresh array every render would re-trigger them forever.
   const data = useMemo(
@@ -62,7 +60,7 @@ export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) 
     >
       <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="h-full min-h-[320px] sm:min-h-[360px]">
         <Grid horizontal />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
         <BarXAxis />
         <ChartTooltip
           showDatePill={false}
@@ -92,7 +90,6 @@ export function TopDepartmentsChart({
   year: number;
   limit?: number;
 }) {
-  const reduceMotion = useReducedMotion();
   const top = useMemo(
     () =>
       [...departments]
@@ -125,7 +122,7 @@ export function TopDepartmentsChart({
         margin={{ top: 16, right: 16, bottom: 32, left: 96 }}
       >
         <Grid vertical />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
         <BarYAxis />
         <ChartTooltip
           showDatePill={false}
@@ -144,7 +141,6 @@ export function TopDepartmentsChart({
  * whose axis labels ("Jan 1" style) cannot represent fiscal years.
  */
 export function DepartmentTrendChart({ totals }: { totals: NationalYearTotal[] }) {
-  const reduceMotion = useReducedMotion();
   const data = useMemo(
     () => totals.map((t) => ({ year: String(t.year), amount: toTrillions(t.amount) })),
     [totals]
@@ -158,7 +154,7 @@ export function DepartmentTrendChart({ totals }: { totals: NationalYearTotal[] }
     >
       <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="h-full min-h-[320px] sm:min-h-[360px]">
         <Grid horizontal />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
         <BarXAxis />
         <ChartTooltip
           showDatePill={false}
@@ -186,7 +182,6 @@ export function ExpenseMixChart({
   classes: ExpenseClassRow[];
   year: number;
 }) {
-  const reduceMotion = useReducedMotion();
   const yearKey = String(year);
   const total = classes.reduce((sum, c) => sum + (c.years[yearKey]?.amount ?? 0), 0);
   const items = useMemo(
@@ -222,7 +217,7 @@ export function ExpenseMixChart({
         margin={{ top: 16, right: 16, bottom: 32, left: 72 }}
       >
         <Grid vertical />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduceMotion} />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
         <BarYAxis />
         <ChartTooltip
           showDatePill={false}

@@ -60,8 +60,10 @@ types/        per-source API shapes + normalized SearchResult
 Skip-to-content link, semantic landmarks/headings, labeled form controls,
 visible focus states, keyboard-operable navigation and pagination, captioned
 tables, screen-reader summaries for charts (chart SVGs are decorative),
-`prefers-reduced-motion` support (chart enter animations disabled via
-`useReducedMotion`), AA-passing text contrast.
+AA-passing text contrast.
+
+Motion runs unconditionally: the `prefers-reduced-motion` branches were
+removed on purpose, so the OS-level setting has no effect here.
 
 ## Charts (Bklit UI)
 

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  animate,
-  useMotionValue,
-  useReducedMotion,
-  useTransform,
-} from "motion/react";
+import { animate, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
 import {
   LINE_LOADING_LOOP_PAUSE_MS,
@@ -35,11 +30,9 @@ export function useGridShimmer({
   oneShot = false,
 }: UseGridShimmerOptions) {
   const progress = useMotionValue(0);
-  const reducedMotion = useReducedMotion();
   const shimmerCycleS =
     LINE_LOADING_PULSE_CYCLE_S / Math.max(shimmerSpeed, 0.1);
-  const shimmerEnabled =
-    active && shimmer && reducedMotion !== true && innerWidth > 0;
+  const shimmerEnabled = active && shimmer && innerWidth > 0;
 
   useEffect(() => {
     if (!shimmerEnabled) {

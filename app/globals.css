@@ -155,29 +155,6 @@ body {
   top: 1rem;
 }
 
-/* Reduced motion.
-   Covers CSS animation and transition. JavaScript-driven Motion animations
-   are not reachable from here, so each component that runs one checks
-   useReducedMotion and renders its final state instead.
-
-   Iteration count is clamped alongside duration on purpose: shortening an
-   infinite keyframe to a fraction of a millisecond would otherwise turn it
-   into a strobe. */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0.01ms !important;
-  }
-}
-
 .dark {
   --chart-1: oklch(1 0 none);
   --chart-2: oklch(0.73 0 none);

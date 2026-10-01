@@ -4,15 +4,11 @@ import { cn } from "@/lib/utils";
 /**
  * Loading skeletons that mirror the shape of the real pages (header, stats,
  * tables/cards) so layout doesn't jump when data arrives.
- * `motion-safe:` keeps them static under prefers-reduced-motion.
  * Skeletons are aria-hidden; each loading route announces itself via role="status".
  */
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div
-      aria-hidden="true"
-      className={cn("rounded-md bg-slate-200 motion-safe:animate-pulse", className)}
-    />
+    <div aria-hidden="true" className={cn("rounded-md bg-slate-200 animate-pulse", className)} />
   );
 }
 

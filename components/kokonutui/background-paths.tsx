@@ -20,11 +20,9 @@
  *    across server and client, and which also stops two instances sharing
  *    one gradient.
  *
- * 2. Reduced motion. Upstream runs an infinite vertical drift per path with
- *    no guard. `loop()` below returns a zero-length, single-iteration
- *    transition instead. The animate targets are untouched on purpose: if
- *    the target changed with the preference, server and client would render
- *    different attributes.
+ * 2. Loop timing. Upstream runs an infinite vertical drift per path. The
+ *    transition below keeps the timing explicit so the drift stays cheap to
+ *    composite and identical on the server and the client.
  *
  * 3. Decoration only. The `min-h-screen` wrapper, the centred title block
  *    and the `<h1>` are gone, and the whole layer is `aria-hidden` and
@@ -40,7 +38,7 @@
  *    `d` attribute and trips a hydration mismatch. See `q` below.
  */
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { memo, useId, useMemo } from "react";
 
 interface Point {
@@ -138,15 +136,7 @@ function generateAestheticPath(index: number, position: number, kind: PathKind):
     .join(" ");
 }
 
-function PathLayer({
-  kind,
-  gradientId,
-  reducedMotion,
-}: {
-  kind: PathKind;
-  gradientId: string;
-  reducedMotion: boolean;
-}) {
+function PathLayer({ kind, gradientId }: { kind: PathKind; gradientId: string }) {
   const paths = useMemo(
     () =>
       Array.from({ length: PATH_COUNTS[kind] }, (_, i) => ({
@@ -156,25 +146,19 @@ function PathLayer({
     [kind],
   );
 
-  /**
-   * Timing only. Keeping the animate target identical in both branches is
-   * what makes the server and client render the same attributes.
-   */
   const travel = KIND_TRAVEL[kind];
-  const transition = reducedMotion
-    ? { duration: 0, repeat: 0 }
-    : {
-        duration: KIND_DURATION[kind],
-        repeat: Number.POSITIVE_INFINITY,
-        ease: "easeInOut" as const,
-        repeatType: "reverse" as const,
-      };
+  const transition = {
+    duration: KIND_DURATION[kind],
+    repeat: Number.POSITIVE_INFINITY,
+    ease: "easeInOut" as const,
+    repeatType: "reverse" as const,
+  };
 
   return (
     <g style={{ opacity: KIND_OPACITY[kind] }}>
       {paths.map((path) => (
         <motion.path
-          animate={{ y: reducedMotion ? 0 : [0, -travel, 0] }}
+          animate={{ y: [0, -travel, 0] }}
           d={path.d}
           key={path.id}
           stroke={`url(#${gradientId})`}
@@ -191,8 +175,6 @@ const PathLayerMemo = memo(PathLayer);
 
 export default function BackgroundPaths({ className }: { className?: string }) {
   const gradientId = useId();
-  // This version of Motion types the preference as boolean | null.
-  const reducedMotion = useReducedMotion() ?? false;
 
   return (
     <div
@@ -214,9 +196,9 @@ export default function BackgroundPaths({ className }: { className?: string }) {
           </linearGradient>
         </defs>
 
-        <PathLayerMemo gradientId={gradientId} kind="primary" reducedMotion={reducedMotion} />
-        <PathLayerMemo gradientId={gradientId} kind="secondary" reducedMotion={reducedMotion} />
-        <PathLayerMemo gradientId={gradientId} kind="accent" reducedMotion={reducedMotion} />
+        <PathLayerMemo gradientId={gradientId} kind="primary" />
+        <PathLayerMemo gradientId={gradientId} kind="secondary" />
+        <PathLayerMemo gradientId={gradientId} kind="accent" />
       </svg>
     </div>
   );
