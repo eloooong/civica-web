@@ -193,6 +193,7 @@ export default async function BudgetDepartmentPage({
           series={yearly_totals.map((t) => ({ year: t.year, amount: t.amount }))}
           defaultLabel={`Enacted GAA · FY ${year}`}
           defaultTrend={yoy}
+          selectedYear={year}
           chartSize="md"
         />
         <div className="grid items-stretch gap-4 sm:grid-cols-3">

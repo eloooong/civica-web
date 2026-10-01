@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/budget";
 import { BUDGET_FISCAL_YEARS, isBudgetFiscalYear } from "@/types/budget";
 import { cn } from "@/lib/utils";
-import { formatCount } from "@/lib/utils";
+import { formatCount, formatPctDelta } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Budget Explorer",
@@ -70,6 +70,12 @@ export default async function BudgetPage({
   const { total, departments } = breakdown.data;
   const previous = totals.find((t) => t.year === year - 1);
   const yoy = previous ? ((total.amount - previous.amount) / previous.amount) * 100 : null;
+  const first = totals[0];
+  const last = totals[totals.length - 1];
+  const changePct =
+    first && last && first.amount > 0
+      ? ((last.amount - first.amount) / first.amount) * 100
+      : null;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -125,6 +131,7 @@ export default async function BudgetPage({
           series={totals.map((t) => ({ year: t.year, amount: t.amount }))}
           defaultLabel={`Enacted GAA · FY ${year}`}
           defaultTrend={yoy}
+          selectedYear={year}
         />
         <StatCard
           icon={Layers}
@@ -143,13 +150,9 @@ export default async function BudgetPage({
         <StatCard
           icon={TrendingUp}
           label="7-year change"
-          value={(() => {
-            const first = totals[0];
-            const last = totals[totals.length - 1];
-            if (!first || !last) return "–";
-            const pct = ((last.amount - first.amount) / first.amount) * 100;
-            return `+${pct.toFixed(1)}%`;
-          })()}
+          value={changePct === null ? "–" : formatPctDelta(changePct)}
+          valueNumber={changePct ?? undefined}
+          valueFormat="percent"
           hint="FY2020 → FY2026 enacted total"
         />
       </div>

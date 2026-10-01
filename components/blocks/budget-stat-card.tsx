@@ -33,18 +33,25 @@ export interface BudgetSeriesPoint {
  * KPI card with an area sparkline of the yearly series and a trend badge.
  * Hovering the sparkline swaps the headline value/label/trend to that year.
  * Follows the Bklit stat-card-area block pattern, themed for CivicLens.
+ *
+ * `selectedYear` pins the card to one year of the series: the sparkline keeps
+ * that year's dot enlarged when the pointer is away, and the resting value is
+ * that year's figure rather than the last one. Hover still overrides both.
  */
 export function BudgetStatCard({
   title,
   series,
   defaultLabel,
   defaultTrend,
+  selectedYear,
   chartSize = "sm",
 }: {
   title: string;
   series: BudgetSeriesPoint[];
   defaultLabel: string;
   defaultTrend: number | null;
+  /** Year the card is pinned to. Defaults to the last year in the series. */
+  selectedYear?: number;
   chartSize?: "sm" | "md" | "lg";
 }) {
   const [hover, setHover] = useState<StatCardHoverState>({
@@ -56,8 +63,14 @@ export function BudgetStatCard({
     () => series.map((p) => ({ date: new Date(p.year, 0, 1), value: p.amount })),
     [series]
   );
-  const last = series[series.length - 1];
-  const displayValue = hover.value ?? last?.amount ?? 0;
+  const activeIndex = useMemo(() => {
+    if (selectedYear === undefined) return null;
+    const index = series.findIndex((point) => point.year === selectedYear);
+    return index >= 0 ? index : null;
+  }, [series, selectedYear]);
+  const restingPoint =
+    activeIndex === null ? series[series.length - 1] : series[activeIndex];
+  const displayValue = hover.value ?? restingPoint?.amount ?? 0;
   const displayLabel = hover.label ?? defaultLabel;
   const displayTrend = hover.trend ?? defaultTrend;
 
@@ -96,6 +109,7 @@ export function BudgetStatCard({
             />
             <Grid horizontal />
             <Area
+              activeMarkerIndex={activeIndex}
               dataKey="value"
               fill="var(--chart-1)"
               fillOpacity={0.45}

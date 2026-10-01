@@ -70,6 +70,11 @@ export interface AreaProps {
   /** Marker styling (same options as Scatter). */
   markers?: SeriesPointMarkerStyle;
   /**
+   * Data index that keeps the enlarged marker dot when the pointer is away.
+   * Hover still wins while it lasts. Default: null (no pinned dot).
+   */
+  activeMarkerIndex?: number | null;
+  /**
    * Data index from which the line stroke becomes dashed (inclusive).
    * Useful for projecting incomplete periods, e.g. dashed from yesterday through today.
    */
@@ -149,6 +154,7 @@ export function Area({
   fadeEdges = false,
   showMarkers = false,
   markers,
+  activeMarkerIndex = null,
   dashFromIndex,
   dashArray = "6,4",
   loading,
@@ -337,6 +343,7 @@ export function Area({
       {showMarkers && showSeriesContent ? (
         <SeriesMarkers
           animate={animate}
+          activeIndex={activeMarkerIndex}
           dataKey={dataKey}
           {...markers}
           fill={markers?.fill ?? resolvedStroke}

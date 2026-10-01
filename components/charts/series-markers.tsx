@@ -22,6 +22,12 @@ export interface SeriesMarkersProps extends SeriesPointMarkerStyle {
   fill?: string;
   /** Whether to animate markers with clip reveal. Default: true */
   animate?: boolean;
+  /**
+   * Data index that keeps the enlarged "active" dot when the pointer is
+   * away. Hover still wins while it lasts. Use it to pin the marker to a
+   * chosen point, e.g. the fiscal year the page is filtered to.
+   */
+  activeIndex?: number | null;
 }
 
 interface PointAt {
@@ -56,6 +62,7 @@ export function SeriesMarkers({
   inactiveBlur = 2,
   enterBlur = 2,
   showActiveHighlight = true,
+  activeIndex = null,
 }: SeriesMarkersProps) {
   // Stable slice only. Hover-driven dim + active-highlight live in the inner
   // <SeriesMarkersDimWrapper> / <SeriesMarkersActiveHighlight> components, so
@@ -206,6 +213,7 @@ export function SeriesMarkers({
         {baseMarkers}
       </SeriesMarkersDimWrapper>
       <SeriesMarkersActiveHighlight
+        activeIndex={activeIndex}
         activeScale={activeScale}
         enabled={fadeOnHover}
         markerStyle={markerStyle}
@@ -258,6 +266,7 @@ function SeriesMarkersDimWrapper({
 
 interface SeriesMarkersActiveHighlightProps {
   enabled: boolean;
+  activeIndex: number | null;
   points: PointAt[];
   markerStyle: MarkerStyle;
   activeScale: number;
@@ -266,18 +275,25 @@ interface SeriesMarkersActiveHighlightProps {
 /**
  * Renders the scaled "active" marker on top of the base grid. Subscribes to
  * hover internally; the parent doesn't re-render on cursor motion.
+ *
+ * The pointer wins while it is over the chart. With no pointer, a caller-
+ * supplied `activeIndex` keeps one dot enlarged, so a card filtered to a
+ * given year shows that year's dot at rest.
  */
 function SeriesMarkersActiveHighlight({
   enabled,
+  activeIndex,
   points,
   markerStyle,
   activeScale,
 }: SeriesMarkersActiveHighlightProps) {
   const { tooltipData } = useChartHover();
-  if (!enabled || tooltipData === null) {
+  const index =
+    tooltipData !== null ? tooltipData.index : enabled ? activeIndex : null;
+  if (index === null) {
     return null;
   }
-  const activePoint = points.find((point) => point.index === tooltipData.index);
+  const activePoint = points.find((point) => point.index === index);
   if (!activePoint) {
     return null;
   }

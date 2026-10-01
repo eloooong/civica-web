@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { animate, useInView } from "motion/react";
-import { formatCount, formatPesoCompact } from "@/lib/utils";
+import { formatCount, formatPctDelta, formatPesoCompact } from "@/lib/utils";
 import { DURATION_COUNTER, EASE_INSTITUTIONAL } from "./tokens";
 
 /**
@@ -15,11 +15,12 @@ import { DURATION_COUNTER, EASE_INSTITUTIONAL } from "./tokens";
  * sitting alone in a heading.
  */
 
-export type CountFormat = "peso-compact" | "count";
+export type CountFormat = "peso-compact" | "count" | "percent";
 
 const FORMATTERS: Record<CountFormat, (value: number) => string> = {
   "peso-compact": formatPesoCompact,
   count: formatCount,
+  percent: formatPctDelta,
 };
 
 export function CountUp({
@@ -41,6 +42,13 @@ export function CountUp({
   const [frame, setFrame] = useState<number | null>(null);
   const running = inView;
 
+  // Government figures are whole numbers, so every intermediate frame is
+  // rounded to one. Without this a single-digit counter climbing to 7 flashes
+  // 3.667 on its way there, and a two-digit one flashes 14.829: toLocaleString
+  // keeps up to three fraction digits, and on a short number they dominate the
+  // figure. A fractional target keeps its decimals.
+  const whole = Number.isInteger(value);
+
   // Deriving the start frame during render rather than resetting it from an
   // effect avoids a render that briefly shows the finished figure again.
   const display = running ? (frame ?? 0) : value;
@@ -50,10 +58,10 @@ export function CountUp({
     const controls = animate(0, value, {
       duration,
       ease: EASE_INSTITUTIONAL,
-      onUpdate: (latest) => setFrame(latest),
+      onUpdate: (latest) => setFrame(whole ? Math.round(latest) : latest),
     });
     return () => controls.stop();
-  }, [running, value, duration]);
+  }, [running, value, duration, whole]);
 
   return (
     <span ref={ref} className={className}>
