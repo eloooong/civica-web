@@ -15,6 +15,7 @@ all three.
 | Section | Source | Base URL |
 |---|---|---|
 | Budget | BetterGov.PH Budget API (GAA FY2020–2026) | `https://budget.bettergov.ph/api/v1` |
+| Budget hearings | BetterGov.PH Budget API (House Committee on Appropriations, FY2027) | `https://budget.bettergov.ph/api/v1` |
 | Congress | Open Congress API (bills, legislators) | `https://open-congress-api.bettergov.ph/api` |
 | Data | Open Data Portal (dataset catalog) | `https://data.bettergov.ph/api/v1` |
 
@@ -42,7 +43,11 @@ npm start        # serve the production build
 app/
   page.tsx                 homepage (hero, explore cards, popular searches)
   search/                  unified search (budget + congress + data)
-  budget/  budget/[id]/    GAA explorer + department detail
+  budget/                  GAA explorer
+  budget/compare/          two departments side by side (?a=&b=&year=)
+  budget/hearings/         House budget hearing index
+  budget/hearings/[id]/    topic records, plus timeline/ and transcript/ sub-routes
+  budget/[id]/             department detail
   congress/ bills/[id]/ people/[id]/   bill explorer + bill + legislator pages
   data/    data/[id]/      dataset catalog + dataset detail
   sitemap.ts  robots.ts    SEO
@@ -91,10 +96,35 @@ Budget charts and KPI cards use [Bklit UI](https://bklit.com) components
   its neighbor. KPI cards (`StatCard`, `BudgetStatCard`) all stretch to
   equal height in shared grids.
 
+## Budget hearings (FY2027)
+
+`/budget/hearings` indexes every House Committee on Appropriations hearing on
+the FY2027 proposed budget. Three notes for maintainers:
+
+- `GET /hearings` reports `limit`, `offset`, and `returned` but **no
+  whole-result total**, so the index fetches the season in one request
+  (`listHearings`) and filters and paginates the array itself. If a future
+  season outgrows one page, switch to offset pagination with a next link.
+- `GET /hearings/{id}/topics?thread=0` returns every topic record for one
+  hearing in a single call, which is what the detail page uses. The
+  moment-by-moment thread is omitted there and served on demand by
+  `/transcript?t=` instead.
+- `GET /hearings/{id}/timeline` is about 250 KB for a seven hour hearing, so
+  it has its own route under `[videoId]/timeline` and never loads on the
+  detail page. Its sections render inside `<details>`, so a 39 section hearing
+  stays scannable with no client state.
+
+Every hearing record is machine-generated from the hearing audio. Speaker
+names, figures, and summaries are best effort, so each page repeats the
+source's own confidence note and every timestamp deep links to the video.
+
 ## Known limitations (honest by design)
 
 - The Open Congress API publishes **no bill statuses or legislative stages**,
   so no progress timelines are shown — only source-provided facts.
+- Hearing transcripts, topic records, and timelines are machine-generated, so
+  speaker names and figures are as heard rather than as said. Every page that
+  shows them carries the source's confidence note and timestamped video links.
 - Unknown detail IDs render the correct not-found UI but return HTTP 200 when
   streamed (documented Next.js App Router behavior for segments with
   `loading.tsx`); truly unknown routes return 404.

@@ -128,6 +128,12 @@ export default async function BudgetPage({
               >
                 Budget execution, 2018 to 2026
               </Link>
+              <Link
+                href="/budget/hearings"
+                className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
+              >
+                House budget hearings
+              </Link>
             </>
           }
         />

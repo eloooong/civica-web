@@ -21,8 +21,13 @@ import {
   type GaaDepartmentsResponse,
   type GaaNationalResponse,
   type GaaYearResponse,
+  type HearingDetailResponse,
   type HierarchyRow,
+  type HearingTimelineResponse,
   type HearingTopicResponse,
+  type HearingTopicsResponse,
+  type HearingTranscriptResponse,
+  type HearingsListResponse,
   type HearingsSearchResponse,
   type NepDimension,
   type NepOverviewResponse,
@@ -248,6 +253,64 @@ export function searchHearings(
 export function getHearingTopic(videoId: string, index: number): Promise<HearingTopicResponse> {
   return fetchBudget<HearingTopicResponse>(
     `/hearings/${encodeURIComponent(videoId)}/topics/${index}`
+  );
+}
+
+/**
+ * GET /hearings — every hearing stream, newest first.
+ *
+ * The upstream filters (fiscal_year, agency, q, has_record) are available but
+ * the response carries no whole-result total, so the explorer fetches the
+ * season in one request and filters it here. The season is small (40 rows as
+ * of the FY2027 hearings), so one cached request covers the whole index.
+ */
+export function listHearings(limit = 500): Promise<HearingsListResponse> {
+  return fetchBudget<HearingsListResponse>("/hearings", { limit });
+}
+
+/** GET /hearings/{video_id} — hearing metadata plus its topic index. */
+export function getHearing(videoId: string): Promise<HearingDetailResponse> {
+  return fetchBudget<HearingDetailResponse>(`/hearings/${encodeURIComponent(videoId)}`);
+}
+
+/**
+ * GET /hearings/{video_id}/topics?thread=0 — every topic record for one
+ * hearing in a single request. `thread=0` omits the moment-by-moment lines,
+ * which the transcript endpoint serves on demand instead.
+ */
+export function getHearingTopics(videoId: string): Promise<HearingTopicsResponse> {
+  return fetchBudget<HearingTopicsResponse>(
+    `/hearings/${encodeURIComponent(videoId)}/topics`,
+    { thread: 0 }
+  );
+}
+
+/**
+ * GET /hearings/{video_id}/timeline — the whole proceedings in order.
+ * Roughly 250 KB for a seven hour hearing, so callers put it on its own route
+ * rather than on the hearing detail page.
+ */
+export function getHearingTimeline(videoId: string): Promise<HearingTimelineResponse> {
+  return fetchBudget<HearingTimelineResponse>(
+    `/hearings/${encodeURIComponent(videoId)}/timeline`
+  );
+}
+
+/**
+ * GET /hearings/{video_id}/transcript?from&to — machine transcript lines for a
+ * time window. Upstream default is 20 minutes from `from`, capped at 1000
+ * segments.
+ */
+export function getHearingTranscript(
+  videoId: string,
+  fromSeconds: number,
+  toSeconds?: number
+): Promise<HearingTranscriptResponse> {
+  const params: Record<string, string | number> = { from: Math.max(0, Math.floor(fromSeconds)) };
+  if (toSeconds !== undefined) params.to = Math.floor(toSeconds);
+  return fetchBudget<HearingTranscriptResponse>(
+    `/hearings/${encodeURIComponent(videoId)}/transcript`,
+    params
   );
 }
 

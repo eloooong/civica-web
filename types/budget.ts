@@ -301,6 +301,159 @@ export interface BudgetApiError {
 }
 
 /**
+ * House Committee on Appropriations budget hearings (FY2027 season).
+ * One row per hearing stream. The list endpoint reports limit, offset, and
+ * returned but no whole-result total, so index pages filter and paginate the
+ * fetched array rather than reading a total from meta.
+ */
+
+export interface HearingListRow {
+  video_id: string;
+  title: string;
+  agency: string | null;
+  fiscal_year: string;
+  hearing_date: string;
+  duration_seconds: number;
+  length_text: string | null;
+  youtube_url: string;
+  page_url: string;
+  has_transcript: boolean;
+  transcript_source: string | null;
+  has_record: boolean;
+  record_method: string | null;
+  /** Null when the hearing has no topic record at all. */
+  topic_count: number | null;
+  has_brief: boolean;
+  status: string | null;
+  updated_at: string | null;
+}
+
+/** GET /hearings. */
+export interface HearingsListResponse {
+  meta: {
+    dataset: "hearings";
+    currency: string;
+    scale: string;
+    limit: number;
+    offset: number;
+    returned: number;
+    note: string;
+    [key: string]: unknown;
+  };
+  data: HearingListRow[];
+}
+
+/** GET /hearings/{video_id} — hearing metadata plus its topic index. */
+export interface HearingDetailResponse {
+  meta: {
+    dataset: "hearings";
+    currency: string;
+    scale: string;
+    note?: string;
+    [key: string]: unknown;
+  };
+  data: Omit<HearingListRow, "has_brief" | "links"> & {
+    links?: Record<string, string>;
+    topics: HearingTopic[];
+  };
+}
+
+/** One speaker named in a hearing timeline, with the confidence of the match. */
+export interface HearingSpeaker {
+  label: string | null;
+  name: string | null;
+  role: string | null;
+  side: string | null;
+  confidence: string | null;
+}
+
+/** One question and answer inside a timeline section. */
+export interface HearingTimelineExchange {
+  asked_by: string | null;
+  question: string;
+  answered_by: string | null;
+  answer: string | null;
+  outcome: string | null;
+  seconds: number;
+  timestamp: string;
+  url: string;
+}
+
+/**
+ * One contiguous section of a hearing: roll call, presentation, an
+ * interpellation, a motion, a suspension. Sections carry their own exchanges,
+ * figures, and actions, so this payload is large (about 250 KB for a seven
+ * hour hearing) and is loaded on its own route.
+ */
+export interface HearingTimelineSection {
+  index: number;
+  start_seconds: number;
+  end_seconds: number;
+  start: string;
+  end: string;
+  kind: string;
+  title: string | null;
+  summary: string | null;
+  participants: string[] | null;
+  topics: string[] | null;
+  exchanges: HearingTimelineExchange[] | null;
+  figures: HearingFigure[] | null;
+  actions: HearingAction[] | null;
+  url: string;
+}
+
+/** GET /hearings/{video_id}/timeline. */
+export interface HearingTimelineResponse {
+  meta: {
+    dataset: "hearings";
+    video_id: string;
+    title: string;
+    agency: string | null;
+    hearing_date: string;
+    sections: number;
+    generated_at: string;
+    model: string;
+    transcript_source: string;
+    diarized: boolean;
+    confidence_note: string;
+    note: string;
+    [key: string]: unknown;
+  };
+  data: {
+    overview: string | null;
+    speakers: HearingSpeaker[];
+    sections: HearingTimelineSection[];
+  };
+}
+
+/** One machine-transcript line from GET /hearings/{video_id}/transcript. */
+export interface HearingTranscriptSegment {
+  seconds: number;
+  timestamp: string;
+  speaker: string | null;
+  text: string;
+  url: string;
+}
+
+/** GET /hearings/{video_id}/transcript?from&to. */
+export interface HearingTranscriptResponse {
+  meta: {
+    dataset: "hearings";
+    video_id: string;
+    title: string;
+    from_seconds: number;
+    to_seconds: number;
+    returned: number;
+    truncated: boolean;
+    transcript_source: string;
+    diarized: boolean;
+    note: string;
+    [key: string]: unknown;
+  };
+  data: HearingTranscriptSegment[];
+}
+
+/**
  * NEP (National Expenditure Program): the FY2027 proposal as submitted to
  * Congress, paired against the FY2026 enacted baseline. Amounts are pesos.
  */
@@ -548,6 +701,19 @@ export interface HearingTopicResponse {
     [key: string]: unknown;
   };
   data: HearingTopicDetail;
+}
+
+/** GET /hearings/{video_id}/topics?thread=0 — every topic for one hearing. */
+export interface HearingTopicsResponse {
+  meta: {
+    dataset: "hearings";
+    currency: string;
+    scale: string;
+    video_id: string;
+    returned?: number;
+    [key: string]: unknown;
+  };
+  data: HearingTopicDetail[];
 }
 
 /** Normalized summary used by the explorer UI. */

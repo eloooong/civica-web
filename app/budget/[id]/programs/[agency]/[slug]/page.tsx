@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
+import { HearingRecord } from "@/components/budget/HearingRecord";
 import {
   BUDGET_API_BASE,
   BudgetApiError,
@@ -86,7 +87,17 @@ const HEARING_STOPWORDS = new Set([
 
 type ProgramPageSearchParams = {
   year?: string;
+  /** How many spending categories to show in "What the money buys". */
+  items?: string;
 };
+
+/**
+ * Row counts offered for the spending category list. A program can have
+ * hundreds of object-level rows, so the table starts short and the reader
+ * asks for more. The choice lives in the URL, so a view is shareable.
+ */
+const OBJECT_VIEW_SIZES = [10, 25, 50] as const;
+const DEFAULT_OBJECT_VIEW = 10;
 
 function yearHref(departmentId: string, agency: string, slug: string, year: number): string {
   const base = `/budget/${departmentId}/programs/${agency}/${slug}`;
@@ -308,6 +319,21 @@ export default async function BudgetProgramPage({
         ).catch(() => [])
       : [];
 
+  /**
+   * The scan above returns every object row belonging to the program, which
+   * for a large program runs to hundreds. Show the top handful by default and
+   * let the reader ask for more; an unknown or oversized request falls back to
+   * the largest offered size below it.
+   */
+  const requestedItems = Number.parseInt(sp.items ?? "", 10);
+  const targetItems = Number.isNaN(requestedItems) ? DEFAULT_OBJECT_VIEW : requestedItems;
+  // Largest offered size at or below the request, so 25 shows 25 and 999
+  // clamps to 50 rather than dropping to the smallest.
+  const itemLimit =
+    [...OBJECT_VIEW_SIZES].reverse().find((size) => size <= targetItems) ??
+    DEFAULT_OBJECT_VIEW;
+  const visibleObjects = objectRows.slice(0, itemLimit);
+
   // Full deliberation records for each matched hearing topic (optional).
   const hearingRecords = await Promise.all(
     hearingHits.map((hit) =>
@@ -318,6 +344,13 @@ export default async function BudgetProgramPage({
   );
 
   const backHref = departmentHref(id, year);
+
+  function itemsHref(size: number): string {
+    const qs = new URLSearchParams();
+    if (year !== DEFAULT_YEAR) qs.set("year", String(year));
+    qs.set("items", String(size));
+    return `/budget/${id}/programs/${agency}/${slug}?${qs.toString()}`;
+  }
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -535,7 +568,7 @@ export default async function BudgetProgramPage({
         <section aria-labelledby="objects-heading" className="mt-8">
           <SectionHeader
             title="What the money buys"
-            description={`Spending categories behind the FY ${year} figure, the finest detail the GAA publishes.`}
+            description={`Spending categories behind the FY ${year} figure, the finest detail the GAA publishes. ${formatCount(objectRows.length)} in total, largest first.`}
           />
           <h2 id="objects-heading" className="sr-only">
             Spending categories
@@ -556,7 +589,7 @@ export default async function BudgetProgramPage({
                 </tr>
               </thead>
               <tbody>
-                {objectRows.map((row) => {
+                {visibleObjects.map((row) => {
                   const figure = row.years[yearKey];
                   const firstFunded = firstFundedYear(row);
                   return (
@@ -574,6 +607,36 @@ export default async function BudgetProgramPage({
               </tbody>
             </table>
           </div>
+          {objectRows.length > visibleObjects.length && (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-muted" role="status" aria-live="polite">
+                Showing {visibleObjects.length} of {formatCount(objectRows.length)} spending
+                categories
+              </p>
+              <nav aria-label="Spending categories shown" className="flex flex-wrap items-center gap-2">
+                {OBJECT_VIEW_SIZES.map((size) =>
+                  size > visibleObjects.length ? null : (
+                    <Link
+                      key={size}
+                      href={itemsHref(size)}
+                      aria-current={size === itemLimit ? "true" : undefined}
+                      className={cn(
+                        "inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-semibold transition-colors",
+                        size === itemLimit
+                          ? "border-brand-700 bg-brand-700 text-white"
+                          : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
+                      )}
+                    >
+                      {size}
+                      <span className="sr-only">
+                        {size === itemLimit ? " shown" : " spending categories"}
+                      </span>
+                    </Link>
+                  )
+                )}
+              </nav>
+            </div>
+          )}
         </section>
       )}
 
@@ -591,9 +654,6 @@ export default async function BudgetProgramPage({
             {hearingHits.map((hit, index) => {
               const record = hearingRecords[index];
               const moments = hit.matching_moments.slice(0, 2);
-              const figures = (record?.figures ?? []).slice(0, 4);
-              const actions = (record?.actions ?? []).slice(0, 3);
-              const positions = (record?.positions ?? []).slice(0, 3);
               return (
                 <li
                   key={`${hit.hearing.video_id}-${hit.topic.index}`}
@@ -601,16 +661,22 @@ export default async function BudgetProgramPage({
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Gavel className="h-4 w-4 text-brand-700" aria-hidden="true" />
+                    <Link
+                      href={`/budget/hearings/${encodeURIComponent(hit.hearing.video_id)}#topic-${hit.topic.index}`}
+                      className="font-semibold text-brand-700 hover:underline"
+                    >
+                      {hit.topic.topic}
+                    </Link>
+                    <Badge>{hit.topic.status}</Badge>
                     <a
                       href={hit.topic.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-semibold text-brand-700 hover:underline"
+                      className="text-xs font-semibold tabular-nums text-brand-700 hover:underline"
                     >
-                      {hit.topic.topic}
-                      <span className="sr-only"> (opens in a new tab)</span>
+                      {hit.topic.timestamp}
+                      <span className="sr-only"> watch from this point (opens in a new tab)</span>
                     </a>
-                    <Badge>{hit.topic.status}</Badge>
                   </div>
                   <p className="mt-1 text-xs text-muted">
                     {hit.hearing.title} · {hit.hearing.hearing_date} · FY {hit.hearing.fiscal_year} ·{" "}
@@ -645,100 +711,7 @@ export default async function BudgetProgramPage({
                   )}
 
                   {record && (record.question || record.agency_position || record.outcome) && (
-                    <details className="mt-3 rounded-md border border-line bg-surface/60 p-3">
-                      <summary className="cursor-pointer text-sm font-semibold text-brand-700">
-                        Deliberation record
-                      </summary>
-                      <div className="mt-3 space-y-3 text-sm leading-6">
-                        {record.question && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Question at issue
-                            </p>
-                            <p className="mt-1 text-ink/80">{record.question}</p>
-                          </div>
-                        )}
-                        {record.agency_position && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Agency position
-                            </p>
-                            <p className="mt-1 text-ink/80">{record.agency_position}</p>
-                          </div>
-                        )}
-                        {record.outcome && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Outcome
-                            </p>
-                            <p className="mt-1 text-ink/80">{record.outcome}</p>
-                          </div>
-                        )}
-                        {figures.length > 0 && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Figures mentioned
-                            </p>
-                            <ul className="mt-1 space-y-1">
-                              {figures.map((figure) => (
-                                <li
-                                  key={`${figure.url}-${figure.amount_text}`}
-                                  className="flex flex-wrap items-baseline gap-x-2"
-                                >
-                                  <span className="font-semibold tabular-nums text-ink">
-                                    {figure.amount_text}
-                                  </span>
-                                  <span className="text-muted">{figure.what}</span>
-                                  {figure.url && (
-                                    <a
-                                      href={figure.url}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-xs font-semibold text-brand-700 hover:underline"
-                                    >
-                                      {figure.timestamp}
-                                      <span className="sr-only"> (opens in a new tab)</span>
-                                    </a>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {actions.length > 0 && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Commitments and requests
-                            </p>
-                            <ul className="mt-1 list-disc space-y-1 pl-5">
-                              {actions.map((action) => (
-                                <li key={`${action.url}-${action.kind}`}>
-                                  <span className="text-ink/80">{action.action}</span>{" "}
-                                  <span className="text-xs text-muted">
-                                    ({action.kind.replace(/_/g, " ")}, {action.who})
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {positions.length > 0 && (
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                              Positions taken
-                            </p>
-                            <ul className="mt-1 space-y-1">
-                              {positions.map((position) => (
-                                <li key={`${position.who}-${position.position.slice(0, 40)}`}>
-                                  <span className="font-semibold text-ink">{position.who}:</span>{" "}
-                                  <span className="text-ink/80">{position.position}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </details>
+                    <HearingRecord record={record} />
                   )}
                 </li>
               );

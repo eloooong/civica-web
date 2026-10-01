@@ -5,38 +5,20 @@ import { BarChart } from "@/components/charts/bar-chart";
 import { Bar } from "@/components/charts/bar";
 import { BarXAxis } from "@/components/charts/bar-x-axis";
 import { BarYAxis } from "@/components/charts/bar-y-axis";
+import { ChartShell } from "@/components/charts/chart-shell";
 import { Grid } from "@/components/charts/grid";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import type { TooltipRow } from "@/components/charts/tooltip/tooltip-content";
 import type { DepartmentRow, ExpenseClassRow, NationalYearTotal } from "@/types/budget";
-import { deptShortName as shortDeptName, formatPesoCompact, formatPesoFull, formatShare, toTrillions } from "@/lib/utils";
+import {
+  deptShortName as shortDeptName,
+  formatPesoCompact,
+  formatPesoFull,
+  formatShare,
+  toTrillions,
+} from "@/lib/utils";
 
 const BRAND = "var(--chart-1)";
-
-function ChartShell({
-  title,
-  captionId,
-  summary,
-  children,
-}: {
-  title: string;
-  captionId: string;
-  summary: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <figure className="flex h-full min-w-0 flex-col rounded-lg border border-line bg-white p-5">
-      <figcaption id={captionId} className="text-sm font-bold text-ink">
-        {title}
-      </figcaption>
-      <p className="sr-only">{summary}</p>
-      {/* Bklit charts render aria-hidden SVGs and size themselves. */}
-      <div className="mt-4 min-h-0 flex-1" aria-hidden="true">
-        {children}
-      </div>
-    </figure>
-  );
-}
 
 /** Bklit tooltips show raw numbers — format peso values via custom rows. */
 function pesoRow(color: string, label: string, trillions: number): TooltipRow {
