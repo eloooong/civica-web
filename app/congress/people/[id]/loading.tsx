@@ -10,7 +10,7 @@ import {
 
 export default function PersonLoading() {
   return (
-    <LoadingShell label="Loading legislator profile from the Open Congress API">
+    <LoadingShell label="Loading legislator profile from Open Congress">
       <CrumbSkeleton />
       <HeaderSkeleton titleWidth="w-1/2" />
       <StatsSkeleton count={3} />

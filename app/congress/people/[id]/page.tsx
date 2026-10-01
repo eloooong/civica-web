@@ -75,8 +75,8 @@ export default async function PersonDetailPage({
             title="Unable to load this legislator"
             description={
               err instanceof CongressApiError
-                ? `${err.message} (Source: Open Congress API.)`
-                : "The Open Congress API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: Open Congress records.)`
+                : "The congressional records source may be temporarily unavailable. Please try again."
             }
             retryHref={`/congress/people/${id}`}
           />

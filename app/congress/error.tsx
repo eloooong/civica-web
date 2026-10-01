@@ -25,7 +25,7 @@ export default function CongressError({
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading congressional data"
-          description="An unexpected error occurred. The Open Congress API may be temporarily unavailable."
+          description="An unexpected error occurred. The congressional records source may be temporarily unavailable."
           onRetry={reset}
         />
       </div>

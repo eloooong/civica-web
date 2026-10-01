@@ -104,7 +104,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
             description={
               err instanceof DataApiError
                 ? `${err.message} (Source: Open Data Portal.)`
-                : "The Open Data Portal API may be temporarily unavailable. Please try again."
+                : "The government datasets source may be temporarily unavailable. Please try again."
             }
             retryHref="/data"
           />

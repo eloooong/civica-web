@@ -116,8 +116,8 @@ export default async function ComparePage({
             title="Unable to load department budgets"
             description={
               err instanceof BudgetApiError
-                ? `${err.message} (Source: BetterGov.PH Budget API.)`
-                : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: BetterGov.PH budget records.)`
+                : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
             retryHref="/budget/compare"
           />
@@ -152,7 +152,7 @@ export default async function ComparePage({
         <div className="mt-6">
           <ErrorState
             title="No departments to compare"
-            description="The BetterGov.PH Budget API returned no department rows for the enacted budget."
+            description="The enacted budget published no department rows for that year."
             retryHref="/budget"
           />
         </div>

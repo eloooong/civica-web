@@ -27,7 +27,7 @@ export default function DatasetError({
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading this dataset"
-          description="An unexpected error occurred. The Open Data Portal API may be temporarily unavailable."
+          description="An unexpected error occurred. The government datasets source may be temporarily unavailable."
           onRetry={reset}
         />
       </div>

@@ -60,21 +60,21 @@ const groups = [
 
 const sources = [
   {
-    name: "BetterGov.PH Budget API",
+    name: "BetterGov.PH Budget",
     scope: "GAA FY2020–2026",
     record: "Department of Budget and Management",
     endpoint: BUDGET_API_BASE,
     docs: BUDGET_DOCS_URL,
   },
   {
-    name: "Open Congress API",
+    name: "Open Congress",
     scope: "Bills and legislators",
     record: "Congress of the Philippines",
     endpoint: CONGRESS_API_BASE,
     docs: CONGRESS_DOCS_URL,
   },
   {
-    name: "Open Data Portal API",
+    name: "Open Data Portal",
     scope: "Dataset catalog",
     record: "Philippine Statistics Authority and agency publishers",
     endpoint: DATA_API_BASE,
@@ -168,7 +168,7 @@ export default async function HomePage() {
               large
               eyebrow="Start here"
               title="Explore"
-              description="Three collections of public records, each one traceable to the API it came from."
+              description="Three collections of public records, each one traceable to the source it came from."
             />
           </Reveal>
           <RevealGroup className="mt-7 grid gap-4 md:grid-cols-3">
@@ -259,7 +259,7 @@ export default async function HomePage() {
           <Reveal>
             <SectionHeader
               title="Sourced, not scraped"
-              description="Every record links back to the public API it came from, with a retrieval timestamp."
+              description="Every record links back to the public source it came from, with a retrieval timestamp."
             />
           </Reveal>
           <RevealGroup as="ul" className="mt-6 grid gap-4 md:grid-cols-3">
@@ -296,7 +296,7 @@ export default async function HomePage() {
           <Reveal delay={0.1} className="mt-6 max-w-3xl">
             <p className="rounded-lg border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
               Civica is an independent demonstration interface, not an official government
-              website. Figures are fetched from the public APIs above and cached for up to one
+              website. Figures are fetched from the public sources above and cached for up to one
               hour. When a source is unreachable, a clearly labeled illustrative figure is shown
               instead. Verify important numbers with the source agencies.
             </p>

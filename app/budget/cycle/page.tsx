@@ -111,8 +111,8 @@ export default async function BudgetCyclePage({
         title="Unable to load the budget cycle workbook"
         description={
           err instanceof BudgetApiError
-            ? `${err.message} (Source: BetterGov.PH Budget API.)`
-            : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+            ? `${err.message} (Source: BetterGov.PH budget records.)`
+            : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
         }
         retryHref="/budget/cycle"
       />
@@ -148,8 +148,8 @@ export default async function BudgetCyclePage({
           title="Unable to load this subject's facts"
           description={
             err instanceof BudgetApiError
-              ? `${err.message} (Source: BetterGov.PH Budget API.)`
-              : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+              ? `${err.message} (Source: BetterGov.PH budget records.)`
+              : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
           }
           retryHref={subjectHref(departmentId, year)}
         />

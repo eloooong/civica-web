@@ -103,8 +103,8 @@ export default async function BudgetDepartmentPage({
             title="Unable to load department budget"
             description={
               err instanceof BudgetApiError
-                ? `${err.message} (Source: BetterGov.PH Budget API.)`
-                : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: BetterGov.PH budget records.)`
+                : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
             retryHref={`/budget/${id}`}
           />

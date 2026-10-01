@@ -10,7 +10,7 @@ export default function BudgetDepartmentNotFound() {
         <PageHeader
           eyebrow="Budget explorer"
           title="Department not found"
-          description="The BetterGov.PH Budget API has no department with that code. It may be a mistyped URL."
+          description="There is no department with that code. It may be a mistyped URL."
         />
       </div>
       <div className="mt-6">

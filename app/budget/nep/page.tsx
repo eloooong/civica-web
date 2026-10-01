@@ -217,8 +217,8 @@ export default async function NepPage() {
             title="Unable to load the proposed budget"
             description={
               err instanceof BudgetApiError
-                ? `${err.message} (Source: BetterGov.PH Budget API.)`
-                : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: BetterGov.PH budget records.)`
+                : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
             retryHref="/budget/nep"
           />

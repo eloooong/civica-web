@@ -23,7 +23,7 @@ import { congressOrdinal, personFullName } from "@/lib/congress";
 export const metadata: Metadata = {
   title: "Congress Explorer",
   description:
-    "Search Philippine House and Senate bills and find legislators, powered by the Open Congress API.",
+    "Search Philippine House and Senate bills and find legislators, with records from Open Congress.",
 };
 
 const BILLS_PER_PAGE = 12;
@@ -92,8 +92,8 @@ export default async function CongressPage({
             title="Unable to load congressional data"
             description={
               err instanceof CongressApiError
-                ? `${err.message} (Source: Open Congress API.)`
-                : "The Open Congress API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: Open Congress records.)`
+                : "The congressional records source may be temporarily unavailable. Please try again."
             }
             retryHref="/congress"
           />

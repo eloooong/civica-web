@@ -28,9 +28,9 @@ export function Footer() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Sources</p>
           <ul className="mt-3 space-y-2 text-sm text-ink/80">
-            <li>BetterGov Budget API</li>
-            <li>Open Congress API</li>
-            <li>Open Data Portal API</li>
+            <li>BetterGov.PH Budget</li>
+            <li>Open Congress</li>
+            <li>Open Data Portal</li>
           </ul>
         </div>
         <div>

@@ -106,7 +106,7 @@ export default async function HearingPage({
           <PageHeader
             eyebrow="Budget hearing"
             title="Hearing unavailable"
-            description="This hearing could not be loaded from the BetterGov.PH Budget API."
+            description="This hearing could not be loaded from the BetterGov.PH budget records."
           />
         </div>
         <div className="mt-6">
@@ -114,8 +114,8 @@ export default async function HearingPage({
             title="Unable to load this hearing"
             description={
               err instanceof BudgetApiError
-                ? `${err.message} (Source: BetterGov.PH Budget API.)`
-                : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: BetterGov.PH budget records.)`
+                : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
             retryHref="/budget/hearings"
           />

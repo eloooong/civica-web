@@ -27,7 +27,7 @@ export default function BillError({
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading this bill"
-          description="An unexpected error occurred. The Open Congress API may be temporarily unavailable."
+          description="An unexpected error occurred. The congressional records source may be temporarily unavailable."
           onRetry={reset}
         />
       </div>

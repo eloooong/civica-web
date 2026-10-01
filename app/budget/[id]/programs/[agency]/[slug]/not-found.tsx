@@ -16,7 +16,7 @@ export default function BudgetProgramNotFound() {
         <PageHeader
           eyebrow="Budget explorer"
           title="Program not found"
-          description="The BetterGov.PH Budget API has no program matching this address. It may be a mistyped URL, or the program sits beyond the lookup scan for this agency."
+          description="There is no program matching this address. It may be a mistyped URL, or the program sits beyond the lookup scan for this agency."
         />
       </div>
       <div className="mt-6">

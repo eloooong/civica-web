@@ -178,7 +178,7 @@ export default async function SearchPage({
             </h2>
             <EmptyState
               title="Keep typing"
-              description="Search needs at least 2 characters. The source APIs don't accept shorter queries."
+              description="Search needs at least 2 characters. The records don't match on shorter queries."
             />
           </>
         ) : allFailed ? (
@@ -279,8 +279,8 @@ export default async function SearchPage({
                 className="mt-10 rounded-lg border border-line bg-surface px-4 py-3 text-xs leading-5 text-muted"
               >
                 <p>
-                  <span className="font-semibold text-ink">Sources:</span> BetterGov.PH Budget API
-                  (GAA programs) · Open Congress API (bills, legislators) · Open Data Portal
+                  <span className="font-semibold text-ink">Sources:</span> BetterGov.PH Budget
+                  (GAA programs) · Open Congress (bills, legislators) · Open Data Portal
                   (datasets). Results link to the full record on Civica, which attributes the
                   source endpoint.
                 </p>

@@ -36,7 +36,7 @@ export default function HearingsError({
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading the hearings"
-          description="An unexpected error occurred. The BetterGov.PH Budget API may be temporarily unavailable."
+          description="An unexpected error occurred. The BetterGov.PH budget source may be temporarily unavailable."
           onRetry={reset}
         />
       </div>

@@ -12,7 +12,7 @@ export default function BillNotFound() {
         <PageHeader
           eyebrow="Congress explorer"
           title="Bill not found"
-          description="The Open Congress API has no bill with that ID. It may be a mistyped URL."
+          description="There is no bill with that ID. It may be a mistyped URL."
         />
       </div>
       <div className="mt-6">

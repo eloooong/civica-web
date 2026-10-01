@@ -89,8 +89,8 @@ export default async function HearingsPage({
             title="Unable to load hearings"
             description={
               err instanceof BudgetApiError
-                ? `${err.message} (Source: BetterGov.PH Budget API.)`
-                : "The BetterGov.PH Budget API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: BetterGov.PH budget records.)`
+                : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
             retryHref="/budget/hearings"
           />

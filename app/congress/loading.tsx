@@ -9,7 +9,7 @@ import {
 
 export default function CongressLoading() {
   return (
-    <LoadingShell label="Loading congressional data from the Open Congress API">
+    <LoadingShell label="Loading congressional data from Open Congress">
       <CrumbSkeleton />
       <HeaderSkeleton />
       <StatsSkeleton count={4} />

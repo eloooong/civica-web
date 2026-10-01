@@ -31,13 +31,13 @@ export default function HearingError({
         <PageHeader
           eyebrow="Budget hearing"
           title="Hearing unavailable"
-          description="This hearing could not be loaded from the BetterGov.PH Budget API."
+          description="This hearing could not be loaded from the BetterGov.PH budget records."
         />
       </div>
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading this hearing"
-          description="An unexpected error occurred. The BetterGov.PH Budget API may be temporarily unavailable."
+          description="An unexpected error occurred. The BetterGov.PH budget source may be temporarily unavailable."
           onRetry={reset}
         />
       </div>

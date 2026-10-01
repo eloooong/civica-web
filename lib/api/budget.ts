@@ -41,7 +41,7 @@ import { slugify } from "@/lib/utils";
 
 export const BUDGET_API_BASE = "https://budget.bettergov.ph/api/v1";
 export const BUDGET_DOCS_URL = "https://budget.bettergov.ph/docs";
-export const BUDGET_SOURCE_NAME = "BetterGov.PH Budget API";
+export const BUDGET_SOURCE_NAME = "BetterGov.PH Budget records";
 export const BUDGET_REVALIDATE_SECONDS = 3600;
 
 export class BudgetApiError extends Error {

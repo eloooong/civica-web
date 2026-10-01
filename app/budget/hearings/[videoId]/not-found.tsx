@@ -17,7 +17,7 @@ export default function HearingNotFound() {
         <PageHeader
           eyebrow="Budget hearing"
           title="No hearing at that address"
-          description="The BetterGov.PH Budget API has no hearing with that video id. It may be a mistyped URL."
+          description="There is no hearing with that video id. It may be a mistyped URL."
         />
       </div>
       <div className="mt-6">

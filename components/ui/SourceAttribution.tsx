@@ -47,7 +47,7 @@ export function SourceAttribution({
           rel="noreferrer"
           className="inline-flex items-center gap-0.5 whitespace-nowrap font-semibold text-brand-700 hover:underline"
         >
-          API docs
+          Source documentation
           <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </a>
       </p>

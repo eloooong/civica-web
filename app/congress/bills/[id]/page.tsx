@@ -57,8 +57,8 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
             title="Unable to load this bill"
             description={
               err instanceof CongressApiError
-                ? `${err.message} (Source: Open Congress API.)`
-                : "The Open Congress API may be temporarily unavailable. Please try again."
+                ? `${err.message} (Source: Open Congress records.)`
+                : "The congressional records source may be temporarily unavailable. Please try again."
             }
             retryHref={`/congress/bills/${id}`}
           />
@@ -149,7 +149,7 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
               )}
             </dl>
             <p className="mt-3 rounded-md bg-surface px-3 py-2 text-xs leading-5 text-muted">
-              The Open Congress API does not publish bill statuses or legislative stages, so
+              The congressional record does not publish bill statuses or legislative stages, so
               this page shows no progress timeline. Only the facts above come from the source record.
             </p>
           </section>

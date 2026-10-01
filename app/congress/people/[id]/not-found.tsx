@@ -12,7 +12,7 @@ export default function PersonNotFound() {
         <PageHeader
           eyebrow="Congress explorer"
           title="Legislator not found"
-          description="The Open Congress API has no legislator with that ID. It may be a mistyped URL."
+          description="There is no legislator with that ID. It may be a mistyped URL."
         />
       </div>
       <div className="mt-6">

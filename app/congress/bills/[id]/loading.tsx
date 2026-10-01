@@ -7,7 +7,7 @@ import {
 
 export default function BillLoading() {
   return (
-    <LoadingShell label="Loading bill record from the Open Congress API">
+    <LoadingShell label="Loading bill record from Open Congress">
       <CrumbSkeleton />
       <HeaderSkeleton titleWidth="w-5/6" />
       <DetailSkeleton />
