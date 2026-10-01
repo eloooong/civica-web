@@ -9,7 +9,7 @@ import { Grid } from "@/components/charts/grid";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import type { TooltipRow } from "@/components/charts/tooltip/tooltip-content";
 import type { DepartmentRow, ExpenseClassRow, NationalYearTotal } from "@/types/budget";
-import { formatPesoCompact, formatPesoFull, formatShare, toTrillions } from "@/lib/utils";
+import { deptShortName as shortDeptName, formatPesoCompact, formatPesoFull, formatShare, toTrillions } from "@/lib/utils";
 
 const BRAND = "var(--chart-1)";
 
@@ -71,13 +71,6 @@ export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) 
       </BarChart>
     </ChartShell>
   );
-}
-
-/** Short label: prefer the acronym in parentheses, else truncate. */
-export function shortDeptName(description: string): string {
-  const match = description.match(/\(([^)]+)\)/);
-  if (match) return match[1];
-  return description.length > 34 ? `${description.slice(0, 34)}…` : description;
 }
 
 /** Top departments for one fiscal year, horizontal bars. */

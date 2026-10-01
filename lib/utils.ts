@@ -41,6 +41,13 @@ export function toTrillions(value: number): number {
   return Math.round((value / 1_000_000_000_000) * 100) / 100;
 }
 
+/** Short department label: the acronym in parentheses, else a truncated name. */
+export function deptShortName(description: string): string {
+  const match = description.match(/\(([^)]+)\)/);
+  if (match) return match[1];
+  return description.length > 34 ? `${description.slice(0, 34)}…` : description;
+}
+
 /** Lowercase, collapse every run of non-alphanumerics to one hyphen, trim hyphens. */
 export function slugify(value: string): string {
   return value

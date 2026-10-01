@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/budget";
 import { BUDGET_FISCAL_YEARS, isBudgetFiscalYear } from "@/types/budget";
 import { cn } from "@/lib/utils";
-import { formatCount, formatPctDelta } from "@/lib/utils";
+import { deptShortName, formatCount, formatPctDelta, formatPesoCompact, formatShare } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Budget Explorer",
@@ -70,12 +70,41 @@ export default async function BudgetPage({
   const { total, departments } = breakdown.data;
   const previous = totals.find((t) => t.year === year - 1);
   const yoy = previous ? ((total.amount - previous.amount) / previous.amount) * 100 : null;
-  const first = totals[0];
-  const last = totals[totals.length - 1];
+  const totalsByYear = [...totals].sort((a, b) => a.year - b.year);
+  const first = totalsByYear[0];
+  const last = totalsByYear[totalsByYear.length - 1];
   const changePct =
     first && last && first.amount > 0
       ? ((last.amount - first.amount) / first.amount) * 100
       : null;
+
+  // Footers for the stat cards, built from the rows already fetched above.
+  const largestDepartments = [...departments]
+    .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))
+    .slice(0, 4)
+    .map((d) => ({
+      label: deptShortName(d.description),
+      value: d.share !== undefined ? formatShare(d.share) : formatPesoCompact(d.amount ?? 0),
+    }));
+
+  const mostLineItems = [...departments]
+    .filter((d) => (d.line_items ?? 0) > 0)
+    .sort((a, b) => (b.line_items ?? 0) - (a.line_items ?? 0))
+    .slice(0, 4)
+    .map((d) => ({ label: deptShortName(d.description), value: formatCount(d.line_items ?? 0) }));
+
+  const largestIncreases = totalsByYear
+    .flatMap((t, i) => {
+      const prev = totalsByYear[i - 1];
+      if (!prev || prev.amount <= 0) return [];
+      return [{ year: t.year, pct: ((t.amount - prev.amount) / prev.amount) * 100 }];
+    })
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 4)
+    .map((row) => ({
+      label: `FY ${row.year} over FY ${row.year - 1}`,
+      value: formatPctDelta(row.pct),
+    }));
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -139,6 +168,7 @@ export default async function BudgetPage({
           value={String(departments.length)}
           valueNumber={departments.length}
           hint={`In the FY ${year} enacted budget`}
+          details={{ caption: "Largest departments", rows: largestDepartments }}
         />
         <StatCard
           icon={Landmark}
@@ -146,6 +176,7 @@ export default async function BudgetPage({
           value={formatCount(total.line_items)}
           valueNumber={total.line_items}
           hint="Individual spending line items"
+          details={{ caption: "Most line items", rows: mostLineItems }}
         />
         <StatCard
           icon={TrendingUp}
@@ -154,6 +185,7 @@ export default async function BudgetPage({
           valueNumber={changePct ?? undefined}
           valueFormat="percent"
           hint="FY2020 → FY2026 enacted total"
+          details={{ caption: "Largest annual increases", rows: largestIncreases }}
         />
       </div>
 
