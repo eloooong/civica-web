@@ -358,7 +358,7 @@ export default async function BudgetProgramPage({
             href={yearHref(id, agency, slug, y)}
             aria-current={y === year ? "true" : undefined}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors",
+              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
               y === year
                 ? "border-brand-700 bg-brand-700 text-white"
                 : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
@@ -477,7 +477,7 @@ export default async function BudgetProgramPage({
             aria-label={`${name} appropriation history, FY2020 to FY2026, scrollable table`}
             className="mt-4 overflow-x-auto rounded-lg border border-line"
           >
-            <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
+            <table className="w-full min-w-[320px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
                 {name} appropriation history, FY2020 to FY2026
               </caption>
@@ -546,7 +546,7 @@ export default async function BudgetProgramPage({
             aria-label={`Spending categories for ${name} in FY ${year}, scrollable table`}
             className="mt-4 overflow-x-auto rounded-lg border border-line"
           >
-            <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
+            <table className="w-full min-w-[340px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">Spending categories for {name} in FY {year}</caption>
               <thead>
                 <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">

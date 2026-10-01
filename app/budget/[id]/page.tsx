@@ -175,7 +175,7 @@ export default async function BudgetDepartmentPage({
             href={yearHref(id, y, q, agency)}
             aria-current={y === year ? "true" : undefined}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors",
+              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
               y === year
                 ? "border-brand-700 bg-brand-700 text-white"
                 : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"

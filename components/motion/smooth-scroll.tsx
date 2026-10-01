@@ -29,11 +29,27 @@ export function SmoothScroll() {
       // Lenis cancels anchor clicks while it is running, which would break
       // the skip link. Turning this on routes them through lenis.scrollTo.
       anchors: true,
-      // Wheel input is smoothed. Touch input is deliberately left native:
-      // these pages are long and table-heavy, and Lenis documents that
-      // syncTouch misbehaves on iOS below 16.
-      smoothWheel: true,
-      syncTouch: false,
+      // Lenis 1.3 defaults this to true, which pins lerp to 1 and makes every
+      // programmatic scroll instant for anyone who set reduce-motion on their
+      // OS. This site does not honour that preference, so the two have to
+      // agree: leaving it on would silently reintroduce it for exactly the
+      // readers who get the rawest scrolling.
+      respectReducedMotion: false,
+      // Exponential follow rather than a fixed-duration tween. The library
+      // default is 0.1, which reads a touch abrupt on pages this long; 0.075
+      // lets a single flick coast instead of stopping dead.
+      lerp: 0.075,
+      // Slightly under 1:1 so one notch of a mouse wheel travels a little
+      // less than the platform's own step, which keeps the tables readable.
+      wheelMultiplier: 0.9,
+      // Touch input is smoothed too, otherwise phones (most of the traffic)
+      // get none of this. Lenis documents syncTouch as unreliable below
+      // iOS 16, where touch then falls back to the native scroller.
+      syncTouch: true,
+      syncTouchLerp: 0.075,
+      // A finger covers far less ground than a wheel notch, so it needs more
+      // distance per gesture to reach the same scroll speed.
+      touchMultiplier: 1.4,
       // An internal link drops any momentum still in flight, so a page
       // cannot keep gliding while RouteTransition crossfades to the next one.
       stopInertiaOnNavigate: true,

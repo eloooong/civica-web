@@ -142,7 +142,7 @@ export default async function BudgetPage({
             href={y === DEFAULT_YEAR ? "/budget" : `/budget?year=${y}`}
             aria-current={y === year ? "true" : undefined}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 ease-institutional",
+              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ease-institutional",
               y === year
                 ? "border-brand-700 bg-brand-700 text-white"
                 : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
@@ -153,8 +153,9 @@ export default async function BudgetPage({
         ))}
       </div>
 
-      {/* Summary statistics */}
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
+      {/* Summary statistics. One column on phones: the three count cards carry
+          footer lists, which are unreadable at half a phone's width. */}
+      <div className="mt-6 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <BudgetStatCard
           title={`National budget · FY ${year}`}
           series={totals.map((t) => ({ year: t.year, amount: t.amount }))}

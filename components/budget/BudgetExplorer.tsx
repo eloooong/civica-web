@@ -121,73 +121,116 @@ export function BudgetExplorer({
           />
         </div>
       ) : (
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label={`Enacted national budget allocations by department for FY ${year}, scrollable table`}
-          className="mt-3 overflow-x-auto rounded-lg border border-line"
-        >
-          <table className="w-full min-w-[420px] border-collapse bg-white text-left text-sm">
-            <caption className="sr-only">
-              Enacted national budget allocations by department for FY {year}
-            </caption>
-            <thead>
-              <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-                <th scope="col" className="px-4 py-2.5 font-semibold">Department</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">FY {year}</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-semibold">Share</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((d) => {
-                const share = d.share ?? 0;
-                const barWidth =
-                  maxShare > 0 ? Math.max((share / maxShare) * 100, 3) : 0;
-                return (
-                  <tr
-                    key={d.id}
-                    className="group border-b border-line last:border-0 hover:bg-surface/60"
+        <>
+          {/* Phones: one card per department. A three-column table cannot
+              hold a full department name at this width, so the rows become
+              stacked cards and the horizontal scroll disappears. */}
+          <ul className="mt-3 space-y-3 sm:hidden">
+            {rows.map((d) => {
+              const share = d.share ?? 0;
+              const barWidth =
+                maxShare > 0 ? Math.max((share / maxShare) * 100, 3) : 0;
+              return (
+                <li key={d.id} className="rounded-lg border border-line bg-white p-4">
+                  <Link
+                    href={`/budget/${d.id}`}
+                    className="block text-sm font-semibold text-ink hover:text-brand-700"
                   >
-                    <td className="px-4 py-2.5">
-                      <Link
-                        href={`/budget/${d.id}`}
-                        className="inline-flex items-center gap-0.5 font-semibold text-ink transition-colors duration-150 hover:text-brand-700 hover:underline group-hover:text-brand-700"
-                      >
-                        {d.description}
-                        <ChevronRight
-                          aria-hidden="true"
-                          className="h-3.5 w-3.5 shrink-0 text-brand-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                        />
-                        <span className="sr-only">
-                          budget details for FY {year}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-ink">
+                    {d.description}
+                    <span className="sr-only">budget details for FY {year}</span>
+                  </Link>
+                  <div className="mt-2 flex items-baseline justify-between gap-3">
+                    <p className="text-base font-bold tabular-nums text-ink">
                       {formatPesoCompact(d.amount ?? 0)}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center justify-end gap-2.5">
-                        <span
-                          aria-hidden="true"
-                          className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-line sm:block"
+                    </p>
+                    <p className="shrink-0 text-xs tabular-nums text-muted">
+                      {d.share !== undefined
+                        ? `${formatShare(d.share)} of national`
+                        : "–"}
+                    </p>
+                  </div>
+                  <span
+                    aria-hidden="true"
+                    className="mt-2 block h-1.5 overflow-hidden rounded-full bg-line"
+                  >
+                    <span
+                      className="block h-full rounded-full bg-brand-700/70"
+                      style={{ width: `${barWidth}%` }}
+                    />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label={`Enacted national budget allocations by department for FY ${year}, scrollable table`}
+            className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+          >
+            <table className="w-full min-w-[420px] border-collapse bg-white text-left text-sm">
+              <caption className="sr-only">
+                Enacted national budget allocations by department for FY {year}
+              </caption>
+              <thead>
+                <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+                  <th scope="col" className="px-4 py-2.5 font-semibold">Department</th>
+                  <th scope="col" className="px-4 py-2.5 text-right font-semibold">FY {year}</th>
+                  <th scope="col" className="px-4 py-2.5 text-right font-semibold">Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((d) => {
+                  const share = d.share ?? 0;
+                  const barWidth =
+                    maxShare > 0 ? Math.max((share / maxShare) * 100, 3) : 0;
+                  return (
+                    <tr
+                      key={d.id}
+                      className="group border-b border-line last:border-0 hover:bg-surface/60"
+                    >
+                      <td className="px-4 py-2.5">
+                        <Link
+                          href={`/budget/${d.id}`}
+                          className="inline-flex items-center gap-0.5 font-semibold text-ink transition-colors duration-150 hover:text-brand-700 hover:underline group-hover:text-brand-700"
                         >
-                          <span
-                            className="block h-full rounded-full bg-brand-700/70"
-                            style={{ width: `${barWidth}%` }}
+                          {d.description}
+                          <ChevronRight
+                            aria-hidden="true"
+                            className="h-3.5 w-3.5 shrink-0 text-brand-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                           />
-                        </span>
-                        <span className="w-14 shrink-0 text-right tabular-nums text-muted">
-                          {d.share !== undefined ? formatShare(d.share) : "–"}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                          <span className="sr-only">
+                            budget details for FY {year}
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-ink">
+                        {formatPesoCompact(d.amount ?? 0)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center justify-end gap-2.5">
+                          <span
+                            aria-hidden="true"
+                            className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-line sm:block"
+                          >
+                            <span
+                              className="block h-full rounded-full bg-brand-700/70"
+                              style={{ width: `${barWidth}%` }}
+                            />
+                          </span>
+                          <span className="w-14 shrink-0 text-right tabular-nums text-muted">
+                            {d.share !== undefined ? formatShare(d.share) : "–"}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
