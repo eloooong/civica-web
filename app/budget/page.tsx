@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Layers, Landmark, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { ErrorState } from "@/components/ui/States";
 import { BudgetExplorer } from "@/components/budget/BudgetExplorer";
@@ -110,7 +109,6 @@ export default async function BudgetPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Budget" }]} />
-      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget" />
       <div className="mt-4">
         <PageHeader
           eyebrow="Budget explorer · Live data"

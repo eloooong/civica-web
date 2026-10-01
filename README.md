@@ -1,4 +1,4 @@
-# CivicLens PH
+# Civica
 
 Philippine government data, made easier to understand. Explore national
 budgets, legislation, and government datasets — with unified search across

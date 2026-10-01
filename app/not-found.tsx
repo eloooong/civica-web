@@ -9,9 +9,9 @@ export default function NotFound() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Not found" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="CivicLens PH"
+          eyebrow="Civica"
           title="Page not found"
-          description="This URL doesn't match anything on CivicLens PH. It may be mistyped. Try searching instead."
+          description="This URL doesn't match anything on Civica. It may be mistyped. Try searching instead."
         />
       </div>
       <div className="mt-6 flex flex-wrap gap-3">
@@ -25,7 +25,7 @@ export default function NotFound() {
           href="/search"
           className="inline-block rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-50"
         >
-          Search CivicLens
+          Search Civica
         </Link>
       </div>
     </div>

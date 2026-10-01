@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { FileText, Landmark, Percent, Scale } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
@@ -206,7 +205,6 @@ export default async function NepPage() {
         <Breadcrumbs
           items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "FY2027 Proposal" }]}
         />
-                <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/nep" />
         <div className="mt-4">
           <PageHeader
             eyebrow="Budget explorer"
@@ -242,7 +240,6 @@ export default async function NepPage() {
       <Breadcrumbs
         items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "FY2027 Proposal" }]}
       />
-      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/nep" />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader

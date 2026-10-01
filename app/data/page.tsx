@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Building2, Database, HardDrive, Tags } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, DATA_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -133,7 +132,6 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Government Data" }]} />
-      <SectionNav section="Data" links={DATA_SECTIONS} current="/data" />
       <div className="mt-4">
           <PageHeader
             eyebrow="Data explorer · Live data"

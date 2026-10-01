@@ -304,7 +304,7 @@ export default async function HomePage() {
           </RevealGroup>
           <Reveal delay={0.1} className="mt-6 max-w-3xl">
             <p className="rounded-lg border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
-              CivicLens is an independent demonstration interface, not an official government
+              Civica is an independent demonstration interface, not an official government
               website. Figures are fetched from the public APIs above and cached for up to one
               hour. When a source is unreachable, a clearly labeled illustrative figure is shown
               instead. Verify important numbers with the source agencies.

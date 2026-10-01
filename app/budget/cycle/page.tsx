@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { CircleDollarSign, FileText, Gauge, Layers } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState, EmptyState } from "@/components/ui/States";
@@ -85,7 +84,6 @@ function pageShell(title: string, description: string, body: ReactNode) {
       <Breadcrumbs
         items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "Execution" }]}
       />
-      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/cycle" />
       <div className="mt-4">
         <PageHeader eyebrow="Budget explorer" title={title} description={description} />
       </div>
@@ -167,7 +165,6 @@ export default async function BudgetCyclePage({
         <Breadcrumbs
           items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "Execution" }]}
         />
-        <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/cycle" />
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <PageHeader
             eyebrow="Budget explorer · Execution"
@@ -243,7 +240,6 @@ export default async function BudgetCyclePage({
           { label: subjectName },
         ]}
       />
-      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/cycle" />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader

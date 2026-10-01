@@ -101,7 +101,7 @@ export default async function SearchPage({
       <div className="mt-4">
         <PageHeader
           eyebrow="Unified search · Live"
-          title="Search CivicLens"
+          title="Search Civica"
           description="Search budgets, bills, legislators, and datasets in one place, with every result linked to its source."
         />
       </div>
@@ -281,7 +281,7 @@ export default async function SearchPage({
                 <p>
                   <span className="font-semibold text-ink">Sources:</span> BetterGov.PH Budget API
                   (GAA programs) · Open Congress API (bills, legislators) · Open Data Portal
-                  (datasets). Results link to the full record on CivicLens, which attributes the
+                  (datasets). Results link to the full record on Civica, which attributes the
                   source endpoint.
                 </p>
               </aside>

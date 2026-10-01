@@ -22,7 +22,7 @@ export default function SearchError({
       <div className="mt-4">
         <PageHeader
           eyebrow="Unified search"
-          title="Search CivicLens"
+          title="Search Civica"
           description="One query across budgets, bills, legislators, and government datasets."
         />
       </div>

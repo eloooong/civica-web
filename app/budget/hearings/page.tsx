@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Gavel, ScrollText } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, BUDGET_SECTIONS } from "@/components/ui/SectionNav";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -154,8 +153,6 @@ export default async function HearingsPage({
           { label: "Hearings" },
         ]}
       />
-
-      <SectionNav section="Budget" links={BUDGET_SECTIONS} current="/budget/hearings" />
 
       <div className="mt-4">
         <PageHeader

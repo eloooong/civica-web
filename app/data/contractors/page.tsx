@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Building2, Coins, FileText } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { SectionNav, DATA_SECTIONS } from "@/components/ui/SectionNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -78,7 +77,6 @@ function shell(title: string, description: string, body: React.ReactNode) {
       <Breadcrumbs
         items={[{ label: "Home", href: "/" }, { label: "Government Data", href: "/data" }, { label: "Contractors" }]}
       />
-      <SectionNav section="Data" links={DATA_SECTIONS} current="/data/contractors" />
       <div className="mt-4">
         <PageHeader eyebrow="Government data · Contractors" title={title} description={description} />
       </div>
@@ -132,7 +130,6 @@ export default async function ContractorsPage({
           { label: "Contractors" },
         ]}
       />
-      <SectionNav section="Data" links={DATA_SECTIONS} current="/data/contractors" />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader

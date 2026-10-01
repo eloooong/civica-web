@@ -23,7 +23,7 @@ export default function GlobalError({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Error" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="CivicLens PH"
+          eyebrow="Civica"
           title="Something went wrong"
           description="An unexpected error occurred while loading this page."
         />
