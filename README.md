@@ -1,147 +1,151 @@
-# Civica
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/typologo-light.png" />
+    <img src="public/typologo.png" alt="Civica" width="240" />
+  </picture>
 
-Philippine government data, made easier to understand. Explore national
-budgets, legislation, and government datasets — with unified search across
-all three.
+  <h1>CivicLens</h1>
+  <p><strong>Public records. A clearer picture.</strong></p>
+  <p>Explore Philippine budgets, legislation, and government datasets in one place.</p>
 
-## Stack
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&amp;logoColor=white" alt="Next.js 16" />
+    <img src="https://img.shields.io/badge/React-19-149ECA?logo=react&amp;logoColor=white" alt="React 19" />
+    <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&amp;logoColor=white" alt="TypeScript strict mode" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-4-0284C7?logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS 4" />
+  </p>
 
-- Next.js 16 (App Router) + React 19 + TypeScript (strict)
-- Tailwind CSS v4, Lucide icons, Bklit UI charts (visx-based) + KPI blocks
-- No database, no auth, no env vars — all data comes from public read-only APIs
+  <p>
+    <a href="#features">Features</a> ·
+    <a href="#getting-started">Getting started</a> ·
+    <a href="#data-sources">Data sources</a> ·
+    <a href="https://github.com/eloooong/CivicLens/issues">Report an issue</a>
+  </p>
+</div>
 
-## Public data sources (attributed in-app)
+![CivicLens homepage with the Civica interface, record search, and collection navigation](docs/images/homepage.png)
 
-| Section | Source | Base URL |
-|---|---|---|
-| Budget | BetterGov.PH Budget API (GAA FY2020–2026) | `https://budget.bettergov.ph/api/v1` |
-| Budget hearings | BetterGov.PH Budget API (House Committee on Appropriations, FY2027) | `https://budget.bettergov.ph/api/v1` |
-| Congress | Open Congress API (bills, legislators) | `https://open-congress-api.bettergov.ph/api` |
-| Data | Open Data Portal (dataset catalog) | `https://data.bettergov.ph/api/v1` |
+## Overview
 
-API clients live in `lib/api/` (one module per source, uniqueness enforced by a
-single base-URL constant each). UI components never fetch directly.
-API response bodies and their actual retrieval timestamps are cached together
-(`revalidate: 3600`). They become eligible for refresh on a later request after
-one hour. Failed refreshes can leave older responses visible, with their original
-timestamps. Retrieval times use Philippine time and are separate from source
-publication dates. Sources without a recorded timestamp explicitly say it is
-unavailable. The homepage shows “Unavailable” when no national budget figure
-can be retrieved; it does not substitute an illustrative amount.
+CivicLens, branded as **Civica** in the interface, brings public information from several Philippine data sources into a consistent browsing experience. Search across collections, compare department budgets, follow legislative records, and inspect the sources behind the figures.
+
+The application uses public, read-only data sources. Local setup requires no database, account, API key, or environment file.
+
+> This is an independent demonstration project, not an official government website. Verify figures and records with the original publishing agencies before citing them.
+
+## Features
+
+| Collection | What you can explore |
+| --- | --- |
+| **Unified search** | Search budget programs, bills, legislators, and datasets, with collection filters and pagination. |
+| **Budget explorer** | Browse enacted allocations for FY2020–2026 by department, agency, and program. |
+| **Department comparison** | Compare two departments for the same fiscal year, with charts and expense breakdowns. |
+| **Proposed budget** | Explore the FY2027 National Expenditure Program against the FY2026 enacted budget. |
+| **Budget execution** | Follow available workbook records from proposal through enactment, obligations, and disbursements. |
+| **Budget hearings** | Browse House hearing records, topics, timelines, and transcripts with timestamped video links. |
+| **Congress** | Find bills and legislators, including source-provided authorship, dates, and document links. |
+| **Government data** | Filter datasets by category and publisher, inspect resources, and preview supported files. |
+| **Flood control and contractors** | Filter project contracts and contractor summaries when the upstream data file is available. |
+
+The interface includes responsive layouts, shareable filter URLs, keyboard navigation, chart text alternatives, and visible focus states. Overview and source sections start expanded. Motion respects the system's reduced-motion preference, and the hero animation pauses when out of view or when the browser tab is hidden.
 
 ## Getting started
 
-Requires Node.js 20+ and npm.
+### Requirements
+
+- Node.js **20.9 or later**, as required by the installed Next.js version.
+- npm and internet access to retrieve public source data.
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000
-npm run lint     # eslint
-npx tsc --noEmit # typecheck
-npm run build
-npm start        # serve the production build
+git clone https://github.com/eloooong/CivicLens.git
+cd CivicLens
+npm ci
+npm run dev
 ```
 
-## Project structure
+Open [localhost:3000](http://localhost:3000).
+
+### Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local development server. |
+| `npm run lint` | Run ESLint. |
+| `npm run typecheck` | Check TypeScript without emitting files. |
+| `npm run build` | Create the production build. |
+| `npm start` | Serve the production build. |
+
+## Data sources
+
+| Source | Coverage | API base |
+| --- | --- | --- |
+| [BetterGov.PH Budget](https://budget.bettergov.ph/docs) | Enacted budgets, proposed budget, execution workbook, and hearings | `https://budget.bettergov.ph/api/v1` |
+| [Open Congress](https://open-congress-api.bettergov.ph/api/scalar) | Bills, legislators, and related legislative records | `https://open-congress-api.bettergov.ph/api` |
+| [Open Data Portal](https://data.bettergov.ph/docs) | Dataset catalog, publishers, categories, and resources | `https://data.bettergov.ph/api/v1` |
+
+Flood control and contractor views share a separate public JSON feed configured in [`lib/api/floodControl.ts`](lib/api/floodControl.ts). Those views depend on that file remaining available.
+
+### Freshness and provenance
+
+- Core API responses are cached with their actual retrieval timestamps and become eligible for refresh after one hour.
+- A failed refresh may leave an older cached response visible with its original timestamp.
+- Recorded retrieval times display in Philippine time and are distinct from a publisher's update date. Missing timestamps are labeled unavailable.
+- Missing national budget figures display as **Unavailable**, without a fabricated fallback amount.
+- Search handles source failures independently so an unavailable collection does not prevent other collections from returning results.
+
+## Architecture
+
+Built with **Next.js App Router**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Server Components handle data-backed pages; client components provide interactive navigation, charts, and motion.
 
 ```text
-app/
-  page.tsx                 homepage (hero, explore cards, popular searches)
-  search/                  unified search (budget + congress + data)
-  budget/                  GAA explorer
-  budget/compare/          two departments side by side (?a=&b=&year=)
-  budget/hearings/         House budget hearing index
-  budget/hearings/[id]/    topic records, plus timeline/ and transcript/ sub-routes
-  budget/[id]/             department detail
-  congress/ bills/[id]/ people/[id]/   bill explorer + bill + legislator pages
-  data/    data/[id]/      dataset catalog + dataset detail
-  sitemap.ts  robots.ts    SEO
-components/
-  layout/  ui/  search/  budget/  congress/  data/
+app/                 Routes, layouts, loading states, and error boundaries
+  budget/            Explorer, comparison, proposal, execution, and hearings
+  congress/          Bill and legislator browsing and detail pages
+  data/              Dataset catalog, resources, contracts, and contractors
+  search/            Unified search interface
+components/          Shared UI, collection components, charts, and motion
 lib/
-  api/        per-source clients (budget, congress, datasets)
-  search/     unified search (normalize → rank → sections)
-  utils.ts  congress.ts  datasets.ts  placeholder.ts  (display helpers)
-types/        per-source API shapes + normalized SearchResult
+  api/               Source clients, normalization, and response caching
+  search/            Search aggregation and ranking
+types/               Source response types and shared record models
+public/              Brand assets and static files
 ```
 
-## Accessibility
+UI components use the source clients in `lib/api/` rather than fetching directly. Unified search normalizes records into a shared model, retains source ordering, and prioritizes titles that start with the query within each returned page.
 
-Skip-to-content link, semantic landmarks/headings, labeled form controls,
-visible focus states, keyboard-operable navigation and pagination, captioned
-tables, screen-reader summaries for charts (chart SVGs are decorative),
-AA-passing text contrast.
+## Data limitations
 
-Motion runs unconditionally: the `prefers-reduced-motion` branches were
-removed on purpose, so the OS-level setting has no effect here.
+- Coverage and availability depend on upstream sources. An enacted allocation, proposed amount, and disbursement describe different budget stages.
+- The Congress integration does not infer bill statuses or legislative progress from filing dates.
+- Hearing transcripts, topics, and timelines are machine-generated. Speaker names, summaries, and figures should be checked against the linked video.
+- Budget topic search can be capped at 100 programs. The interface discloses the limit and offers department-level browsing.
+- Dataset previews support small text resources; other files remain available through source download links.
 
-## Charts (Bklit UI)
+## Development and deployment
 
-Budget charts and KPI cards use [Bklit UI](https://bklit.com) components
-(installed via the shadcn registry into `components/charts/` and
-`components/blocks/`). Notes for maintainers:
+Before submitting a change, run:
 
-- Bklit files are vendored upstream code — excluded from ESLint
-  (see `eslint.config.mjs`). Review diffs on every registry update.
-- The shadcn CLI wants to overwrite `lib/utils.ts` and
-  `components/ui/Badge.tsx` — always refuse; our versions are API-compatible
-  where Bklit needs them (`cn`) and intentionally different otherwise.
-- One vendor import was fixed: `chart-loading-label.tsx` referenced a
-  non-existent `../components/shimmering-text` path.
-- `--chart-*` CSS variables in `app/globals.css` are mapped to the Civica
-  brand palette (including a fix to the registry's `var(----chart-*)`
-  typos in the `@theme inline` bridge).
-- Bklit's line chart is time-series-only (axis labels render "Jan 1" style),
-  so fiscal-year trends use categorical bar charts instead.
-- Expense-class mix uses horizontal Bklit bars with a peso plus share
-  tooltip and a full name legend; loading routes render `BarChartLoading`
-  skeletons shaped like the real charts.
-- Chart pairs share one minimum height per row and stretch through a full
-  height flex shell, so a taller chart no longer leaves whitespace beside
-  its neighbor. KPI cards (`StatCard`, `BudgetStatCard`) all stretch to
-  equal height in shared grids.
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
 
-## Budget hearings (FY2027)
+Check affected pages on desktop and mobile, including keyboard controls, reduced motion, and unavailable-source states. Keep source attribution intact and avoid inventing missing data.
 
-`/budget/hearings` indexes every House Committee on Appropriations hearing on
-the FY2027 proposed budget. Three notes for maintainers:
+Deploy to a host that supports the Next.js server runtime, such as Vercel, or run a production Node.js server:
 
-- `GET /hearings` reports `limit`, `offset`, and `returned` but **no
-  whole-result total**, so the index fetches the season in one request
-  (`listHearings`) and filters and paginates the array itself. If a future
-  season outgrows one page, switch to offset pagination with a next link.
-- `GET /hearings/{id}/topics?thread=0` returns every topic record for one
-  hearing in a single call, which is what the detail page uses. The
-  moment-by-moment thread is omitted there and served on demand by
-  `/transcript?t=` instead.
-- `GET /hearings/{id}/timeline` is about 250 KB for a seven hour hearing, so
-  it has its own route under `[videoId]/timeline` and never loads on the
-  detail page. Its sections render inside `<details>`, so a 39 section hearing
-  stays scannable with no client state.
+```bash
+npm run build
+npm start
+```
 
-Every hearing record is machine-generated from the hearing audio. Speaker
-names, figures, and summaries are best effort, so each page repeats the
-source's own confidence note and every timestamp deep links to the video.
+No application environment variables are required by the current implementation. The host needs network access to the public data sources.
 
-## Known limitations (honest by design)
+## Acknowledgments and licensing
 
-- The Open Congress API publishes **no bill statuses or legislative stages**,
-  so no progress timelines are shown — only source-provided facts.
-- Hearing transcripts, topic records, and timelines are machine-generated, so
-  speaker names and figures are as heard rather than as said. Every page that
-  shows them carries the source's confidence note and timestamped video links.
-- Unknown detail IDs render the correct not-found UI but return HTTP 200 when
-  streamed (documented Next.js App Router behavior for segments with
-  `loading.tsx`); truly unknown routes return 404.
-- The Open Data Portal's `/categories` counts are stale (all zero), so
-  category counts are derived from one cached full-catalog fetch.
-- Dataset row previews are best-effort (small text files only); large files
-  offer download links instead.
-- Upstream data is manually/community encoded in places — every record links
-  back to its source; verify before citing formally.
+Data integrations use BetterGov.PH's public services and the agencies credited on individual records. Interface components include adaptations from Bklit UI, Kokonut UI, and React Bits.
 
-## Deployment
+The Grid Scan component includes its [upstream MIT + Commons Clause terms](components/reactbits/LICENSE.md). Third-party code and source datasets retain their respective terms. This repository currently does not include a project-wide license.
 
-Standard Next.js deployment (e.g. Vercel: framework preset, `npm run build`,
-no environment variables required). Any Node 20+ host works with
-`npm run build` + `npm start`.
+Maintained by [eloooong](https://github.com/eloooong).
