@@ -4,7 +4,7 @@
     <img src="public/typologo.png" alt="Civica" width="240" />
   </picture>
 
-  <h1>CivicLens</h1>
+  <h1>Civica Web</h1>
   <p><strong>Public records. A clearer picture.</strong></p>
   <p>Explore Philippine budgets, legislation, and government datasets in one place.</p>
 
@@ -19,15 +19,15 @@
     <a href="#features">Features</a> ·
     <a href="#getting-started">Getting started</a> ·
     <a href="#data-sources">Data sources</a> ·
-    <a href="https://github.com/eloooong/CivicLens/issues">Report an issue</a>
+    <a href="https://github.com/eloooong/civica-web/issues">Report an issue</a>
   </p>
 </div>
 
-![CivicLens homepage with the Civica interface, record search, and collection navigation](docs/images/homepage.png)
+![Civica homepage with record search and collection navigation](docs/images/homepage.png)
 
 ## Overview
 
-CivicLens, branded as **Civica** in the interface, brings public information from several Philippine data sources into a consistent browsing experience. Search across collections, compare department budgets, follow legislative records, and inspect the sources behind the figures.
+Civica brings public information from several Philippine data sources into a consistent browsing experience. Search across collections, compare department budgets, follow legislative records, and inspect the sources behind the figures.
 
 The application uses public, read-only data sources. Local setup requires no database, account, API key, or environment file.
 
@@ -57,8 +57,8 @@ The interface includes responsive layouts, shareable filter URLs, keyboard navig
 - npm and internet access to retrieve public source data.
 
 ```bash
-git clone https://github.com/eloooong/CivicLens.git
-cd CivicLens
+git clone https://github.com/eloooong/civica-web.git
+cd civica-web
 npm ci
 npm run dev
 ```
