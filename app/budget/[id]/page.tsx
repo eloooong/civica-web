@@ -73,6 +73,7 @@ export default async function BudgetDepartmentPage({
   const sp = await searchParams;
   const parsedYear = Number.parseInt(sp.year ?? "", 10);
   const year = isBudgetFiscalYear(parsedYear) ? parsedYear : DEFAULT_YEAR;
+  const budgetHref = `/budget?year=${year}`;
   const q = (sp.q ?? "").trim();
   const agency = (sp.agency ?? "").trim();
   const cursor = sp.cursor?.trim() || undefined;
@@ -97,7 +98,7 @@ export default async function BudgetDepartmentPage({
     if (err instanceof BudgetApiError && err.isNotFound) notFound();
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: `Department ${id}` }]} />
+        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Budget", href: budgetHref }, { label: `Department ${id}` }]} />
         <div className="mt-6">
           <ErrorState
             title="Unable to load department budget"
@@ -106,7 +107,7 @@ export default async function BudgetDepartmentPage({
                 ? `${err.message} (Source: BetterGov.PH budget records.)`
                 : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
-            retryHref={`/budget/${id}`}
+            retryHref={yearHref(id, year, q, agency)}
           />
         </div>
       </div>
@@ -153,7 +154,7 @@ export default async function BudgetDepartmentPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs
-        items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: department.description }]}
+        items={[{ label: "Home", href: "/" }, { label: "Budget", href: budgetHref }, { label: department.description }]}
       />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">

@@ -133,7 +133,7 @@ export function BudgetExplorer({
               return (
                 <li key={d.id} className="rounded-lg border border-line bg-white p-4">
                   <Link
-                    href={`/budget/${d.id}`}
+                    href={`/budget/${d.id}?year=${year}`}
                     className="block text-sm font-semibold text-ink hover:text-brand-700"
                   >
                     {d.description}
@@ -192,7 +192,7 @@ export function BudgetExplorer({
                     >
                       <td className="px-4 py-2.5">
                         <Link
-                          href={`/budget/${d.id}`}
+                          href={`/budget/${d.id}?year=${year}`}
                           className="inline-flex items-center gap-0.5 font-semibold text-ink transition-colors duration-150 hover:text-brand-700 hover:underline group-hover:text-brand-700"
                         >
                           {d.description}

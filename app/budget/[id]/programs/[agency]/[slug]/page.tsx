@@ -255,8 +255,8 @@ export default async function BudgetProgramPage({
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Budget", href: "/budget" },
-            { label: `Department ${id}`, href: `/budget/${id}` },
+            { label: "Budget", href: `/budget?year=${year}` },
+            { label: `Department ${id}`, href: departmentHref(id, year) },
             { label: "Program" },
           ]}
         />
@@ -357,8 +357,8 @@ export default async function BudgetProgramPage({
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
-          { label: "Budget", href: "/budget" },
-          { label: department.description, href: `/budget/${id}` },
+          { label: "Budget", href: `/budget?year=${year}` },
+          { label: department.description, href: backHref },
           { label: name },
         ]}
       />

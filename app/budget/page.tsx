@@ -59,7 +59,7 @@ export default async function BudgetPage({
                 ? `${err.message} (Source: BetterGov.PH budget records.)`
                 : "The BetterGov.PH budget source may be temporarily unavailable. Please try again."
             }
-            retryHref="/budget"
+            retryHref={`/budget?year=${year}`}
           />
         </div>
       </div>
