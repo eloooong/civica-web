@@ -47,6 +47,9 @@ export interface SourceResults {
   results: SearchResult[];
   /** Total matches reported by the source (may exceed results.length). */
   total: number;
+  pageCount: number;
+  /** The source capped its response, so this is not a complete match count. */
+  limited: boolean;
 }
 
 export interface FailedSource {
@@ -79,8 +82,11 @@ function rankResults(results: SearchResult[], query: string): SearchResult[] {
   return [...startsWith, ...rest];
 }
 
-async function searchBudgetSource(query: string, limit: number): Promise<SourceResults> {
-  const res = await searchPrograms({ q: query, year: BUDGET_YEAR, limit });
+async function searchBudgetSource(query: string, limit: number, page: number, browse: boolean): Promise<SourceResults> {
+  // Global budget search has no cursor and accepts at most 100 results.
+  // Fetch that bounded set once for category browsing, then page it locally.
+  const sourceLimit = browse ? 100 : limit;
+  const res = await searchPrograms({ q: query, year: BUDGET_YEAR, limit: sourceLimit });
   const results: SearchResult[] = res.data.map((p) => {
     const yearFig = p.years[String(BUDGET_YEAR)];
     const dept = p.department ?? p.department_id;
@@ -98,18 +104,26 @@ async function searchBudgetSource(query: string, limit: number): Promise<SourceR
       url: budgetProgramPath(p.department_id, p.agency_id, p.name),
     };
   });
-  const total = res.meta.matched ?? res.meta.returned ?? res.data.length;
-  return { source: "budget", results: rankResults(results, query), total };
+  const total = res.meta.matched ?? res.data.length;
+  const ranked = rankResults(results, query);
+  return {
+    source: "budget",
+    results: ranked.slice((page - 1) * limit, page * limit),
+    total,
+    pageCount: Math.max(1, Math.ceil(results.length / limit)),
+    limited: res.meta.matched !== undefined ? res.meta.matched > results.length : results.length === sourceLimit,
+  };
 }
 
 async function searchCongressSource(
   query: string,
   billLimit: number,
-  personLimit: number
+  personLimit: number,
+  page: number
 ): Promise<SourceResults> {
   const [bills, people] = await Promise.all([
-    searchDocuments({ q: query, limit: billLimit }),
-    searchPeople(query, { limit: personLimit }),
+    searchDocuments({ q: query, limit: billLimit, offset: (page - 1) * billLimit }),
+    searchPeople(query, { limit: personLimit, offset: (page - 1) * personLimit }),
   ]);
   const results: SearchResult[] = [
     ...bills.data.map(
@@ -133,13 +147,21 @@ async function searchCongressSource(
       })
     ),
   ];
-  const total =
-    (bills.pagination?.total ?? bills.data.length) + (people.pagination?.total ?? people.data.length);
-  return { source: "congress", results: rankResults(results, query), total };
+  const billTotal = bills.pagination?.total ?? bills.data.length;
+  const personTotal = people.pagination?.total ?? people.data.length;
+  return {
+    source: "congress",
+    results: rankResults(results, query),
+    total: billTotal + personTotal,
+    // Bills and legislators have independent offsets and page sizes.
+    // Continue until both collections are exhausted.
+    pageCount: Math.max(1, Math.ceil(billTotal / billLimit), Math.ceil(personTotal / personLimit)),
+    limited: false,
+  };
 }
 
-async function searchDataSource(query: string, limit: number): Promise<SourceResults> {
-  const res = await listDatasets({ search: query, limit });
+async function searchDataSource(query: string, limit: number, page: number): Promise<SourceResults> {
+  const res = await listDatasets({ search: query, limit, offset: (page - 1) * limit });
   const results: SearchResult[] = res.data.map((d) => ({
     id: `dataset-${d.id}`,
     type: "dataset",
@@ -153,6 +175,8 @@ async function searchDataSource(query: string, limit: number): Promise<SourceRes
     source: "data",
     results: rankResults(results, query),
     total: res.pagination?.total ?? res.data.length,
+    pageCount: Math.max(1, Math.ceil((res.pagination?.total ?? res.data.length) / limit)),
+    limited: false,
   };
 }
 
@@ -163,18 +187,19 @@ export interface SearchAllOptions {
   datasetLimit?: number;
   /** Restrict to one source (used by category tabs). */
   only?: SearchSource;
+  page?: number;
 }
 
 /** Fan out to all (or one) sources; per-source failures degrade gracefully. */
 export async function searchAll(query: string, options: SearchAllOptions = {}): Promise<UnifiedSearch> {
   const q = query.trim();
-  const { budgetLimit = 5, billLimit = 5, personLimit = 4, datasetLimit = 5, only } = options;
+  const { budgetLimit = 5, billLimit = 5, personLimit = 4, datasetLimit = 5, only, page = 1 } = options;
 
   const tasks: { source: SearchSource; run: () => Promise<SourceResults> }[] = [];
-  if (!only || only === "budget") tasks.push({ source: "budget", run: () => searchBudgetSource(q, budgetLimit) });
+  if (!only || only === "budget") tasks.push({ source: "budget", run: () => searchBudgetSource(q, budgetLimit, page, only === "budget") });
   if (!only || only === "congress")
-    tasks.push({ source: "congress", run: () => searchCongressSource(q, billLimit, personLimit) });
-  if (!only || only === "data") tasks.push({ source: "data", run: () => searchDataSource(q, datasetLimit) });
+    tasks.push({ source: "congress", run: () => searchCongressSource(q, billLimit, personLimit, page) });
+  if (!only || only === "data") tasks.push({ source: "data", run: () => searchDataSource(q, datasetLimit, page) });
 
   const settled = await Promise.allSettled(tasks.map((t) => t.run()));
   const sections: SourceResults[] = [];
