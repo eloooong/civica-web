@@ -136,7 +136,7 @@ function generateAestheticPath(index: number, position: number, kind: PathKind):
     .join(" ");
 }
 
-function PathLayer({ kind, gradientId }: { kind: PathKind; gradientId: string }) {
+function PathLayer({ kind, gradientId, active }: { kind: PathKind; gradientId: string; active: boolean }) {
   const paths = useMemo(
     () =>
       Array.from({ length: PATH_COUNTS[kind] }, (_, i) => ({
@@ -158,13 +158,13 @@ function PathLayer({ kind, gradientId }: { kind: PathKind; gradientId: string })
     <g style={{ opacity: KIND_OPACITY[kind] }}>
       {paths.map((path) => (
         <motion.path
-          animate={{ y: [0, -travel, 0] }}
+          animate={{ y: active ? [0, -travel, 0] : 0 }}
           d={path.d}
           key={path.id}
           stroke={`url(#${gradientId})`}
           strokeLinecap="round"
           strokeWidth={KIND_WIDTH[kind]}
-          transition={transition}
+          transition={active ? transition : { duration: 0 }}
         />
       ))}
     </g>
@@ -173,7 +173,7 @@ function PathLayer({ kind, gradientId }: { kind: PathKind; gradientId: string })
 
 const PathLayerMemo = memo(PathLayer);
 
-export default function BackgroundPaths({ className }: { className?: string }) {
+export default function BackgroundPaths({ className, active = true }: { className?: string; active?: boolean }) {
   const gradientId = useId();
 
   return (
@@ -196,9 +196,9 @@ export default function BackgroundPaths({ className }: { className?: string }) {
           </linearGradient>
         </defs>
 
-        <PathLayerMemo gradientId={gradientId} kind="primary" />
-        <PathLayerMemo gradientId={gradientId} kind="secondary" />
-        <PathLayerMemo gradientId={gradientId} kind="accent" />
+        <PathLayerMemo gradientId={gradientId} kind="primary" active={active} />
+        <PathLayerMemo gradientId={gradientId} kind="secondary" active={active} />
+        <PathLayerMemo gradientId={gradientId} kind="accent" active={active} />
       </svg>
     </div>
   );

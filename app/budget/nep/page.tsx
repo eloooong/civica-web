@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { FileText, Landmark, Percent, Scale } from "lucide-react";
+import { Landmark, Percent } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
@@ -25,11 +25,12 @@ function changeCell(delta: number, pct: number): string {
 function RollupTable({ caption, rows }: { caption: string; rows: NepRollupRow[] }) {
   const total = rows.reduce((sum, row) => sum + row.amount, 0);
   return (
+    <>
     <div
       tabIndex={0}
       role="region"
       aria-label={`${caption}, scrollable table`}
-      className="mt-4 overflow-x-auto rounded-lg border border-line bg-white"
+      className="mt-4 hidden min-w-0 max-w-full overflow-x-auto rounded-lg border border-line bg-white sm:block relative"
     >
       <table className="w-full min-w-[560px] border-collapse text-left text-sm">
         <caption className="sr-only">{caption}</caption>
@@ -69,17 +70,32 @@ function RollupTable({ caption, rows }: { caption: string; rows: NepRollupRow[] 
         </tbody>
       </table>
     </div>
+    <ul className="mt-4 space-y-3 sm:hidden" aria-label={caption}>
+      {rows.map((row) => (
+        <li key={row.code} className="rounded-lg border border-line bg-white p-4">
+          <h3 className="text-base font-semibold leading-6 text-ink">{row.description ?? row.code}</h3>
+          {row.extra && <p className="mt-1 text-sm text-muted">{row.extra}</p>}
+          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            <div><dt className="text-muted">FY2027 proposed</dt><dd aria-label={formatPesoFull(row.amount)} title={formatPesoFull(row.amount)} className="mt-1 font-semibold tabular-nums text-ink">{formatPesoCompact(row.amount)}</dd></div>
+            <div><dt className="text-muted">FY2026 enacted</dt><dd aria-label={formatPesoFull(row.base_amount)} title={formatPesoFull(row.base_amount)} className="mt-1 font-semibold tabular-nums text-ink">{formatPesoCompact(row.base_amount)}</dd></div>
+            <div className="col-span-2"><dt className="text-muted">Proposed change</dt><dd className="mt-1 font-semibold tabular-nums text-ink">{changeCell(row.delta, row.pct)}</dd></div>
+            <div className="col-span-2"><dt className="text-muted">Share of this breakdown</dt><dd className="mt-1 tabular-nums text-ink">{total > 0 ? `${((row.amount / total) * 100).toFixed(1)}%` : "Unavailable"}</dd></div>
+          </dl>
+        </li>
+      ))}
+    </ul>
+    </>
   );
 }
 
-function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
+function DepartmentTable({ rows, baselineYear }: { rows: NepDepartmentRow[]; baselineYear: number }) {
   return (
     <>
       <div
         tabIndex={0}
         role="region"
         aria-label="FY2027 proposed budget by department with change against FY2026, scrollable table"
-        className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+        className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
       >
         <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
           <caption className="sr-only">
@@ -99,7 +115,8 @@ function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
                 <td className="px-4 py-3.5">
                   {DEPARTMENT_ID.test(row.id) ? (
                     <Link
-                      href={`/budget/${row.id}`}
+                      href={`/budget/${row.id}?year=${baselineYear}`}
+                      aria-label={`${row.description}: FY ${baselineYear} enacted budget`}
                       className="block font-semibold text-ink hover:text-brand-700 hover:underline"
                     >
                       {row.description}
@@ -130,7 +147,8 @@ function DepartmentTable({ rows }: { rows: NepDepartmentRow[] }) {
           <li key={row.id} className="rounded-lg border border-line bg-white p-4">
             {DEPARTMENT_ID.test(row.id) ? (
               <Link
-                href={`/budget/${row.id}`}
+                href={`/budget/${row.id}?year=${baselineYear}`}
+                      aria-label={`${row.description}: FY ${baselineYear} enacted budget`}
                 className="block text-sm font-semibold text-ink hover:text-brand-700 hover:underline"
               >
                 {row.description}
@@ -159,10 +177,12 @@ function MoversList({
   title,
   rows,
   tone,
+  baselineYear,
 }: {
   title: string;
   rows: NepDepartmentRow[];
   tone: "up" | "down";
+  baselineYear: number;
 }) {
   return (
     <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
@@ -173,13 +193,14 @@ function MoversList({
             <div className="min-w-0">
               {DEPARTMENT_ID.test(row.id) ? (
                 <Link
-                  href={`/budget/${row.id}`}
-                  className="block truncate text-sm font-semibold text-ink hover:text-brand-700 hover:underline"
+                  href={`/budget/${row.id}?year=${baselineYear}`}
+                      aria-label={`${row.description}: FY ${baselineYear} enacted budget`}
+                  className="block line-clamp-2 text-sm font-semibold text-ink hover:text-brand-700 hover:underline"
                 >
                   {row.description}
                 </Link>
               ) : (
-                <span className="block truncate text-sm font-semibold text-ink">{row.description}</span>
+                <span className="block line-clamp-2 text-sm font-semibold text-ink">{row.description}</span>
               )}
               <span className={cn("block text-xs font-semibold tabular-nums", tone === "up" ? "text-emerald-700" : "text-accent-700")}>
                 {changeCell(row.delta, row.pct)}
@@ -207,7 +228,6 @@ export default async function NepPage() {
         />
         <div className="mt-4">
           <PageHeader
-            eyebrow="Budget explorer"
             title="FY2027 National Expenditure Program"
             description="The Executive's proposed budget for FY2027, compared with the FY2026 enacted budget."
           />
@@ -243,7 +263,6 @@ export default async function NepPage() {
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
-          eyebrow="Budget explorer · Proposed budget"
           title="FY2027 National Expenditure Program"
           description="The proposal the Executive sends to Congress for FY2027, set against the FY2026 enacted budget. Proposal figures are not law until Congress enacts them."
         />
@@ -252,7 +271,7 @@ export default async function NepPage() {
         </span>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-2">
         <StatCard
           icon={Landmark}
           label={`Proposed total · FY ${meta.fiscal_year}`}
@@ -265,84 +284,64 @@ export default async function NepPage() {
           value={formatPctDelta(national.pct)}
           hint={`${formatPesoDelta(national.delta)} against ${formatPesoCompact(national.base_amount)} enacted`}
         />
-        <StatCard
-          icon={Scale}
-          label="Departments"
-          value={String(departments.length)}
-          hint={`Compared with FY ${meta.baseline_year} enacted`}
-        />
-        <StatCard
-          icon={FileText}
-          label="Regions"
-          value={String(regions.length)}
-          hint="Regional tagging of the proposal"
-        />
       </div>
 
+      <p className="mt-3 text-sm text-muted">{departments.length} departments · {regions.length} regional groups in this proposal</p>
+      <nav aria-label="Proposal sections" className="mt-5 flex flex-wrap gap-2">
+        {[['expense-classes-heading', 'Expense classes'], ['regions-heading', 'Regions'], ['nep-departments-heading', 'Departments'], ['movers-heading', 'Biggest movers'], ['top-programs-heading', 'Programs and funds']].map(([id, label]) => (
+          <Link key={id} href={`#${id}`} className="inline-flex min-h-11 items-center rounded-md border border-control px-3 text-sm font-semibold text-brand-700 hover:bg-surface">{label}</Link>
+        ))}
+      </nav>
+
       <section aria-labelledby="expense-classes-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="expense-classes-heading"
           title="By expense class"
           description="Personnel, maintenance, capital outlays, and financial expenditures in the proposal."
         />
-        <h2 id="expense-classes-heading" className="sr-only">
-          By expense class
-        </h2>
         <RollupTable caption="FY2027 proposal by expense class against FY2026 enacted" rows={expense_classes} />
       </section>
 
       <section aria-labelledby="regions-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="regions-heading"
           title="By region"
           description="Where the proposal would be spent. Regional tagging comes from the NEP source file."
         />
-        <h2 id="regions-heading" className="sr-only">
-          By region
-        </h2>
         <RollupTable caption="FY2027 proposal by region against FY2026 enacted" rows={regions} />
       </section>
 
       <section aria-labelledby="nep-departments-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="nep-departments-heading"
           title="By department"
           description="Every department in the proposal, ranked by proposed amount. Select a department to open its enacted-budget explorer."
         />
-        <h2 id="nep-departments-heading" className="sr-only">
-          By department
-        </h2>
-        <DepartmentTable rows={departments} />
+        <DepartmentTable rows={departments} baselineYear={meta.baseline_year} />
       </section>
 
       <section aria-labelledby="movers-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="movers-heading"
           title="Biggest movers"
           description="Departments whose proposed amounts changed most against FY 2026."
         />
-        <h2 id="movers-heading" className="sr-only">
-          Biggest movers
-        </h2>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <MoversList title="Largest increases" rows={top_movers_up} tone="up" />
-          <MoversList title="Largest decreases" rows={top_movers_down} tone="down" />
+          <MoversList title="Largest increases" rows={top_movers_up} tone="up" baselineYear={meta.baseline_year} />
+          <MoversList title="Largest decreases" rows={top_movers_down} tone="down" baselineYear={meta.baseline_year} />
         </div>
       </section>
 
-      <section aria-labelledby="top-programs-heading" className="mt-8 grid gap-4 lg:grid-cols-2">
-        <div>
-          <SectionHeader
+      <section aria-labelledby="top-programs-heading" className="mt-8 grid min-w-0 gap-4 lg:grid-cols-2">
+        <div className="min-w-0">
+          <SectionHeader id="top-programs-heading"
             title="Top programs"
             description="Largest programs and projects in the proposal."
           />
-          <h2 id="top-programs-heading" className="sr-only">
-            Top programs
-          </h2>
-          <ol className="mt-4 rounded-lg border border-line bg-white">
+            <ol className="mt-4 rounded-lg border border-line bg-white">
             {top_programs.map((row) => (
               <li
                 key={`${row.department_id}-${row.code}`}
                 className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3 last:border-0"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ink">{row.description}</p>
+                  <p className="line-clamp-2 text-sm font-semibold text-ink">{row.description}</p>
                   <p className="text-xs text-muted tabular-nums">
                     {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)})
                   </p>
@@ -354,14 +353,11 @@ export default async function NepPage() {
             ))}
           </ol>
         </div>
-        <div>
+        <div className="min-w-0">
           <SectionHeader
             title="Top funds"
             description="Largest fund sources in the proposal."
           />
-          <h2 className="sr-only">
-            Top funds
-          </h2>
           <ol className="mt-4 rounded-lg border border-line bg-white">
             {top_funds.map((row) => (
               <li
@@ -369,7 +365,7 @@ export default async function NepPage() {
                 className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3 last:border-0"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ink">{row.description ?? row.code}</p>
+                  <p className="line-clamp-2 text-sm font-semibold text-ink">{row.description ?? row.code}</p>
                   <p className="text-xs text-muted tabular-nums">
                     {formatPesoDelta(row.delta)} ({formatPctDelta(row.pct)})
                   </p>

@@ -3,7 +3,6 @@ import {
   HeaderSkeleton,
   LoadingShell,
   Skeleton,
-  StatsSkeleton,
   TableSkeleton,
 } from "@/components/ui/Skeleton";
 
@@ -17,7 +16,7 @@ export default function BudgetCycleLoading() {
           <Skeleton key={i} className="h-9 w-16" />
         ))}
       </div>
-      <StatsSkeleton count={4} />
+      <Skeleton className="h-12 w-full" />
       <div className="space-y-3">
         <Skeleton className="h-7 w-64" />
         <TableSkeleton rows={8} cols={7} />

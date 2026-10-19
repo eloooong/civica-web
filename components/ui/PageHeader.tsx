@@ -29,7 +29,7 @@ export function PageHeader({
       )}
       <h1
         className={cn(
-          "font-bold tracking-tight text-ink",
+          "break-words font-bold tracking-tight text-ink",
           size === "compact" ? "mt-1 text-2xl sm:text-3xl" : "mt-1 text-3xl sm:text-4xl"
         )}
       >
@@ -46,12 +46,14 @@ export function PageHeader({
 }
 
 export function SectionHeader({
+  id,
   eyebrow,
   title,
   description,
   action,
   large = false,
 }: {
+  id?: string;
   eyebrow?: string;
   title: string;
   description?: string;
@@ -60,17 +62,18 @@ export function SectionHeader({
 }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
-      <div className="max-w-2xl">
+      <div className="min-w-0 max-w-2xl">
         {eyebrow && (
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-brand-700">
             {eyebrow}
           </p>
         )}
         <h2
+          id={id}
           className={
             large
-              ? "text-2xl font-extrabold tracking-tight text-ink sm:text-3xl"
-              : "text-xl font-bold tracking-tight text-ink sm:text-2xl"
+              ? "break-words text-2xl font-extrabold tracking-tight text-ink sm:text-3xl"
+              : "break-words text-xl font-bold tracking-tight text-ink sm:text-2xl"
           }
         >
           {title}

@@ -4,7 +4,6 @@ import {
   HeaderSkeleton,
   LoadingShell,
   Skeleton,
-  StatsSkeleton,
   TableSkeleton,
 } from "@/components/ui/Skeleton";
 
@@ -13,11 +12,11 @@ export default function ContractorsLoading() {
     <LoadingShell label="Loading contractor data from the Open Data Portal">
       <CrumbSkeleton />
       <HeaderSkeleton />
-      <div className="flex gap-3" aria-hidden="true">
+      <div className="flex flex-wrap gap-3" aria-hidden="true">
         <Skeleton className="h-11 w-44" />
         <Skeleton className="h-11 w-40" />
       </div>
-      <StatsSkeleton count={3} />
+      <Skeleton className="h-12 w-full" />
       <div className="space-y-3">
         <Skeleton className="h-7 w-40" />
         <FilterBarSkeleton />

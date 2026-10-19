@@ -107,7 +107,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
                 ? `${err.message} (Source: Open Data Portal.)`
                 : "The government datasets source may be temporarily unavailable. Please try again."
             }
-            retryHref="/data"
+            retryHref={pageHref(sp, page)}
           />
         </div>
       </div>
@@ -135,7 +135,6 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Government Data" }]} />
       <div className="mt-4">
           <PageHeader
-            eyebrow="Data explorer · Source records"
             title="Government Data"
             description="Discover datasets published by Philippine government agencies: budgets, elections, procurement, and more."
           />
@@ -152,10 +151,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
 
         {/* Categories */}
         <section aria-labelledby="cats-heading" className="mt-10">
-          <SectionHeader title="Categories" description="Browse the catalog by topic." />
-          <h2 id="cats-heading" className="sr-only">
-            Dataset categories
-          </h2>
+          <SectionHeader id="cats-heading" title="Categories" description="Browse the catalog by topic." />
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {sortedCategories.map((c) => {
               const count = counts.get(c.id) ?? 0;
@@ -187,12 +183,10 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
       {/* Search + filters */}
       <section aria-labelledby="datasets-heading" className="mt-6">
         <SectionHeader
+          id="datasets-heading"
           title="Browse datasets"
           description="Find a dataset by keyword, category, or publisher."
         />
-        <h2 id="datasets-heading" className="sr-only">
-          Browse datasets
-        </h2>
         <form
           key={JSON.stringify(baseParams)}
           method="get"
@@ -211,7 +205,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. elections, procurement, flood…"
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
           <div className="min-w-0">
@@ -222,7 +216,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-category"
               name="category"
               defaultValue={categoryId !== undefined ? String(categoryId) : ""}
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All categories</option>
               {sortedCategories.map((c) => (
@@ -240,7 +234,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-publisher"
               name="publisher"
               defaultValue={publisherId !== undefined ? String(publisherId) : ""}
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All publishers</option>
               {sortedPublishers.map((p) => (
@@ -258,7 +252,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-sort"
               name="sort"
               defaultValue={sp.sort ?? "latest_version_date:desc"}
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>

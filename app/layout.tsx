@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <SmoothScroll />
         <SiteShell>
-          <main id="main" className="flex-1">
+          <main id="main" tabIndex={-1} className="flex-1">
             <RouteTransition>{children}</RouteTransition>
           </main>
           <Footer />

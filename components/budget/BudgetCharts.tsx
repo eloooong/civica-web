@@ -1,143 +1,86 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
+import { useReducedMotion } from "motion/react";
 import { BarChart } from "@/components/charts/bar-chart";
 import { Bar } from "@/components/charts/bar";
-import { BarXAxis } from "@/components/charts/bar-x-axis";
 import { BarYAxis } from "@/components/charts/bar-y-axis";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { Grid } from "@/components/charts/grid";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
-import type { TooltipRow } from "@/components/charts/tooltip/tooltip-content";
 import type { DepartmentRow, ExpenseClassRow, NationalYearTotal } from "@/types/budget";
 import {
-  deptShortName as shortDeptName,
   formatPesoCompact,
   formatPesoFull,
   formatShare,
-  toTrillions,
 } from "@/lib/utils";
 
 const BRAND = "var(--chart-1)";
 
-/** Bklit tooltips show raw numbers — format peso values via custom rows. */
-function pesoRow(color: string, label: string, trillions: number): TooltipRow {
-  return { color, label, value: `₱${trillions.toFixed(2)} trillion` };
+/** Native labels keep the exact values available without hover or JavaScript. */
+function BudgetYearBars({ totals }: { totals: NationalYearTotal[] }) {
+  const ordered = [...totals].sort((a, b) => a.year - b.year);
+  const maximum = Math.max(...ordered.map((row) => row.amount), 1);
+  return (
+    <>
+      <p className="text-sm leading-6 text-muted">Enacted allocation in Philippine pesos. T = trillion; B = billion.</p>
+      <ol className="mt-5 space-y-3 sm:grid sm:min-h-80 sm:flex-1 sm:auto-cols-fr sm:grid-flow-col sm:gap-3 sm:space-y-0" aria-label="Enacted allocation by fiscal year">
+        {ordered.map((row) => (
+          <li key={row.year} className="grid grid-cols-[3rem_minmax(0,1fr)_5rem] items-center gap-3 text-sm sm:flex sm:flex-col">
+            <span className="text-muted sm:order-3">{row.year}</span>
+            <div className="flex h-3 items-end overflow-hidden rounded-sm bg-brand-50 sm:order-2 sm:h-auto sm:min-h-56 sm:w-full sm:flex-1" aria-hidden="true" style={{ "--bar-share": `${row.amount / maximum * 100}%` } as CSSProperties}>
+              <span className="block h-full w-[var(--bar-share)] rounded-sm bg-brand-700 sm:h-[var(--bar-share)] sm:w-full" />
+            </div>
+            <span title={formatPesoFull(row.amount)} className="text-right font-semibold tabular-nums text-ink sm:order-1 sm:text-xs lg:text-sm">{formatPesoCompact(row.amount)}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
 }
 
 /** National enacted budget trend, FY2020–2026. */
 export function NationalTrendChart({ totals }: { totals: NationalYearTotal[] }) {
-  // Stable identity: Bklit chart internals sync derived state in effects,
-  // so a fresh array every render would re-trigger them forever.
-  const data = useMemo(
-    () => totals.map((t) => ({ year: String(t.year), amount: toTrillions(t.amount) })),
-    [totals]
-  );
-  const summary = totals.map((t) => `${t.year}: ${formatPesoCompact(t.amount)}`).join("; ");
   return (
-    <ChartShell
-      title="National budget trend (enacted GAA)"
-      captionId="national-trend-caption"
-      summary={`Enacted national budget per year. ${summary}.`}
-    >
-      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="h-full min-h-[320px] sm:min-h-[360px]">
-        <Grid horizontal />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
-        <BarXAxis />
-        <ChartTooltip
-          showDatePill={false}
-          rows={(point) => [
-            pesoRow("#0038A8", `FY ${String(point.year)} enacted`, Number(point.amount)),
-          ]}
-        />
-      </BarChart>
+    <ChartShell title="National budget trend (enacted GAA)" captionId="national-trend-caption" summary="" accessibleContent contentClassName="flex flex-col">
+      <BudgetYearBars totals={totals} />
     </ChartShell>
   );
 }
 
-/** Top departments for one fiscal year, horizontal bars. */
-export function TopDepartmentsChart({
-  departments,
-  year,
-  limit = 10,
-}: {
+/** Largest first, with full department names and values visible at every size. */
+export function TopDepartmentsChart({ departments, year, limit = 10 }: {
   departments: DepartmentRow[];
   year: number;
   limit?: number;
 }) {
-  const top = useMemo(
-    () =>
-      [...departments]
-        .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))
-        .slice(0, limit)
-        .map((d) => ({ name: shortDeptName(d.description), amount: toTrillions(d.amount ?? 0) }))
-        .reverse(),
-    [departments, limit]
-  );
-  const summary = top.map((t) => `${t.name}: ₱${t.amount}T`).join("; ");
+  const top = [...departments].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0)).slice(0, limit);
+  const maximum = Math.max(...top.map((row) => row.amount ?? 0), 1);
   return (
-    <ChartShell
-      title={`Largest departments · FY ${year}`}
-      captionId="top-depts-caption"
-      summary={`Largest department budgets for FY ${year}. ${summary}.`}
-    >
-      <BarChart
-        data={top}
-        xDataKey="name"
-        orientation="horizontal"
-        aspectRatio="4 / 3"
-        // Roomy bands on phones: 10 labels at 12px need ~30px each, but a
-        // 4/3 box only yields ~15px per band at 360px wide. The shared
-        // minimum height keeps bands readable on phones and keeps the
-        // chart pair even on desktop (ParentSize measures the real box).
-        // h-full fills extra height when the sibling card stretches taller.
-        className="h-full min-h-[320px] sm:min-h-[360px]"
-        // Wide left gutter: axis labels truncate at 70px and right-align
-        // into this gutter. The 40px default clips them past the card edge.
-        margin={{ top: 16, right: 16, bottom: 32, left: 96 }}
-      >
-        <Grid vertical />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
-        <BarYAxis />
-        <ChartTooltip
-          showDatePill={false}
-          rows={(point) => [
-            pesoRow("#0038A8", `${String(point.name)} · FY ${year}`, Number(point.amount)),
-          ]}
-        />
-      </BarChart>
+    <ChartShell title={`Largest departments · FY ${year}`} captionId="top-depts-caption" summary="" accessibleContent>
+      <p className="text-sm leading-6 text-muted">Enacted allocation in Philippine pesos, largest first.</p>
+      <ol className="mt-4 space-y-4" aria-label={`Largest department allocations for FY ${year}`}>
+        {top.map((row) => (
+          <li key={row.id} className="text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <span className="min-w-0 text-ink">{row.description}</span>
+              <span title={formatPesoFull(row.amount ?? 0)} className="shrink-0 font-semibold tabular-nums text-ink">{formatPesoCompact(row.amount ?? 0)}</span>
+            </div>
+            <div className="mt-1.5 h-2 rounded-sm bg-brand-50" aria-hidden="true">
+              <div className="h-full rounded-sm bg-brand-700" style={{ width: `${(row.amount ?? 0) / maximum * 100}%` }} />
+            </div>
+          </li>
+        ))}
+      </ol>
     </ChartShell>
   );
 }
 
-/**
- * One department's enacted budget across FY2020–2026.
- * Rendered as categorical bars: Bklit's line chart is a time-series chart
- * whose axis labels ("Jan 1" style) cannot represent fiscal years.
- */
+/** One department's enacted budget across the available fiscal years. */
 export function DepartmentTrendChart({ totals }: { totals: NationalYearTotal[] }) {
-  const data = useMemo(
-    () => totals.map((t) => ({ year: String(t.year), amount: toTrillions(t.amount) })),
-    [totals]
-  );
-  const summary = totals.map((t) => `${t.year}: ${formatPesoCompact(t.amount)}`).join("; ");
   return (
-    <ChartShell
-      title="Budget trend (enacted GAA)"
-      captionId="dept-trend-caption"
-      summary={`Department enacted budget per year. ${summary}.`}
-    >
-      <BarChart data={data} xDataKey="year" aspectRatio="2 / 1" className="h-full min-h-[320px] sm:min-h-[360px]">
-        <Grid horizontal />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
-        <BarXAxis />
-        <ChartTooltip
-          showDatePill={false}
-          rows={(point) => [
-            pesoRow("#0038A8", `FY ${String(point.year)} enacted`, Number(point.amount)),
-          ]}
-        />
-      </BarChart>
+    <ChartShell title="Budget trend (enacted GAA)" captionId="dept-trend-caption" summary="" accessibleContent contentClassName="flex flex-col">
+      <BudgetYearBars totals={totals} />
     </ChartShell>
   );
 }
@@ -158,6 +101,7 @@ export function ExpenseMixChart({
   year: number;
 }) {
   const yearKey = String(year);
+  const reduced = useReducedMotion();
   const total = classes.reduce((sum, c) => sum + (c.years[yearKey]?.amount ?? 0), 0);
   const items = useMemo(
     () =>
@@ -192,7 +136,7 @@ export function ExpenseMixChart({
         margin={{ top: 16, right: 16, bottom: 32, left: 72 }}
       >
         <Grid vertical />
-        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate />
+        <Bar dataKey="amount" fill={BRAND} lineCap="round" animate={!reduced} />
         <BarYAxis />
         <ChartTooltip
           showDatePill={false}

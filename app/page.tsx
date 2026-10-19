@@ -1,23 +1,17 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Database, PhilippinePeso, ScrollText } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { SearchBar } from "@/components/search/SearchBar";
-import { DataStatus } from "@/components/ui/DataStatus";
-import { ExploreCard } from "@/components/ui/ExploreCard";
-import { SectionHeader } from "@/components/ui/PageHeader";
 import { HeroBackdrop } from "@/components/home/HeroBackdrop";
-import { CountUp, type CountFormat } from "@/components/motion/count-up";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
-import { popularSearches } from "@/lib/placeholder";
 import { BUDGET_API_BASE, BUDGET_DOCS_URL, getNationalTotals } from "@/lib/api/budget";
 import { CONGRESS_API_BASE, CONGRESS_DOCS_URL } from "@/lib/api/congress";
 import { DATA_API_BASE, DATA_DOCS_URL } from "@/lib/api/datasets";
 import { formatRetrievalTime } from "@/lib/freshness";
+import { formatPesoCompact } from "@/lib/utils";
 import type { SourceRetrieval } from "@/lib/api/source-cache";
 
 interface HomeStat {
   amount: number | null;
-  format: CountFormat;
-  label: string;
   hint: string;
   retrieval?: SourceRetrieval;
 }
@@ -29,9 +23,7 @@ async function getBudgetStat(): Promise<HomeStat> {
     if (row) {
       return {
         amount: row.amount,
-        format: "peso-compact",
-        label: "FY2026 national budget",
-        hint: "General Appropriations Act · source response",
+        hint: "Enacted General Appropriations Act",
         retrieval: national.retrieval,
       };
     }
@@ -40,26 +32,32 @@ async function getBudgetStat(): Promise<HomeStat> {
   }
   return {
     amount: null,
-    format: "peso-compact",
-    label: "FY2026 national budget",
     hint: "Current source figure unavailable",
   };
 }
 
 const heroSuggestions = [
   { label: "Flood control", href: "/search?q=flood%20control" },
-  { label: "Public schools", href: "/search?q=public%20schools" },
-  { label: "Scholarship programs", href: "/search?q=scholarship%20programs" },
+  { label: "Education", href: "/search?q=education" },
+  { label: "Health", href: "/search?q=health" },
 ];
 
-const groups = [
+const collections = [
   {
-    heading: "Budget",
-    icon: PhilippinePeso,
-    items: popularSearches.filter((p) => p.category === "Budget"),
+    title: "Budget",
+    description: "Explore allocations by year, department, and program.",
+    href: "/budget",
   },
-  { heading: "Congress", icon: ScrollText, items: popularSearches.filter((p) => p.category === "Congress") },
-  { heading: "Government Data", icon: Database, items: popularSearches.filter((p) => p.category === "Data") },
+  {
+    title: "Congress",
+    description: "Find bills, legislative records, and legislators.",
+    href: "/congress",
+  },
+  {
+    title: "Government Data",
+    description: "Browse datasets from government agencies.",
+    href: "/data",
+  },
 ];
 
 const sources = [
@@ -88,227 +86,111 @@ const sources = [
 
 export default async function HomePage() {
   const budgetStat = await getBudgetStat();
-  const stats: HomeStat[] = [
-    budgetStat,
-    { amount: 7, format: "count", label: "Fiscal years", hint: "FY2020–2026 enacted budgets" },
-    { amount: 3, format: "count", label: "Collections", hint: "Budget, Congress, Government Data" },
-  ];
+  const retrievedAt = budgetStat.retrieval
+    ? formatRetrievalTime(budgetStat.retrieval.retrievedAt) : null;
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-hero">
+      <section aria-labelledby="home-heading" className="relative bg-brand-900 text-white">
         <HeroBackdrop />
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24">
-          <Reveal delay={0.05}>
-            <h1 className="max-w-5xl text-[2.125rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl sm:leading-[1.04] lg:text-7xl">
-              Philippine Government Data, Made Easier to Understand.
+        <div className="relative mx-auto w-full max-w-3xl px-4 py-10 text-center sm:px-6 sm:py-12">
+          <Reveal delay={0.04}>
+            <h1 id="home-heading" className="text-[2rem] font-bold leading-[1.12] tracking-[-0.025em] sm:text-5xl">
+              Public records.<br />A clearer picture.
             </h1>
           </Reveal>
-          <Reveal delay={0.17}>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-brand-100 sm:text-lg sm:leading-8">
-              Explore budgets, legislation, and government datasets in one accessible place built
-              for the public. Free to use, no account needed.
-            </p>
+          <Reveal as="p" delay={0.1} className="mx-auto mt-4 max-w-xl text-base leading-7 text-brand-100">
+            Search Philippine budgets, bills, and government datasets.
           </Reveal>
-          <Reveal delay={0.23}>
-            <div className="mt-7 max-w-2xl">
-              <SearchBar size="lg" />
-              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-brand-100">
-                <span>Try searching:</span>
-                {heroSuggestions.map((s) => (
-                  <Link
-                    key={s.label}
-                    href={s.href}
-                    className="inline-flex min-h-11 items-center rounded-full border border-white/25 bg-white/10 px-3 font-medium text-brand-100 transition-colors duration-200 ease-institutional hover:border-white/50 hover:bg-white/20 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  >
-                    {s.label}
-                  </Link>
-                ))}
-              </div>
-              <DataStatus className="mt-3 text-brand-100" />
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Stats band */}
-      <section aria-label="Coverage at a glance" className="bg-brand-900">
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <RevealGroup as="dl" className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6">
-            {stats.map((s, i) => (
-              <RevealItem key={s.label} index={i} className="flex min-w-0 flex-col">
-                <dt className="order-2 mt-1 text-[11px] font-semibold uppercase tracking-wider text-brand-200 sm:text-xs">
-                  {s.label}
-                </dt>
-                <dd className="order-1 text-4xl font-extrabold tabular-nums tracking-tight text-white sm:text-5xl">
-                  {s.amount === null ? <span className="text-2xl sm:text-3xl">Unavailable</span> : <CountUp value={s.amount} format={s.format} />}
-                </dd>
-                <dd className="order-3 mt-0.5 text-xs text-brand-200">
-                  {s.hint}
-                  {s.retrieval && <span className="mt-1 block">Retrieved <time dateTime={s.retrieval.retrievedAt}>{formatRetrievalTime(s.retrieval.retrievedAt)}</time></span>}
-                </dd>
-              </RevealItem>
-            ))}
-          </RevealGroup>
-        </div>
-        <div aria-hidden="true" className="relative flex h-1 w-full overflow-hidden">
-          <span className="w-1/2 bg-brand-600" />
-          <span className="w-1/3 bg-accent-600" />
-          <span className="w-1/6 bg-amber-300" />
-          <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-white/60 to-transparent animate-rule-sweep" />
-        </div>
-      </section>
-
-      {/* Explore */}
-      <section aria-label="Explore collections" className="border-b border-line bg-surface">
-        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
-          <Reveal>
-            <div aria-hidden="true" className="flex h-1 w-24 overflow-hidden">
-              <span className="w-1/2 bg-brand-600" />
-              <span className="w-1/3 bg-accent-600" />
-              <span className="w-1/6 bg-amber-300" />
-            </div>
-          </Reveal>
-          <Reveal delay={0.06} className="mt-4">
-            <SectionHeader
-              large
-              eyebrow="Start here"
-              title="Explore"
-              description="Three collections of public records, each one traceable to the source it came from."
-            />
-          </Reveal>
-          <RevealGroup className="mt-7 grid gap-4 md:grid-cols-3">
-            <RevealItem index={0}>
-              <ExploreCard
-                icon={PhilippinePeso}
-                title="Budget"
-                description="Explore public spending and national budget data."
-                href="/budget"
-                meta="GAA FY2020–2026"
-              />
-            </RevealItem>
-            <RevealItem index={1}>
-              <ExploreCard
-                icon={ScrollText}
-                title="Congress"
-                description="Explore bills and legislative records."
-                href="/congress"
-                meta="20th Congress"
-              />
-            </RevealItem>
-            <RevealItem index={2}>
-              <ExploreCard
-                icon={Database}
-                title="Government Data"
-                description="Discover datasets published by government agencies."
-                href="/data"
-                meta="Agency datasets"
-              />
-            </RevealItem>
-          </RevealGroup>
-        </div>
-      </section>
-
-      {/* Popular searches */}
-      <section aria-label="Popular searches" className="border-b border-line bg-white">
-        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
-          <Reveal>
-            <SectionHeader
-              title="Popular searches"
-              description="Examples that search across all three sources."
-              action={
+          <Reveal delay={0.16} className="mx-auto mt-6 max-w-xl text-left">
+            <SearchBar size="lg" placeholder="Search records" hideLabel />
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 text-sm text-brand-100">
+              <span>Try:</span>
+              {heroSuggestions.map((suggestion) => (
                 <Link
-                  href="/search"
-                  className="inline-flex min-h-11 items-center gap-1 rounded-md border border-line px-3.5 text-sm font-semibold text-ink transition-colors duration-200 ease-institutional hover:border-brand-200 hover:text-brand-700"
+                  key={suggestion.label}
+                  href={suggestion.href}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm underline decoration-white/40 underline-offset-4 transition-colors duration-150 hover:text-white hover:decoration-white focus-visible:outline-white motion-reduce:transition-none"
                 >
-                  Open search
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  {suggestion.label}
                 </Link>
-              }
-            />
+              ))}
+            </div>
+            <p className="mt-1 text-center text-xs leading-6 text-brand-100">Free to use. No account needed.</p>
           </Reveal>
-          <RevealGroup className="mt-6 grid gap-4 md:grid-cols-3">
-            {groups.map((group, i) => (
-              <RevealItem
-                key={group.heading}
-                index={i}
-                className="rounded-lg border border-line bg-surface p-5"
-              >
-                <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                  <group.icon className="h-4 w-4 shrink-0 text-brand-700" aria-hidden="true" />
-                  <span className="min-w-0 flex-1">{group.heading}</span>
-                  <span className="rounded-full bg-white px-2 py-0.5 font-bold text-muted tabular-nums ring-1 ring-line">
-                    {group.items.length}
-                  </span>
-                </h3>
-                <ul className="mt-2">
-                  {group.items.map((item) => (
-                    <li key={item.label}>
-                      <Link
-                        href={item.href}
-                        className="flex min-h-11 items-center rounded-sm text-sm font-medium text-brand-700 transition-colors duration-150 ease-institutional hover:text-brand-800"
-                      >
-                        {item.label}
+        </div>
+      </section>
+
+      <section aria-labelledby="collections-heading" className="bg-white">
+        <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+          <nav aria-labelledby="collections-heading">
+            <h2 id="collections-heading" className="text-lg font-semibold text-ink">Browse a collection</h2>
+            <RevealGroup as="ul" className="mt-4 grid overflow-hidden rounded-xl border border-line bg-surface/50 sm:grid-cols-3">
+              {collections.map((collection, index) => (
+                <RevealItem as="li" key={collection.href} delay={index * 0.06} className="border-line [&+li]:border-t sm:[&+li]:border-l sm:[&+li]:border-t-0">
+                  <Link
+                    href={collection.href}
+                    className="group flex h-full min-h-24 items-start gap-4 p-5 transition-colors duration-150 hover:bg-brand-50 focus-visible:bg-brand-50 focus-visible:outline-offset-[-3px] focus-visible:outline-brand-700 motion-reduce:transition-none sm:p-6"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-lg font-semibold text-ink group-hover:text-brand-700">{collection.title}</span>
+                      <span className="mt-1 block text-sm leading-6 text-muted">{collection.description}</span>
+                    </span>
+                    <ArrowRight aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-700 transition-transform duration-200 ease-institutional group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" />
+                  </Link>
+                </RevealItem>
+              ))}
+            </RevealGroup>
+          </nav>
+
+          <details open className="group mt-10 border-t border-line text-sm text-muted sm:mt-12">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-sm py-5 text-lg font-semibold text-ink hover:text-brand-700 [&::-webkit-details-marker]:hidden">
+              Sources and coverage
+              <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+            </summary>
+            <div className="pb-2">
+              <p className="max-w-2xl leading-6">
+                Civica is an independent demonstration interface, not an official government website. Individual records include source and retrieval details where available. Verify important figures with the source agencies.
+              </p>
+              <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-10">
+                <div>
+                  <section aria-label="Budget snapshot" className="rounded-lg border border-brand-100 bg-brand-50 p-5">
+                    <h3 className="font-semibold text-ink">FY2026 enacted budget</h3>
+                    <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums text-brand-800">
+                      {budgetStat.amount === null ? "Unavailable" : formatPesoCompact(budgetStat.amount)}
+                    </p>
+                    <p className="mt-3 leading-6">{budgetStat.hint}</p>
+                    <p className="mt-4 border-t border-brand-100 pt-3 text-xs leading-5">
+                      Source: BetterGov.PH Budget
+                      {retrievedAt && budgetStat.retrieval ? (
+                        <span className="mt-1 block">Retrieved <time dateTime={budgetStat.retrieval.retrievedAt}>{retrievedAt}</time></span>
+                      ) : <span className="mt-1 block">Retrieval time unavailable</span>}
+                    </p>
+                  </section>
+                  <p className="mt-4 text-xs leading-5">
+                    Responses are cached and become eligible for refresh after one hour. Failed refreshes may leave older responses visible. Retrieval time is separate from the publisher&apos;s update date.
+                  </p>
+                </div>
+                <ul aria-label="Source directory" className="min-w-0 divide-y divide-line border-y border-line">
+                  {sources.map((source) => (
+                    <li key={source.name} className="py-5 first:pt-4">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <h3 className="font-semibold text-ink">{source.name}</h3>
+                        <p className="text-xs leading-5">{source.scope}</p>
+                      </div>
+                      <p className="mt-1 leading-6">Records from {source.record}.</p>
+                      <Link href={source.docs} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-11 items-center gap-1 rounded-sm font-medium text-brand-700 hover:underline">
+                        Source documentation
+                        <span className="sr-only"> for {source.name} (opens in new tab)</span>
+                        <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
                       </Link>
+                      <p className="break-all font-mono text-xs leading-5">{source.endpoint}</p>
                     </li>
                   ))}
                 </ul>
-              </RevealItem>
-            ))}
-          </RevealGroup>
-        </div>
-      </section>
-
-      {/* Sources */}
-      <section aria-label="Data sources" className="bg-surface">
-        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
-          <Reveal>
-            <SectionHeader
-              title="Sourced, not scraped"
-              description="Every record links back to its public source. Recorded retrieval times show when Civica received a response."
-            />
-          </Reveal>
-          <RevealGroup as="ul" className="mt-6 grid gap-4 md:grid-cols-3">
-            {sources.map((s, i) => (
-              <RevealItem
-                as="li"
-                key={s.name}
-                index={i}
-                className="flex flex-col rounded-lg border border-line bg-white p-5"
-              >
-                <p className="text-sm font-bold text-ink">{s.name}</p>
-                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
-                  {s.scope}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-muted">
-                  Records originate from {s.record}.
-                </p>
-                <p className="mt-3 break-all rounded-md bg-surface px-2.5 py-2 font-mono text-[11px] leading-4 text-muted">
-                  {s.endpoint}
-                </p>
-                <Link
-                  href={s.docs}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-auto inline-flex min-h-11 w-fit items-center gap-1 rounded-sm pt-3 text-sm font-semibold text-brand-700 transition-colors duration-150 ease-institutional hover:text-brand-800"
-                >
-                  Read the docs
-                  <span className="sr-only"> for {s.name} (opens in new tab)</span>
-                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </RevealItem>
-            ))}
-          </RevealGroup>
-          <Reveal delay={0.1} className="mt-6 max-w-3xl">
-            <p className="rounded-lg border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
-              Civica is an independent demonstration interface, not an official government
-              website. Source responses are cached and become eligible for refresh after one hour.
-              Failed refreshes may leave older responses visible. When no budget figure is available,
-              the headline says unavailable. Retrieval time is separate from the publisher&apos;s update
-              date. Verify important numbers with the source agencies.
-            </p>
-          </Reveal>
+              </div>
+            </div>
+          </details>
         </div>
       </section>
     </>

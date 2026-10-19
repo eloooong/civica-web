@@ -1,9 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { FileText, Landmark, ScrollText, Users } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { BillCard } from "@/components/congress/BillCard";
 import { Pagination } from "@/components/congress/Pagination";
@@ -60,6 +59,11 @@ export default async function CongressPage({
   const parsedPage = Number.parseInt(sp.page ?? "", 10);
   const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const offset = (page - 1) * BILLS_PER_PAGE;
+  const retryParams = new URLSearchParams();
+  for (const key of ["q", "congress", "type", "page", "person"] as const) {
+    const value = sp[key];
+    if (value !== undefined) retryParams.set(key, value);
+  }
 
   let stats;
   let bills;
@@ -100,7 +104,7 @@ export default async function CongressPage({
                 ? `${err.message} (Source: Open Congress records.)`
                 : "The congressional records source may be temporarily unavailable. Please try again."
             }
-            retryHref="/congress"
+            retryHref={retryParams.size ? `/congress?${retryParams}` : "/congress"}
           />
         </div>
       </div>
@@ -117,29 +121,25 @@ export default async function CongressPage({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Congress" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Congress explorer · Source records"
           title="Congress"
           description="Search House and Senate bills across congressional sessions, and find the legislators behind them."
         />
       </div>
 
-      {/* Database stats */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard icon={ScrollText} label="Bills indexed" value={stats.total_bills.toLocaleString("en-PH")} valueNumber={stats.total_bills} hint="House + Senate, all congresses" />
-        <StatCard icon={FileText} label="House bills" value={stats.total_house_bills.toLocaleString("en-PH")} valueNumber={stats.total_house_bills} hint={`${stats.total_senate_bills.toLocaleString("en-PH")} Senate bills`} />
-        <StatCard icon={Users} label="Legislators" value={stats.total_people.toLocaleString("en-PH")} valueNumber={stats.total_people} hint="Senators + Representatives" />
-        <StatCard icon={Landmark} label="Congresses" value={String(stats.total_congresses)} valueNumber={stats.total_congresses} hint="8th Congress to present" />
-      </div>
+      <p className="mt-4 text-sm leading-6 text-muted">
+        <span className="font-semibold tabular-nums text-ink">{stats.total_bills.toLocaleString("en-PH")}</span> bills across {stats.total_congresses} congresses
+        <span aria-hidden="true"> · </span>
+        {stats.total_people.toLocaleString("en-PH")} legislators in the catalog
+      </p>
 
       {/* Bill search + filters (shareable GET form) */}
-      <section aria-labelledby="bills-heading" className="mt-10">
+      <section aria-labelledby="bills-heading" className="mt-7">
         <SectionHeader
+          id="bills-heading"
           title="Browse bills"
-          description="New visits start with the latest Congress in this catalog. Choose All congresses to include earlier sessions, or search by topic."
+          description="Search a topic or bill number. Choose All congresses to include earlier sessions."
+          action={<Link href="#legislator-finder" className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold text-brand-700 hover:underline">Find a legislator <ArrowDown className="h-4 w-4" aria-hidden="true" /></Link>}
         />
-        <h2 id="bills-heading" className="sr-only">
-          Browse bills
-        </h2>
         <form
           key={JSON.stringify(baseParams)}
           method="get"
@@ -157,8 +157,8 @@ export default async function CongressPage({
               type="search"
               autoComplete="off"
               defaultValue={q}
-              placeholder="e.g. education, flood control, 4Ps…"
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
+              placeholder="Education, flood control, HB 4664…"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
           <div className="min-w-0">
@@ -169,7 +169,7 @@ export default async function CongressPage({
               id="bill-congress"
               name="congress"
               defaultValue={congress !== undefined ? String(congress) : "all"}
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="all">All congresses</option>
               {congressOptions.map((c) => (
@@ -187,7 +187,7 @@ export default async function CongressPage({
               id="bill-type"
               name="type"
               defaultValue={sp.type ?? ""}
-              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">House + Senate</option>
               <option value="HB">House bills</option>
@@ -211,6 +211,14 @@ export default async function CongressPage({
             )}
           </div>
         </form>
+        <details open className="mt-2 text-sm leading-6 text-muted">
+          <summary className="min-h-11 w-fit cursor-pointer rounded-sm py-2.5 font-semibold text-brand-700">About these records</summary>
+          <p className="max-w-3xl pb-4">
+            HB means House Bill; SB means Senate Bill. A bill is a proposal, and its filing date does not mean it became law.
+            Titles and available dates come from Open Congress. Missing information is labeled on each record.
+            New visits show the latest Congress in this catalog; topic searches without a selected session include all congresses.
+          </p>
+        </details>
 
         {bills.data.length === 0 ? (
           <div className="mt-4">
@@ -229,7 +237,10 @@ export default async function CongressPage({
           </div>
         ) : (
           <>
-            <ul className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mb-3 mt-4">
+              <Pagination page={page} total={total} limit={BILLS_PER_PAGE} hrefFor={(p) => billsHref(baseParams, p)} />
+            </div>
+            <ul className="divide-y divide-line border-y border-line">
               {bills.data.map((bill) => (
                 <li key={bill.id}>
                   <BillCard bill={bill} />
@@ -244,14 +255,12 @@ export default async function CongressPage({
       </section>
 
       {/* Legislator finder */}
-      <section aria-labelledby="people-heading" className="mt-10">
+      <section id="legislator-finder" tabIndex={-1} aria-labelledby="people-heading" className="mt-12 scroll-mt-28">
         <SectionHeader
+          id="people-heading"
           title="Find a legislator"
           description="Search senators and representatives by name to open their profile and authored bills."
         />
-        <h2 id="people-heading" className="sr-only">
-          Find a legislator
-        </h2>
         <form
           method="get"
           role="search"
@@ -269,12 +278,12 @@ export default async function CongressPage({
               autoComplete="off"
               defaultValue={personQuery}
               placeholder="e.g. Dela Cruz, Santos…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 min-h-11 w-full rounded-md border border-control bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
           <button
             type="submit"
-            className="w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+            className="min-h-11 w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
           >
             Find
           </button>

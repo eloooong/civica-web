@@ -79,7 +79,7 @@ export function BudgetExplorer({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter departments by name or code…"
-            className="min-h-11 w-full rounded-md border border-line bg-white py-2.5 pl-9 pr-3 text-base text-ink placeholder:text-muted/80 focus:border-brand-600"
+            className="min-h-11 w-full rounded-md border border-control bg-white py-2.5 pl-9 pr-3 text-base text-ink placeholder:text-muted focus:border-brand-600"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export function BudgetExplorer({
             id="dept-sort"
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="min-h-11 rounded-md border border-line bg-white px-3 py-2.5 text-base text-ink"
+            className="min-h-11 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
           >
             <option value="amount-desc">Largest budget first</option>
             <option value="amount-asc">Smallest budget first</option>

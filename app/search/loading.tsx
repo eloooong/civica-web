@@ -17,7 +17,7 @@ export default function SearchLoading() {
           <Skeleton key={i} className="h-10 w-20 rounded-b-none" />
         ))}
       </div>
-      <CardsSkeleton count={4} />
+      <CardsSkeleton count={4} layout="list" />
     </LoadingShell>
   );
 }

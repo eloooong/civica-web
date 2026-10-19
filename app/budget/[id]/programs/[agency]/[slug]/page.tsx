@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Boxes, Gavel, List, Percent, PhilippinePeso } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { FiscalYearSelector } from "@/components/budget/FiscalYearSelector";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
@@ -383,24 +384,11 @@ export default async function BudgetProgramPage({
       </div>
 
       {/* Fiscal-year filter (shareable) */}
-      <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Fiscal year">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">FY</span>
-        {BUDGET_FISCAL_YEARS.map((y) => (
-          <Link
-            key={y}
-            href={yearHref(id, agency, slug, y)}
-            aria-current={y === year ? "true" : undefined}
-            className={cn(
-              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
-              y === year
-                ? "border-brand-700 bg-brand-700 text-white"
-                : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
-            )}
-          >
-            {y}
-          </Link>
-        ))}
-      </div>
+      <FiscalYearSelector
+        className="mt-4"
+        year={year}
+        links={BUDGET_FISCAL_YEARS.map((y) => ({ year: y, href: yearHref(id, agency, slug, y) }))}
+      />
 
       {/* Summary statistics */}
       <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-3">

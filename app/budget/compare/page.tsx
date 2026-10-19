@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { Scale } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { FiscalYearSelector } from "@/components/budget/FiscalYearSelector";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
@@ -108,7 +108,6 @@ export default async function ComparePage({
         />
         <div className="mt-4">
           <PageHeader
-            eyebrow="Budget explorer"
             title="Compare departments"
             description="Two departments of the enacted General Appropriations Act, side by side."
           />
@@ -149,7 +148,7 @@ export default async function ComparePage({
           items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "Compare" }]}
         />
         <div className="mt-4">
-          <PageHeader eyebrow="Budget explorer" title="Compare departments" />
+          <PageHeader title="Compare departments" />
         </div>
         <div className="mt-6">
           <ErrorState
@@ -237,7 +236,6 @@ export default async function ComparePage({
 
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget explorer · Source records"
           title="Compare two departments"
           description={`Enacted General Appropriations Act budgets for ${rowA.description} and ${rowB.description}, FY2020 to FY2026. Enacted amounts, not the FY2027 proposal.`}
         />
@@ -245,20 +243,21 @@ export default async function ComparePage({
 
       {/* Picker. A GET form keeps every pair linkable, which is the point. */}
       <form
+        key={`${idA}-${idB}-${year}`}
         method="get"
         role="search"
         aria-label="Choose two departments"
         className="mt-6 flex flex-col gap-3 rounded-lg border border-line bg-white p-4 lg:flex-row lg:items-end"
       >
-        <div className="flex-1">
-          <label htmlFor="compare-a" className="block text-xs font-semibold text-muted">
+        <div className="min-w-0 flex-1">
+          <label htmlFor="compare-a" className="block text-sm font-semibold text-muted">
             First department
           </label>
           <select
             id="compare-a"
             name="a"
             defaultValue={idA}
-            className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+            className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
           >
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -267,15 +266,15 @@ export default async function ComparePage({
             ))}
           </select>
         </div>
-        <div className="flex-1">
-          <label htmlFor="compare-b" className="block text-xs font-semibold text-muted">
+        <div className="min-w-0 flex-1">
+          <label htmlFor="compare-b" className="block text-sm font-semibold text-muted">
             Second department
           </label>
           <select
             id="compare-b"
             name="b"
             defaultValue={idB}
-            className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+            className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
           >
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -285,14 +284,14 @@ export default async function ComparePage({
           </select>
         </div>
         <div className="lg:w-32">
-          <label htmlFor="compare-year" className="block text-xs font-semibold text-muted">
+          <label htmlFor="compare-year" className="block text-sm font-semibold text-muted">
             Fiscal year
           </label>
           <select
             id="compare-year"
             name="year"
             defaultValue={year}
-            className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+            className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
           >
             {BUDGET_FISCAL_YEARS.map((y) => (
               <option key={y} value={y}>
@@ -303,7 +302,7 @@ export default async function ComparePage({
         </div>
         <button
           type="submit"
-          className="w-full rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 lg:w-auto"
+          className="min-h-11 w-full rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 lg:w-auto"
         >
           Compare
         </button>
@@ -350,7 +349,7 @@ export default async function ComparePage({
       </section>
 
       <section aria-labelledby="compare-classes-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="compare-classes-heading"
           title={`Expense classes · FY ${year}`}
           description={
             classRows.length > 0
@@ -358,16 +357,13 @@ export default async function ComparePage({
               : "Expense classes are unavailable for one of these departments right now."
           }
         />
-        <h2 id="compare-classes-heading" className="sr-only">
-          Expense classes for the selected fiscal year
-        </h2>
         {classRows.length > 0 && (
           <>
             <div
               tabIndex={0}
               role="region"
               aria-label={`Expense classes for ${rowA.description} and ${rowB.description} in FY ${year}, scrollable table`}
-              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
               <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
@@ -449,11 +445,8 @@ export default async function ComparePage({
 
       {/* Differences, stated only as arithmetic on the figures above. */}
       <section aria-labelledby="compare-gaps-heading" className="mt-8">
-        <SectionHeader title="Where the two differ" description="Computed from the enacted figures above." />
-        <h2 id="compare-gaps-heading" className="sr-only">
-          Where the two departments differ
-        </h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <SectionHeader id="compare-gaps-heading" title="Where the two differ" description="Computed from the enacted figures above." />
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-line bg-white p-4">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
               <Scale className="h-4 w-4" aria-hidden="true" />
@@ -485,24 +478,12 @@ export default async function ComparePage({
         )}
       </section>
 
-      <nav aria-label="Compare other fiscal years" className="mt-8 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">Jump to FY</span>
-        {BUDGET_FISCAL_YEARS.map((y) => (
-          <Link
-            key={y}
-            href={yearHref(idA, idB, y)}
-            aria-current={y === year ? "true" : undefined}
-            className={cn(
-              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
-              y === year
-                ? "border-brand-700 bg-brand-700 text-white"
-                : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
-            )}
-          >
-            {y}
-          </Link>
-        ))}
-      </nav>
+      <FiscalYearSelector
+        className="mt-8"
+        label="Compare other fiscal years"
+        year={year}
+        links={BUDGET_FISCAL_YEARS.map((y) => ({ year: y, href: yearHref(idA, idB, y) }))}
+      />
 
       <div className="mt-8">
         <SourceAttribution

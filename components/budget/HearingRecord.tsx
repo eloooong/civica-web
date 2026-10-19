@@ -41,7 +41,7 @@ export function HearingRecord({
   const sections = record.timeline_sections ?? [];
 
   return (
-    <details className="mt-3 rounded-md border border-line bg-surface/60 p-3">
+    <details open className="mt-3 rounded-md border border-line bg-surface/60 p-3">
       <summary className="cursor-pointer text-sm font-semibold text-brand-700">
         {summaryLabel}
       </summary>

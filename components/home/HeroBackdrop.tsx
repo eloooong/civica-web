@@ -1,40 +1,52 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
-import BackgroundPaths from "@/components/kokonutui/background-paths";
+import { useInView } from "motion/react";
+import { useRef, useSyncExternalStore } from "react";
+import { GridScan } from "@/components/reactbits/GridScan";
+import { usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
 
-/**
- * Homepage hero backdrop, in three layers: a drifting KokonutUI path layer,
- * a ledger grid, and a soft glow. The grid and the glow drift with scroll.
- *
- * The ambient loops are CSS keyframes or guarded KokonutUI components rather
- * than Motion `animate` props on this element. A Motion `animate` prop is
- * materialised into inline styles during server rendering, and those styles
- * do not reliably match the first client render, which produces a hydration
- * mismatch. Only the scroll parallax stays in Motion, because it genuinely
- * needs a scroll position.
- *
- * The grid travels exactly one tile per loop, so the pattern has no seam.
- */
+function subscribeToVisibility(onChange: () => void) {
+  document.addEventListener("visibilitychange", onChange);
+  return () => document.removeEventListener("visibilitychange", onChange);
+}
 
+function isDocumentVisible() {
+  return !document.hidden;
+}
+
+/** Ambient motion rests when the hero is offscreen or the reader requests it. */
 export function HeroBackdrop() {
-  const { scrollY } = useScroll();
-
-  const gridY = useTransform(scrollY, [0, 600], [0, 90]);
-  const glowY = useTransform(scrollY, [0, 600], [0, 150]);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.05 });
+  const reduced = usePrefersReducedMotion();
+  const visible = useSyncExternalStore(subscribeToVisibility, isDocumentVisible, () => false);
+  const active = inView && visible && !reduced;
 
   return (
-    <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-      <BackgroundPaths />
-
-      <motion.div
-        style={{ y: gridY }}
-        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_70%_80%_at_50%_20%,black_30%,transparent_75%)] animate-grid-drift"
+    <div ref={ref} aria-hidden="true" data-hero-motion={active ? "active" : "resting"} className="pointer-events-none absolute inset-0 overflow-hidden">
+      <GridScan
+        paused={!active}
+        linesColor="#7aa7ff"
+        scanColor="#b9cdfd"
+        cells={7}
+        lineThickness={0.8}
+        depth={2.5}
+        parallax={0.25}
+        points={false}
+        reflection={0.15}
+        shading={0.35}
+        scanDuration={4}
+        scanDelay={2}
+        scanWidth={0.8}
+        trail={0.3}
+        glow={0.15}
+        interactive={!reduced}
+        clickEffect="none"
+        intro={false}
+        dpr={1}
+        className="opacity-80"
       />
-
-      <motion.div style={{ y: glowY }} className="absolute inset-0">
-        <div className="absolute inset-0 origin-top bg-[radial-gradient(ellipse_60%_55%_at_50%_0%,rgba(255,255,255,0.20),transparent_70%)] animate-glow-breathe" />
-      </motion.div>
+      <div className="absolute inset-0 bg-brand-900/65" />
     </div>
   );
 }

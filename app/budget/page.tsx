@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { Layers, Landmark, TrendingUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { FiscalYearSelector } from "@/components/budget/FiscalYearSelector";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { ErrorState } from "@/components/ui/States";
@@ -17,7 +17,6 @@ import {
   getYearBreakdown,
 } from "@/lib/api/budget";
 import { BUDGET_FISCAL_YEARS, isBudgetFiscalYear } from "@/types/budget";
-import { cn } from "@/lib/utils";
 import { deptShortName, formatCount, formatPctDelta, formatPesoCompact, formatShare } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -112,31 +111,17 @@ export default async function BudgetPage({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Budget" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget explorer · Source records"
           title="Budget Explorer"
           description="Explore Philippine national budget data from the enacted General Appropriations Act (FY2020–2026), down to agency and program level."
         />
       </div>
 
       {/* Fiscal-year filter (shareable via ?year=) */}
-      <div className="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="Fiscal year">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">FY</span>
-        {BUDGET_FISCAL_YEARS.map((y) => (
-          <Link
-            key={y}
-            href={y === DEFAULT_YEAR ? "/budget" : `/budget?year=${y}`}
-            aria-current={y === year ? "true" : undefined}
-            className={cn(
-              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ease-institutional",
-              y === year
-                ? "border-brand-700 bg-brand-700 text-white"
-                : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
-            )}
-          >
-            {y}
-          </Link>
-        ))}
-      </div>
+      <FiscalYearSelector
+        className="mt-6"
+        year={year}
+        links={BUDGET_FISCAL_YEARS.map((y) => ({ year: y, href: y === DEFAULT_YEAR ? "/budget" : `/budget?year=${y}` }))}
+      />
 
       <OverviewDisclosure title={`Budget overview · FY ${year}`}>
         {/* Detailed statistics and charts stay available without pushing the
@@ -186,12 +171,10 @@ export default async function BudgetPage({
       {/* Explorer table */}
       <section aria-labelledby="dept-table-heading" className="mt-8">
         <SectionHeader
+          id="dept-table-heading"
           title="Budget by department"
           description={`Every department in the FY ${year} enacted budget. Select a department for agencies, programs, and trends.`}
         />
-        <h2 id="dept-table-heading" className="sr-only">
-          Budget by department
-        </h2>
         <div className="mt-4">
           <BudgetExplorer departments={departments} year={year} />
         </div>

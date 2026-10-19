@@ -21,7 +21,7 @@ export function Pagination({
   const safePage = Math.min(Math.max(1, page), totalPages);
   if (totalPages <= 1) {
     return (
-      <p className="text-xs text-muted" role="status">
+      <p className="text-sm text-muted" role="status">
         {total.toLocaleString("en-PH")} result{total === 1 ? "" : "s"}
       </p>
     );
@@ -31,12 +31,12 @@ export function Pagination({
   const to = Math.min(safePage * limit, total);
 
   // Compact window: first, last, and ±1 around current.
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1).filter(
-    (p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1
-  );
+  const pages = [...new Set([1, safePage - 1, safePage, safePage + 1, totalPages])]
+    .filter((p) => p >= 1 && p <= totalPages)
+    .sort((a, b) => a - b);
 
   const arrowClass =
-    "inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-white text-ink transition-colors duration-150 ease-institutional";
+    "inline-flex h-11 w-11 items-center justify-center rounded-md border border-line bg-white text-ink transition-colors duration-150 ease-institutional";
   const disabledArrowClass = "opacity-40";
   const activeArrowClass = "hover:border-brand-200 hover:text-brand-700";
 
@@ -45,7 +45,7 @@ export function Pagination({
 
   return (
     <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-xs text-muted" role="status" aria-live="polite">
+      <p className="text-sm text-muted" role="status" aria-live="polite">
         Showing {from.toLocaleString("en-PH")}–{to.toLocaleString("en-PH")} of{" "}
         {total.toLocaleString("en-PH")}
       </p>
@@ -79,7 +79,7 @@ export function Pagination({
                 aria-label={`Page ${p}`}
                 aria-current={p === safePage ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors duration-150 ease-institutional",
+                  "inline-flex h-11 min-w-11 items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors duration-150 ease-institutional",
                   p === safePage
                     ? "border-brand-700 bg-brand-700 text-white"
                     : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"

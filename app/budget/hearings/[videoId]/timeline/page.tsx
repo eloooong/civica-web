@@ -314,7 +314,7 @@ function SectionItem({
       id={`section-${section.index}`}
       className="scroll-mt-24 rounded-lg border border-line bg-white p-4"
     >
-      <details>
+      <details open>
         <summary className="cursor-pointer list-none">
           <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="font-mono text-xs tabular-nums text-muted">

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Building2, Coins, FileText, MapPinned } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -31,10 +32,10 @@ export const metadata: Metadata = {
 const RESULTS_PER_PAGE = 25;
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: "cost", label: "Contract amount (high to low)" },
-  { value: "abc", label: "Approved budget (high to low)" },
+  { value: "cost", label: "Highest contract amount" },
+  { value: "abc", label: "Highest approved budget" },
   { value: "contractor", label: "Contractor (A to Z)" },
-  { value: "year", label: "Funding year (newest first)" },
+  { value: "year", label: "Newest funding year" },
 ];
 
 type FloodSearchParams = {
@@ -78,7 +79,7 @@ function shell(title: string, description: string, body: React.ReactNode) {
         items={[{ label: "Home", href: "/" }, { label: "Government Data", href: "/data" }, { label: "Flood control contracts" }]}
       />
       <div className="mt-4">
-        <PageHeader eyebrow="Government data · Contracts" title={title} description={description} />
+        <PageHeader title={title} description={description} />
       </div>
       <div className="mt-6">{body}</div>
     </div>
@@ -123,15 +124,21 @@ export default async function FloodControlPage({
     return shell(
       "Flood control contracts",
       "Every flood control contract recorded in the DPWH flood control dashboard, with the company that built it.",
+      <>
       <ErrorState
         title="Unable to load flood control contracts"
         description={
           err instanceof FloodApiError
-            ? `${err.message} (Source: Open Data Portal.)`
+            ? err.isNotFound ? "The published data file could not be found. You can inspect its catalog record below or try again." : `${err.message} (Source: Open Data Portal.)`
             : "The flood control data file may be temporarily unavailable. Please try again."
         }
-        retryHref="/data/flood-control"
+        retryHref={pageHref(sp, page)}
       />
+      <div className="mt-4 flex flex-wrap justify-center gap-3">
+        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View source catalog record</Link>
+        <Link href="/data" className="inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline">Browse other datasets</Link>
+      </div>
+      </>
     );
   }
 
@@ -158,7 +165,6 @@ export default async function FloodControlPage({
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
-          eyebrow="Government data · Contracts"
           title="Flood control contracts"
           description="Who builds Philippine flood control projects: the contractor, the approved budget, and the awarded amount for every contract in the DPWH flood control dashboard."
         />
@@ -178,50 +184,50 @@ export default async function FloodControlPage({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={FileText}
-          label="Contracts"
-          value={formatCount(summary.contracts)}
-          hint="Project components with a contract"
-        />
-        <StatCard
-          icon={Building2}
-          label="Contractors"
-          value={formatCount(summary.contractors)}
-          hint="Distinct company names"
-        />
-        <StatCard
-          icon={Coins}
-          label="Awarded amount"
-          value={formatPesoCompact(summary.totalCost)}
-          hint="Sum of contract costs"
-        />
-        <StatCard
-          icon={MapPinned}
-          label="Funding years"
-          value={summary.yearMin === summary.yearMax ? String(summary.yearMin) : `${summary.yearMin} to ${summary.yearMax}`}
-          hint={`Approved budget ${formatPesoCompact(summary.totalAbc)} total`}
-        />
-      </div>
+      <OverviewDisclosure title="Dataset overview">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatCard
+            icon={FileText}
+            label="Contracts"
+            value={formatCount(summary.contracts)}
+            hint="Project components with a contract"
+          />
+          <StatCard
+            icon={Building2}
+            label="Contractors"
+            value={formatCount(summary.contractors)}
+            hint="Distinct company names"
+          />
+          <StatCard
+            icon={Coins}
+            label="Awarded amount"
+            value={formatPesoCompact(summary.totalCost)}
+            hint="Sum of contract costs"
+          />
+          <StatCard
+            icon={MapPinned}
+            label="Funding years"
+            value={summary.yearMin === summary.yearMax ? String(summary.yearMin) : `${summary.yearMin} to ${summary.yearMax}`}
+            hint={`Approved budget ${formatPesoCompact(summary.totalAbc)} total`}
+          />
+        </div>
+      </OverviewDisclosure>
 
       <section aria-labelledby="contracts-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="contracts-heading"
           title="Contracts"
           description="Search by project, contractor, or location, then filter by funding year and region. Every filter is reflected in the URL."
         />
-        <h2 id="contracts-heading" className="sr-only">
-          Flood control contracts
-        </h2>
 
         <form
+          key={JSON.stringify(base)}
           method="get"
           role="search"
           aria-label="Filter flood control contracts"
-          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-[1fr_160px_200px_220px_auto]"
+          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_auto]"
         >
-          <div>
-            <label htmlFor="fc-q" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0 sm:col-span-2 xl:col-span-1">
+            <label htmlFor="fc-q" className="block text-sm font-semibold text-muted">
               Search contracts
             </label>
             <input
@@ -231,18 +237,18 @@ export default async function FloodControlPage({
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. pump station, Cebu, ABC Construction"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
-          <div>
-            <label htmlFor="fc-year" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="fc-year" className="block text-sm font-semibold text-muted">
               Funding year
             </label>
             <select
               id="fc-year"
               name="year"
               defaultValue={hasYear ? String(year) : ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All years</option>
               {years.map((y) => (
@@ -252,15 +258,15 @@ export default async function FloodControlPage({
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="fc-region" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="fc-region" className="block text-sm font-semibold text-muted">
               Region
             </label>
             <select
               id="fc-region"
               name="region"
               defaultValue={region}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All regions</option>
               {regions.map((r) => (
@@ -270,15 +276,15 @@ export default async function FloodControlPage({
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="fc-sort" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="fc-sort" className="block text-sm font-semibold text-muted">
               Sort by
             </label>
             <select
               id="fc-sort"
               name="sort"
               defaultValue={sort}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -287,17 +293,17 @@ export default async function FloodControlPage({
               ))}
             </select>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-1">
             <button
               type="submit"
-              className="w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+              className="min-h-11 w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
             >
               Apply
             </button>
             {hasFilters && (
               <Link
                 href="/data/flood-control"
-                className="rounded-md border border-line px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-control px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
               >
                 Clear
               </Link>
@@ -384,9 +390,9 @@ export default async function FloodControlPage({
               tabIndex={0}
               role="region"
               aria-label="Flood control contracts with contractor, approved budget, and awarded amount, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[960px] border-collapse bg-white text-left text-sm">
+              <table className="w-full min-w-[960px] border-collapse bg-white text-left text-sm [&_td]:align-top [&_th]:align-top">
                 <caption className="sr-only">
                   Flood control contracts with contractor, approved budget, and awarded amount
                 </caption>

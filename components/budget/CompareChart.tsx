@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import { useReducedMotion } from "motion/react";
 import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
 import { BarXAxis } from "@/components/charts/bar-x-axis";
 import { ChartShell } from "@/components/charts/chart-shell";
 import { Grid } from "@/components/charts/grid";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
-import { formatPesoCompact } from "@/lib/utils";
+import { formatPesoCompact, formatPesoFull } from "@/lib/utils";
 
 /** One department plotted on the comparison chart. */
 export interface CompareSeries {
@@ -49,6 +50,7 @@ export function CompareChart({
   series: CompareSeries[];
   summary: string;
 }) {
+  const reduced = useReducedMotion();
   const data = useMemo(
     () =>
       points.map((point) => {
@@ -62,31 +64,33 @@ export function CompareChart({
   );
 
   return (
-    <ChartShell title={title} captionId={captionId} summary={summary}>
-      <BarChart
-        data={data}
-        xDataKey="year"
-        aspectRatio="2 / 1"
-        // No h-full: the legend below needs the leftover card space, and a
-        // full height chart would push it past the card edge.
-        className="min-h-[320px] sm:min-h-[360px]"
-      >
-        <Grid horizontal />
-        {series.map((s) => (
-          <Bar key={s.dataKey} dataKey={s.dataKey} fill={s.color} lineCap="round" animate />
-        ))}
-        <BarXAxis />
-        <ChartTooltip
-          showDatePill={false}
-          rows={(point) =>
-            series.map((s) => ({
-              color: s.color,
-              label: `${s.label} · FY ${String(point.year)}`,
-              value: formatPesoCompact(Number(point[s.dataKey] ?? 0) * 1e12),
-            }))
-          }
-        />
-      </BarChart>
+    <ChartShell title={title} captionId={captionId} summary={summary} accessibleContent>
+      <div aria-hidden="true">
+        <BarChart
+          data={data}
+          xDataKey="year"
+          aspectRatio="2 / 1"
+          // No h-full: the legend below needs the leftover card space, and a
+          // full height chart would push it past the card edge.
+          className="min-h-[320px] sm:min-h-[360px]"
+        >
+          <Grid horizontal />
+          {series.map((s) => (
+            <Bar key={s.dataKey} dataKey={s.dataKey} fill={s.color} lineCap="round" animate={!reduced} />
+          ))}
+          <BarXAxis />
+          <ChartTooltip
+            showDatePill={false}
+            rows={(point) =>
+              series.map((s) => ({
+                color: s.color,
+                label: `${s.label} · FY ${String(point.year)}`,
+                value: formatPesoCompact(Number(point[s.dataKey] ?? 0) * 1e12),
+              }))
+            }
+          />
+        </BarChart>
+      </div>
       <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2" aria-label="Departments compared">
         {series.map((s) => (
           <li key={s.dataKey} className="flex items-center gap-2 text-sm">
@@ -95,6 +99,21 @@ export function CompareChart({
           </li>
         ))}
       </ul>
+      <dl aria-label="Yearly comparison figures" className="mt-5 grid grid-cols-1 gap-x-5 gap-y-3 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-4">
+        {points.map((point) => (
+          <div key={point.year} className="text-sm">
+            <dt className="font-semibold text-ink">FY {point.year}</dt>
+            <dd className="mt-1 space-y-1">
+              {series.map((entry) => (
+                <div key={entry.dataKey} className="flex flex-wrap justify-between gap-x-2 text-muted">
+                  <span>{entry.label}</span>
+                  <span className="font-semibold tabular-nums text-ink" aria-label={formatPesoFull(point.values[entry.dataKey] ?? 0)} title={formatPesoFull(point.values[entry.dataKey] ?? 0)}>{formatPesoCompact(point.values[entry.dataKey] ?? 0)}</span>
+                </div>
+              ))}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </ChartShell>
   );
 }

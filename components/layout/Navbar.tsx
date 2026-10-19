@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ChartColumn,
   ChevronRight,
@@ -21,13 +21,16 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { tween } from "@/components/motion/tokens";
 import { cn } from "@/lib/utils";
+import { isBudgetFiscalYear } from "@/types/budget";
+import { SmoothNavigation } from "@/components/ui/SmoothNavigation";
 
 interface NavNode {
   href: string;
   label: string;
+  shortLabel?: string;
   icon: LucideIcon;
   children?: NavNode[];
 }
@@ -49,11 +52,11 @@ const tree: NavNode[] = [
     label: "Budget",
     icon: Wallet,
     children: [
-      { href: "/budget", label: "Budget explorer", icon: Table },
-      { href: "/budget/compare", label: "Compare departments", icon: ChartColumn },
+      { href: "/budget", label: "Budget explorer", shortLabel: "Explorer", icon: Table },
+      { href: "/budget/compare", label: "Compare departments", shortLabel: "Compare", icon: ChartColumn },
       { href: "/budget/nep", label: "FY2027 proposal", icon: FileText },
-      { href: "/budget/cycle", label: "Budget execution", icon: Layers },
-      { href: "/budget/hearings", label: "House budget hearings", icon: Video },
+      { href: "/budget/cycle", label: "Budget execution", shortLabel: "Execution", icon: Layers },
+      { href: "/budget/hearings", label: "House budget hearings", shortLabel: "Hearings", icon: Video },
     ],
   },
   {
@@ -67,8 +70,8 @@ const tree: NavNode[] = [
     icon: Database,
     children: [
       { href: "/data", label: "Dataset catalog", icon: ClipboardList },
-      { href: "/data/flood-control", label: "Flood control contracts", icon: Droplets },
-      { href: "/data/contractors", label: "Public contractors", icon: Users },
+      { href: "/data/flood-control", label: "Flood control contracts", shortLabel: "Flood control", icon: Droplets },
+      { href: "/data/contractors", label: "Public contractors", shortLabel: "Contractors", icon: Users },
     ],
   },
   { href: "/search", label: "Search", icon: Search },
@@ -88,6 +91,45 @@ function activeHrefFor(pathname: string): string | null {
     }
   }
   return best;
+}
+
+function sectionFor(pathname: string) {
+  return tree.find((node) => pathname === node.href || pathname.startsWith(`${node.href}/`));
+}
+
+function useEnactedYear(activeHref: string | null) {
+  const params = useSearchParams();
+  const year = params.get("year");
+  return (activeHref === "/budget" || activeHref === "/budget/compare") &&
+    year !== null && /^\d{4}$/.test(year) && isBudgetFiscalYear(Number(year))
+    ? year : undefined;
+}
+
+function destination(href: string, year?: string) {
+  return year && (href === "/budget" || href === "/budget/compare")
+    ? `${href}?year=${year}` : href;
+}
+
+function SectionLinks({ section, activeHref, year }: { section: NavNode; activeHref: string | null; year?: string }) {
+  return (
+    <div data-section-navigation className="hidden border-t border-line lg:block">
+      <div className="mx-auto flex max-w-7xl px-6 py-2">
+        <SmoothNavigation
+          label={`${section.label} tools`}
+          items={(section.children ?? []).map((node) => ({
+            href: destination(node.href, year),
+            label: node.shortLabel ?? node.label,
+            active: activeHref === node.href,
+          }))}
+        />
+      </div>
+    </div>
+  );
+}
+
+function YearAwareSectionLinks(props: { section: NavNode; activeHref: string | null }) {
+  const year = useEnactedYear(props.activeHref);
+  return <SectionLinks {...props} year={year} />;
 }
 
 /**
@@ -119,7 +161,8 @@ const LINE_OUT_HOVER = 21.5;
  * animate in on arrival.
  */
 function MenuMorph({ open }: { open: boolean }) {
-  const transition = tween(0.22);
+  const reduced = useReducedMotion();
+  const transition = reduced ? { duration: 0 } : tween(0.22);
   return (
     <motion.svg
       viewBox="0 0 24 24"
@@ -204,12 +247,14 @@ function Branch({
   collapsed,
   onToggle,
   onNavigate,
+  year,
 }: {
   node: NavNode;
   activeHref: string | null;
   collapsed: ReadonlySet<string>;
   onToggle: (href: string) => void;
   onNavigate?: () => void;
+  year?: string;
 }) {
   const children = node.children ?? [];
 
@@ -218,46 +263,37 @@ function Branch({
     // current page: a chevron that silently refuses to move is worse than a
     // folder the reader closed on purpose. The branch keeps its tint either
     // way, so "you are in here" survives the collapse.
-    const inPath = activeHref === node.href;
+    const inPath = activeHref === node.href || activeHref?.startsWith(`${node.href}/`);
     const open = !collapsed.has(node.href);
     return (
       <li>
-        <div className="flex items-center gap-2 pr-1">
-          <button
-            type="button"
-            onClick={() => onToggle(node.href)}
-            aria-expanded={open}
-            aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
-            className="flex h-9 w-7 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:text-ink"
-          >
-            <ChevronRight
+        <button
+          type="button"
+          onClick={() => onToggle(node.href)}
+          aria-expanded={open}
+          aria-controls={open ? `mobile-nav-${node.href.slice(1)}` : undefined}
+          aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
+          className={cn(
+            "flex min-h-11 w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-semibold transition-colors duration-150 hover:bg-surface",
+            inPath ? "text-brand-800" : "text-ink"
+          )}
+        >
+          <node.icon aria-hidden="true" strokeWidth={2} className="h-4 w-4 shrink-0" />
+          {node.label}
+          {inPath && !open && (
+            <span
               aria-hidden="true"
-              strokeWidth={2}
-              className={cn("h-4 w-4 transition-transform duration-150", open && "rotate-90")}
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700"
             />
-          </button>
-          {/* The branch is tinted, not bordered: a coloured rule beside a list
-              item reads as decoration and competes with the data. Weight and
-              tint carry the state, and a collapsed in-path branch keeps a dot
-              so the reader is never left with a folder and no clue. */}
-          <span
-            className={cn(
-              "flex min-h-9 items-center gap-2.5 text-sm font-semibold transition-colors duration-150",
-              inPath ? "text-brand-800" : "text-ink"
-            )}
-          >
-            <node.icon aria-hidden="true" strokeWidth={2} className="h-4 w-4 shrink-0" />
-            {node.label}
-            {inPath && !open && (
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700"
-              />
-            )}
-          </span>
-        </div>
+          )}
+          <ChevronRight
+            aria-hidden="true"
+            strokeWidth={2}
+            className={cn("ml-auto h-4 w-4 shrink-0 transition-transform duration-150", open && "rotate-90")}
+          />
+        </button>
         {open && (
-          <ul className="ml-[3.125rem] space-y-0.5 border-l border-line pl-2.5">
+          <ul id={`mobile-nav-${node.href.slice(1)}`} className="ml-5 space-y-0.5 border-l border-line pl-3">
             {children.map((child) => (
               <Branch
                 key={child.href}
@@ -266,6 +302,7 @@ function Branch({
                 collapsed={collapsed}
                 onToggle={onToggle}
                 onNavigate={onNavigate}
+                year={year}
               />
             ))}
           </ul>
@@ -277,11 +314,11 @@ function Branch({
   return (
     <li>
       <Link
-        href={node.href}
+        href={destination(node.href, year)}
         aria-current={activeHref === node.href ? "page" : undefined}
         onClick={onNavigate}
         className={cn(
-          "flex min-h-10 items-center gap-2.5 rounded-md py-2 pl-3 pr-2.5 text-sm transition-colors duration-150 ease-institutional",
+          "flex min-h-11 items-center gap-2.5 rounded-md py-2 pl-3 pr-2.5 text-sm transition-colors duration-150 ease-institutional",
           activeHref === node.href
             ? "bg-brand-50 font-semibold text-brand-800"
             : "font-medium text-ink/80 hover:bg-surface hover:text-ink"
@@ -300,12 +337,14 @@ function NavTree({
   onToggle,
   onNavigate,
   label,
+  year,
 }: {
   activeHref: string | null;
   collapsed: ReadonlySet<string>;
   onToggle: (href: string) => void;
   onNavigate?: () => void;
   label: string;
+  year?: string;
 }) {
   return (
     <nav aria-label={label}>
@@ -318,6 +357,7 @@ function NavTree({
             collapsed={collapsed}
             onToggle={onToggle}
             onNavigate={onNavigate}
+            year={year}
           />
         ))}
       </ul>
@@ -325,8 +365,13 @@ function NavTree({
   );
 }
 
+function YearAwareNavTree(props: Parameters<typeof NavTree>[0]) {
+  const year = useEnactedYear(props.activeHref);
+  return <NavTree {...props} year={year} />;
+}
+
 /**
- * Site shell: a full-bleed header bar and a drawer holding the folder tree.
+ * Site shell: desktop section links and contextual tools, with a mobile drawer.
  *
  * On phones a permanent tree would cost most of the screen, so the tree lives
  * in a modal drawer behind the menu button: focus moves into it, Tab is trapped,
@@ -335,20 +380,53 @@ function NavTree({
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  useEffect(() => {
+    const handleSearchShortcut = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== "k" || !(event.ctrlKey || event.metaKey) || event.altKey || event.repeat || event.defaultPrevented) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest("input, textarea, select, [contenteditable], [role=dialog]")) return;
+      event.preventDefault();
+      const field = document.querySelector<HTMLInputElement>("#site-search");
+      if (field) field.focus();
+      else router.push("/search#site-search");
+    };
+    window.addEventListener("keydown", handleSearchShortcut);
+    return () => window.removeEventListener("keydown", handleSearchShortcut);
+  }, [router]);
   const activeHref = activeHrefFor(pathname);
+  const section = sectionFor(pathname);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set());
   const drawerRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   // Close on any route change, not only a link click: the back button and
   // programmatic navigation land here too. Done during render because it is a
   // reset against a changed input, not a sync with anything outside React.
   const [lastPath, setLastPath] = useState(pathname);
   if (lastPath !== pathname) {
+    if (sectionFor(lastPath)?.href !== section?.href) setCollapsed(new Set());
     setLastPath(pathname);
     if (open) setOpen(false);
   }
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (!desktop.matches) return;
+      setOpen(false);
+      if (drawerRef.current?.contains(document.activeElement) || document.activeElement === toggleRef.current) {
+        const header = headerRef.current;
+        const target = header?.querySelector<HTMLElement>('nav[aria-label="Main navigation"] a[aria-current]')
+          ?? header?.querySelector<HTMLElement>('a[aria-label="Civica home"]');
+        target?.focus();
+      }
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -399,72 +477,104 @@ export function SiteShell({ children }: { children: ReactNode }) {
     });
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white px-4 py-3 sm:px-6">
-        <button
-          ref={toggleRef}
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
-          aria-controls="site-drawer"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
-        >
-          <MenuMorph open={open} />
-        </button>
-        <Brand />
-      </header>
+    <MotionConfig reducedMotion="user">
+      <div className="flex min-h-screen flex-col bg-white">
+        <header ref={headerRef} className="sticky top-0 z-30 border-b border-line bg-white">
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
+            <button
+              ref={toggleRef}
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              aria-expanded={open}
+              aria-controls="site-drawer"
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100 lg:hidden"
+            >
+              <MenuMorph open={open} />
+            </button>
+            <Brand />
+            <nav aria-label="Main navigation" className="ml-auto hidden items-center gap-1 lg:flex">
+              {tree.map((node) => {
+                const selected = pathname === node.href || pathname.startsWith(`${node.href}/`);
+                return (
+                  <Link
+                    key={node.href}
+                    href={node.href}
+                    aria-current={selected ? "location" : undefined}
+                    aria-keyshortcuts={node.href === "/search" ? "Control+k Meta+k" : undefined}
+                    className={cn(
+                      "inline-flex min-h-11 items-center gap-2 rounded-md border-b-2 px-4 text-sm font-semibold transition-colors",
+                      selected ? "border-brand-700 bg-brand-50 text-brand-800" : "border-transparent text-muted hover:bg-surface hover:text-ink"
+                    )}
+                  >
+                    {node.href === "/search" && <Search className="h-4 w-4" aria-hidden="true" />}
+                    {node.label}
+                    {node.href === "/search" && <kbd className="rounded border border-line px-1.5 py-0.5 text-xs font-normal text-muted">Ctrl K</kbd>}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+          {section?.children && (
+            <Suspense fallback={<SectionLinks section={section} activeHref={activeHref} />}>
+              <YearAwareSectionLinks section={section} activeHref={activeHref} />
+            </Suspense>
+          )}
+        </header>
 
-      <div
-        id="site-drawer"
-        ref={drawerRef}
-        role="dialog"
-        aria-modal={open ? true : undefined}
-        aria-label="Site navigation"
-        inert={!open}
-        data-lenis-prevent
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 w-[22rem] max-w-[85vw] overflow-y-auto border-r border-line bg-white px-4 py-5 shadow-2xl transition-transform duration-200 ease-institutional",
-          open ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        {/* The drawer covers the header toggle, so it carries its own close
-            control. Escape and the backdrop close it too. */}
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            toggleRef.current?.focus();
-          }}
-          aria-label="Close menu"
-          className="inline-flex h-12 w-12 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
+        <div
+          id="site-drawer"
+          ref={drawerRef}
+          role="dialog"
+          aria-modal={open ? true : undefined}
+          aria-label="Site navigation"
+          inert={!open}
+          data-lenis-prevent
+          className={cn(
+            "fixed inset-y-0 left-0 z-40 w-[22rem] max-w-[85vw] overflow-y-auto border-r border-line bg-white px-4 py-5 shadow-2xl transition-transform duration-200 ease-institutional lg:hidden",
+            open ? "translate-x-0" : "-translate-x-full"
+          )}
         >
-          <X className="h-6 w-6" aria-hidden="true" />
-        </button>
-        <div className="mt-4">
-          <NavTree
-            activeHref={activeHref}
-            collapsed={collapsed}
-            onToggle={toggleFolder}
-            onNavigate={() => setOpen(false)}
-            label="Site menu"
-          />
+          {/* The drawer covers the header toggle, so it carries its own close
+              control. Escape and the backdrop close it too. */}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              toggleRef.current?.focus();
+            }}
+            aria-label="Close menu"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-md text-ink transition-colors hover:bg-slate-100"
+          >
+            <X className="h-6 w-6" aria-hidden="true" />
+          </button>
+          <div className="mt-4">
+            <Suspense fallback={<NavTree activeHref={activeHref} collapsed={collapsed} onToggle={toggleFolder} label="Site menu" />}>
+              <YearAwareNavTree
+                activeHref={activeHref}
+                collapsed={collapsed}
+                onToggle={toggleFolder}
+                onNavigate={() => setOpen(false)}
+                label="Site menu"
+              />
+            </Suspense>
+          </div>
         </div>
+
+        {open && (
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => {
+              setOpen(false);
+              toggleRef.current?.focus();
+            }}
+            className="fixed inset-0 z-30 bg-ink/40 lg:hidden"
+          />
+        )}
+
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
       </div>
-
-      {open && (
-        <button
-          type="button"
-          aria-label="Close menu"
-          onClick={() => {
-            setOpen(false);
-            toggleRef.current?.focus();
-          }}
-          className="fixed inset-0 z-30 bg-ink/40"
-        />
-      )}
-
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
-    </div>
+    </MotionConfig>
   );
 }

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { Transition } from "motion/react";
 import { DURATION_BASE, EASE_INSTITUTIONAL, EASE_STANDARD } from "./tokens";
 
@@ -22,14 +22,15 @@ const EXIT: Transition = { duration: 0.12, ease: EASE_STANDARD };
 
 export function RouteTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const reduced = useReducedMotion();
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0, transition: ENTER }}
-        exit={{ opacity: 0, transition: EXIT }}
+        initial={reduced ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0, transition: reduced ? { duration: 0 } : ENTER }}
+        exit={{ opacity: 0, transition: reduced ? { duration: 0 } : EXIT }}
       >
         {children}
       </motion.div>

@@ -14,6 +14,7 @@ import {
   type RefObject,
 } from "react";
 import { motion, useInView } from "motion/react";
+import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
 import type { TargetAndTransition, Transition } from "motion/react";
 import { DURATION_BASE, EASE_INSTITUTIONAL, REVEAL_DISTANCE, REVEAL_STAGGER } from "./tokens";
 
@@ -98,6 +99,7 @@ function RevealInner({
   children: ReactNode;
 }) {
   const [armed, setArmed] = useState(false);
+  const reduced = usePrefersReducedMotion();
 
   useArmingEffect(() => {
     setArmed(true);
@@ -109,7 +111,7 @@ function RevealInner({
   // element is free to sit hidden until it scrolls into view. The layout
   // effect means that switch lands before the browser paints, so no frame is
   // ever wasted drawing content that is about to disappear.
-  const visible = !armed || active;
+  const visible = reduced || !armed || active;
   const Tag = TAGS[as]!;
 
   return (
@@ -119,7 +121,7 @@ function RevealInner({
       style={style}
       initial={false}
       animate={visible ? VISIBLE : HIDDEN}
-      transition={visible ? { duration: DURATION_BASE, delay, ease: EASE_INSTITUTIONAL } : INSTANT}
+      transition={reduced ? INSTANT : visible ? { duration: DURATION_BASE, delay, ease: EASE_INSTITUTIONAL } : INSTANT}
     >
       {children}
     </Tag>

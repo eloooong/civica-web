@@ -85,9 +85,9 @@ export function TableSkeleton({ rows = 6, cols = 3 }: { rows?: number; cols?: nu
 }
 
 /** Grid of content cards (bills, datasets, search results). */
-export function CardsSkeleton({ count = 6 }: { count?: number }) {
+export function CardsSkeleton({ count = 6, layout = "grid" }: { count?: number; layout?: "grid" | "list" }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ul className={layout === "list" ? "space-y-3" : "grid gap-4 md:grid-cols-2 xl:grid-cols-3"}>
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="rounded-lg border border-line bg-white p-5">
           <div className="flex gap-1.5">

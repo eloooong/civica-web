@@ -12,11 +12,15 @@ export function ChartShell({
   title,
   captionId,
   summary,
+  accessibleContent = false,
+  contentClassName = "",
   children,
 }: {
   title: string;
   captionId: string;
   summary: string;
+  accessibleContent?: boolean;
+  contentClassName?: string;
   children: ReactNode;
 }) {
   return (
@@ -24,9 +28,9 @@ export function ChartShell({
       <figcaption id={captionId} className="text-sm font-bold text-ink">
         {title}
       </figcaption>
-      <p className="sr-only">{summary}</p>
+      {!accessibleContent && <p className="sr-only">{summary}</p>}
       {/* Bklit charts render aria-hidden SVGs and size themselves. */}
-      <div className="mt-4 min-h-0 flex-1" aria-hidden="true">
+      <div className={`mt-4 min-h-0 flex-1 ${contentClassName}`} aria-hidden={accessibleContent ? undefined : true}>
         {children}
       </div>
     </figure>

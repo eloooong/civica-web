@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Building2, Coins, FileText } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { StatCard } from "@/components/ui/StatCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
@@ -78,7 +79,7 @@ function shell(title: string, description: string, body: React.ReactNode) {
         items={[{ label: "Home", href: "/" }, { label: "Government Data", href: "/data" }, { label: "Contractors" }]}
       />
       <div className="mt-4">
-        <PageHeader eyebrow="Government data · Contractors" title={title} description={description} />
+        <PageHeader title={title} description={description} />
       </div>
       <div className="mt-6">{body}</div>
     </div>
@@ -107,15 +108,21 @@ export default async function ContractorsPage({
     return shell(
       "Public contractors",
       "Companies awarded flood control contracts in the Philippines.",
+      <>
       <ErrorState
         title="Unable to load contractor data"
         description={
           err instanceof FloodApiError
-            ? `${err.message} (Source: Open Data Portal.)`
+            ? err.isNotFound ? "The published data file could not be found. You can inspect its catalog record below or try again." : `${err.message} (Source: Open Data Portal.)`
             : "The flood control data file may be temporarily unavailable. Please try again."
         }
-        retryHref="/data/contractors"
+        retryHref={pageHref(sp, page)}
       />
+      <div className="mt-4 flex flex-wrap justify-center gap-3">
+        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View source catalog record</Link>
+        <Link href="/data" className="inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline">Browse other datasets</Link>
+      </div>
+      </>
     );
   }
 
@@ -133,7 +140,6 @@ export default async function ContractorsPage({
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
-          eyebrow="Government data · Contractors"
           title="Public contractors"
           description="Companies awarded flood control contracts: how many contracts each one holds, how much it was awarded, and the regions where it works."
         />
@@ -153,44 +159,44 @@ export default async function ContractorsPage({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-3">
-        <StatCard
-          icon={Building2}
-          label="Companies"
-          value={formatCount(summary.contractors)}
-          hint="Distinct contractor names"
-        />
-        <StatCard
-          icon={FileText}
-          label="Contracts covered"
-          value={formatCount(summary.contracts)}
-          hint="All flood control project components"
-        />
-        <StatCard
-          icon={Coins}
-          label="Awarded amount"
-          value={formatPesoCompact(summary.totalCost)}
-          hint="Sum of contract costs across all companies"
-        />
-      </div>
+      <OverviewDisclosure title="Dataset overview">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-3">
+          <StatCard
+            icon={Building2}
+            label="Companies"
+            value={formatCount(summary.contractors)}
+            hint="Distinct contractor names"
+          />
+          <StatCard
+            icon={FileText}
+            label="Contracts covered"
+            value={formatCount(summary.contracts)}
+            hint="All flood control project components"
+          />
+          <StatCard
+            icon={Coins}
+            label="Awarded amount"
+            value={formatPesoCompact(summary.totalCost)}
+            hint="Sum of contract costs across all companies"
+          />
+        </div>
+      </OverviewDisclosure>
 
       <section aria-labelledby="contractors-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="contractors-heading"
           title="Companies"
           description="Select a company to see every contract it holds in the flood control data. Every filter is reflected in the URL."
         />
-        <h2 id="contractors-heading" className="sr-only">
-          Contractors awarded flood control contracts
-        </h2>
 
         <form
+          key={JSON.stringify(base)}
           method="get"
           role="search"
           aria-label="Filter contractors"
-          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-[1fr_240px_auto]"
+          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,260px)_auto]"
         >
-          <div>
-            <label htmlFor="ct-q" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0 sm:col-span-2 xl:col-span-1">
+            <label htmlFor="ct-q" className="block text-sm font-semibold text-muted">
               Search companies
             </label>
             <input
@@ -200,18 +206,18 @@ export default async function ContractorsPage({
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. construction, builders, trading"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
-          <div>
-            <label htmlFor="ct-sort" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="ct-sort" className="block text-sm font-semibold text-muted">
               Sort by
             </label>
             <select
               id="ct-sort"
               name="sort"
               defaultValue={sort}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2 text-base text-ink"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -220,17 +226,17 @@ export default async function ContractorsPage({
               ))}
             </select>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-wrap items-end gap-2">
             <button
               type="submit"
-              className="w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+              className="min-h-11 w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
             >
               Apply
             </button>
             {q && (
               <Link
                 href="/data/contractors"
-                className="rounded-md border border-line px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-control px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
               >
                 Clear
               </Link>
@@ -264,9 +270,9 @@ export default async function ContractorsPage({
               tabIndex={0}
               role="region"
               aria-label="Contractors by awarded flood control contract value, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[880px] border-collapse bg-white text-left text-sm">
+              <table className="w-full min-w-[880px] border-collapse bg-white text-left text-sm [&_td]:align-top [&_th]:align-top">
                 <caption className="sr-only">
                   Contractors by awarded flood control contract value
                 </caption>

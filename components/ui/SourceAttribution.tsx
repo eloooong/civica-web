@@ -34,7 +34,7 @@ export function SourceAttribution({
   return (
     <aside
       aria-label="Data source"
-      className="rounded-lg border border-line bg-surface px-4 py-3 text-xs leading-5 text-muted"
+      className="rounded-lg border border-line bg-surface px-4 py-3 text-sm leading-6 text-muted"
     >
       <dl className="flex flex-wrap gap-x-6 gap-y-1">
         <div className="flex gap-1.5">
@@ -52,41 +52,35 @@ export function SourceAttribution({
           </dd>
         </div>
       </dl>
-      {oldest ? (
-        <p className="mt-2">
-          Times refer to the listed source requests, not the publisher&apos;s last update.
-          Cached responses are eligible for refresh on request after {Math.round(oldest.cacheSeconds / 60)} minutes;
-          a failed refresh may leave older data visible.
-        </p>
-      ) : (
-        <p className="mt-2">No retrieval timestamp was recorded for this response. Check the source for its publication date.</p>
-      )}
       {stale && <p className="mt-2 font-semibold text-amber-800">A listed cached response is older than its refresh interval.</p>}
-      {requests.length > 1 && (
-        <details className="mt-2">
-          <summary className="min-h-11 cursor-pointer py-3 font-semibold text-brand-700">Source request times ({requests.length})</summary>
-          <ul className="space-y-2 pb-2">
+      <details open className="mt-1">
+        <summary className="min-h-11 w-fit cursor-pointer rounded-sm py-2.5 font-semibold text-brand-700">Source details and retrieval times</summary>
+        {oldest ? (
+          <p className="mt-2">
+            Times refer to the listed source requests, not the publisher&apos;s last update.
+            Cached responses are eligible for refresh on request after {Math.round(oldest.cacheSeconds / 60)} minutes;
+            a failed refresh may leave older data visible.
+          </p>
+        ) : (
+          <p className="mt-2">No retrieval timestamp was recorded for this response. Check the source for its publication date.</p>
+        )}
+        {requests.length > 1 && (
+          <ul aria-label="Source request times" className="mt-3 space-y-2 pb-2">
             {requests.map((request) => (
               <li key={request.endpoint}>
                 <time dateTime={request.retrievedAt}>{formatRetrievalTime(request.retrievedAt)}</time>
-                <code className="mt-0.5 block break-all text-[11px]">{request.endpoint}</code>
+                <code className="mt-0.5 block break-all text-xs">{request.endpoint}</code>
               </li>
             ))}
           </ul>
-        </details>
-      )}
-      <p className="mt-1.5 break-all">
-        Endpoint: <code className="rounded bg-white px-1 py-0.5 font-mono text-[11px]">{displayedEndpoint}</code>{" "}
-        <a
-          href={docsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-0.5 whitespace-nowrap font-semibold text-brand-700 hover:underline"
-        >
-          Source documentation
-          <ExternalLink className="h-3 w-3" aria-hidden="true" />
-        </a>
-      </p>
+        )}
+        <p className="mt-1.5 break-all">
+          Endpoint: <code className="rounded bg-white px-1 py-0.5 font-mono text-xs">{displayedEndpoint}</code>{" "}
+          <a href={docsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-sm font-semibold text-brand-700 hover:underline">
+            Source documentation <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          </a>
+        </p>
+      </details>
     </aside>
   );
 }

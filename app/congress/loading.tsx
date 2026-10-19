@@ -4,7 +4,7 @@ import {
   FilterBarSkeleton,
   HeaderSkeleton,
   LoadingShell,
-  StatsSkeleton,
+  Skeleton,
 } from "@/components/ui/Skeleton";
 
 export default function CongressLoading() {
@@ -12,9 +12,9 @@ export default function CongressLoading() {
     <LoadingShell label="Loading congressional data from Open Congress">
       <CrumbSkeleton />
       <HeaderSkeleton />
-      <StatsSkeleton count={4} />
+      <Skeleton className="h-5 w-full max-w-lg" />
       <FilterBarSkeleton />
-      <CardsSkeleton count={6} />
+      <CardsSkeleton count={6} layout="list" />
     </LoadingShell>
   );
 }

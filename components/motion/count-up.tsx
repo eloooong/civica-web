@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { animate, useInView } from "motion/react";
+import { animate, useInView, useReducedMotion } from "motion/react";
 import { formatCount, formatPctDelta, formatPesoCompact } from "@/lib/utils";
 import { DURATION_COUNTER, EASE_INSTITUTIONAL } from "./tokens";
 
@@ -40,7 +40,8 @@ export function CountUp({
 
   // Latest frame written by the animation, or null before the first one.
   const [frame, setFrame] = useState<number | null>(null);
-  const running = inView;
+  const reduced = useReducedMotion();
+  const running = inView && !reduced;
 
   // Government figures are whole numbers, so every intermediate frame is
   // rounded to one. Without this a single-digit counter climbing to 7 flashes

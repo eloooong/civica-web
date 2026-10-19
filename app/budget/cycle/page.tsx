@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { CircleDollarSign, FileText, Gauge, Layers } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { FiscalYearSelector } from "@/components/budget/FiscalYearSelector";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState, EmptyState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
@@ -16,7 +18,7 @@ import {
   getBudgetCycleDepartment,
 } from "@/lib/api/budget";
 import type { CycleManifestResponse, CycleStage } from "@/types/budget";
-import { cn, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
+import { formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Budget Execution, 2018 to 2026",
@@ -44,6 +46,7 @@ const EXECUTION_STAGES: CycleStage[] = [
 type CycleSearchParams = {
   subject?: string;
   year?: string;
+  q?: string;
 };
 
 function rangeLabel(years: number[] | undefined): string {
@@ -85,7 +88,7 @@ function pageShell(title: string, description: string, body: ReactNode) {
         items={[{ label: "Home", href: "/" }, { label: "Budget", href: "/budget" }, { label: "Execution" }]}
       />
       <div className="mt-4">
-        <PageHeader eyebrow="Budget explorer" title={title} description={description} />
+        <PageHeader title={title} description={description} />
       </div>
       <div className="mt-6">{body}</div>
     </div>
@@ -99,6 +102,7 @@ export default async function BudgetCyclePage({
 }) {
   const sp = await searchParams;
   const subjectParam = (sp.subject ?? "").trim();
+  const query = (sp.q ?? "").trim();
 
   let manifest: Awaited<ReturnType<typeof getBudgetCycle>>;
   try {
@@ -167,7 +171,6 @@ export default async function BudgetCyclePage({
         />
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <PageHeader
-            eyebrow="Budget explorer · Execution"
             title="Budget execution, 2018 to 2026"
             description="One program at a time, from proposal to enacted law to authorized, adjusted, obligated, and disbursed amounts."
           />
@@ -178,7 +181,7 @@ export default async function BudgetCyclePage({
           {scopeNote}
         </p>
 
-        {manifestView(manifest)}
+        {manifestView(manifest, query)}
 
         <div className="mt-8">
           <SourceAttribution endpoint={`${BUDGET_API_BASE}/budget-cycle`} retrievals={[manifest.retrieval]} />
@@ -251,26 +254,15 @@ export default async function BudgetCyclePage({
       </div>
 
       {/* Fiscal-year filter (shareable via ?year=) */}
-      <div className="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="Fiscal year">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">FY</span>
-        {years.map((y) => (
-          <Link
-            key={y}
-            href={subjectHref(departmentId as string, y)}
-            aria-current={y === year ? "true" : undefined}
-            className={cn(
-              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
-              y === year
-                ? "border-brand-700 bg-brand-700 text-white"
-                : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
-            )}
-          >
-            {y}
-          </Link>
-        ))}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+        <FiscalYearSelector
+          className="w-full min-w-0 sm:w-auto sm:flex-1"
+          year={year}
+          links={years.map((y) => ({ year: y, href: subjectHref(departmentId as string, y) }))}
+        />
         <Link
           href="/budget/cycle"
-          className="ml-auto rounded-md border border-line px-3 py-1.5 text-sm font-semibold text-ink hover:bg-slate-50"
+          className="inline-flex min-h-11 items-center rounded-md border border-control px-3 py-1.5 text-sm font-semibold text-ink hover:bg-slate-50"
         >
           All subjects
         </Link>
@@ -312,7 +304,7 @@ export default async function BudgetCyclePage({
       </div>
 
       <section aria-labelledby="execution-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="execution-heading"
           title={`Programs in FY ${year}`}
           description={
             rows.length > shown.length
@@ -320,9 +312,6 @@ export default async function BudgetCyclePage({
               : `${formatCount(rows.length)} programs, expense class total.`
           }
         />
-        <h2 id="execution-heading" className="sr-only">
-          Programs by budget stage
-        </h2>
 
         {shown.length === 0 ? (
           <div className="mt-4">
@@ -345,7 +334,7 @@ export default async function BudgetCyclePage({
               tabIndex={0}
               role="region"
               aria-label={`${subjectName} programs by budget stage in FY ${year}, scrollable table`}
-              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
               <table className="w-full min-w-[860px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
@@ -441,10 +430,10 @@ export default async function BudgetCyclePage({
   );
 }
 
-function manifestView(manifest: CycleManifestResponse) {
+function manifestView(manifest: CycleManifestResponse, query: string) {
   const { meta, data } = manifest;
   const primary = data.subjects.filter((s) => s.is_primary_subject === 1);
-  const sorted = [...data.subjects].sort((a, b) =>
+  const sorted = data.subjects.filter((subject) => !query || `${subject.display_name} ${subject.subject_id} ${subject.source_sheet}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) =>
     (a.canonical_portal_department_id ?? a.subject_id).localeCompare(
       b.canonical_portal_department_id ?? b.subject_id
     )
@@ -452,64 +441,70 @@ function manifestView(manifest: CycleManifestResponse) {
 
   return (
     <>
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={Layers}
-          label="Covered subjects"
-          value={String(data.subjects.length)}
-          hint={`${primary.length} department-level subjects`}
-        />
-        <StatCard
-          icon={FileText}
-          label="Fiscal years"
-          value={String(meta.years.length)}
-          hint={`${meta.years[0]} to ${meta.years[meta.years.length - 1]}`}
-        />
-        <StatCard
-          icon={Gauge}
-          label="Stages"
-          value={String(meta.stages.length)}
-          hint="From proposal to disbursement"
-        />
-        <StatCard
-          icon={CircleDollarSign}
-          label="Expense classes"
-          value={String(meta.expense_classes.length)}
-          hint="PS, MOOE, FinEx, CO, and total"
-        />
-      </div>
+      <OverviewDisclosure title="Workbook coverage and budget stages">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatCard
+            icon={Layers}
+            label="Covered subjects"
+            value={String(data.subjects.length)}
+            hint={`${primary.length} department-level subjects`}
+          />
+          <StatCard
+            icon={FileText}
+            label="Fiscal years"
+            value={String(meta.years.length)}
+            hint={`${meta.years[0]} to ${meta.years[meta.years.length - 1]}`}
+          />
+          <StatCard
+            icon={Gauge}
+            label="Stages"
+            value={String(meta.stages.length)}
+            hint="From proposal to disbursement"
+          />
+          <StatCard
+            icon={CircleDollarSign}
+            label="Expense classes"
+            value={String(meta.expense_classes.length)}
+            hint="PS, MOOE, FinEx, CO, and total"
+          />
+        </div>
 
-      <section aria-labelledby="pipeline-heading" className="mt-8">
-        <SectionHeader
-          title="The budget stages"
-          description="Each stage is one step in the life of a budget. The workbook records the same programs at every step."
-        />
-        <h2 id="pipeline-heading" className="sr-only">
-          The budget stages
-        </h2>
-        <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {meta.stages.map((stage) => (
-            <li key={stage} className="rounded-lg border border-line bg-white p-4">
-              <p className="text-sm font-bold text-ink">{STAGE_LABELS[stage]}</p>
-              <p className="mt-1 font-mono text-xs text-muted">{stage}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
+        <section aria-labelledby="pipeline-heading" className="mt-8">
+          <SectionHeader id="pipeline-heading"
+            title="The budget stages"
+            description="Each stage is one step in the life of a budget. The workbook records the same programs at every step."
+          />
+          <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {meta.stages.map((stage) => (
+              <li key={stage} className="rounded-lg border border-line bg-white p-4">
+                <p className="text-sm font-bold text-ink">{STAGE_LABELS[stage]}</p>
+                <p className="mt-1 font-mono text-xs text-muted">{stage}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </OverviewDisclosure>
 
       <section aria-labelledby="coverage-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="coverage-heading"
           title="Covered subjects"
-          description="Select a subject to see how its programs moved through the stages."
+          description="Find a department or subject, then open its programs and budget stages."
         />
-        <h2 id="coverage-heading" className="sr-only">
-          Covered subjects
-        </h2>
-        <div
+        <form key={query} action="/budget/cycle" method="get" role="search" aria-label="Find an execution subject" className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1">
+            <label htmlFor="cycle-q" className="block text-sm font-semibold text-muted">Search subjects</label>
+            <input id="cycle-q" name="q" type="search" defaultValue={query} placeholder="Department name, code, or source sheet" className="mt-1 min-h-11 w-full rounded-md border border-control px-3 py-2 text-base text-ink placeholder:text-muted" />
+          </div>
+          <button type="submit" className="min-h-11 rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">Find subject</button>
+          {query && <Link href="/budget/cycle" className="inline-flex min-h-11 items-center justify-center rounded-md border border-control px-4 text-sm font-semibold text-ink hover:bg-surface">Clear search</Link>}
+        </form>
+        <p className="mt-3 text-sm text-muted" role="status">Showing {sorted.length} of {data.subjects.length} subjects</p>
+        {sorted.length === 0 && <div className="mt-4"><EmptyState title="No subjects match your search" description="Try a shorter department name or code." action={<Link href="/budget/cycle" className="rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white">Clear search</Link>} /></div>}
+                <div
           tabIndex={0}
           role="region"
           aria-label="Subjects covered by the budget cycle workbook and their year coverage, scrollable table"
-          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
         >
           <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">

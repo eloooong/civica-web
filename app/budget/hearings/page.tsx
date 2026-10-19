@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Gavel, ScrollText } from "lucide-react";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
@@ -81,7 +82,6 @@ export default async function HearingsPage({
         />
         <div className="mt-4">
           <PageHeader
-            eyebrow="Budget hearings"
             title="House budget hearings"
             description="What the Committee on Appropriations asked each agency, and what came of it."
           />
@@ -158,73 +158,72 @@ export default async function HearingsPage({
 
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget hearings · Source records"
           title="House budget hearings"
-          description={`Every Committee on Appropriations hearing on the FY2027 proposed budget, with the topic record the Committee built from each stream: the question at issue, what was said, the figures as spoken, and where each item landed. ${formatCount(hearings.length)} hearings, ${formatCount(topicTotal)} topics.`}
+          description="Browse FY2027 House budget hearings by agency or title. Open a hearing for its topic record and source video."
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-            <Gavel className="h-4 w-4" aria-hidden="true" />
-            Hearings
-          </p>
-          <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-            {formatCount(hearings.length)}
-          </p>
-          <p className="mt-1 min-h-5 text-xs leading-5 text-muted">FY2027 appropriations season</p>
+      <OverviewDisclosure title="Hearing coverage">
+        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              <Gavel className="h-4 w-4" aria-hidden="true" />
+              Hearings
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+              {formatCount(hearings.length)}
+            </p>
+            <p className="mt-1 min-h-5 text-xs leading-5 text-muted">FY2027 appropriations season</p>
+          </div>
+          <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              <ScrollText className="h-4 w-4" aria-hidden="true" />
+              Agencies heard
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+              {formatCount(agencies.length)}
+            </p>
+            <p className="mt-1 min-h-5 text-xs leading-5 text-muted">
+              Some hearings cover more than one agency
+            </p>
+          </div>
+          <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              <Gavel className="h-4 w-4" aria-hidden="true" />
+              Topics recorded
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+              {formatCount(topicTotal)}
+            </p>
+            <p className="mt-1 min-h-5 text-xs leading-5 text-muted">
+              {formatCount(withRecord)} of {formatCount(hearings.length)} hearings have a record
+            </p>
+          </div>
         </div>
-        <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-            <ScrollText className="h-4 w-4" aria-hidden="true" />
-            Agencies heard
-          </p>
-          <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-            {formatCount(agencies.length)}
-          </p>
-          <p className="mt-1 min-h-5 text-xs leading-5 text-muted">
-            Some hearings cover more than one agency
-          </p>
-        </div>
-        <div className="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-            <Gavel className="h-4 w-4" aria-hidden="true" />
-            Topics recorded
-          </p>
-          <p className="mt-2 text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-            {formatCount(topicTotal)}
-          </p>
-          <p className="mt-1 min-h-5 text-xs leading-5 text-muted">
-            {formatCount(withRecord)} of {formatCount(hearings.length)} hearings have a record
-          </p>
-        </div>
-      </div>
+      </OverviewDisclosure>
 
       <section aria-labelledby="hearings-list-heading" className="mt-8">
-        <SectionHeader
+        <SectionHeader id="hearings-list-heading"
           title="All hearings"
           description="Newest first, as the source publishes them."
         />
-        <h2 id="hearings-list-heading" className="sr-only">
-          All budget hearings
-        </h2>
 
         <form
+          key={`${agencyParam}-${query}-${recordOnly}`}
           method="get"
           role="search"
           aria-label="Filter hearings"
-          className="mt-4 flex flex-col gap-3 rounded-lg border border-line bg-white p-4 lg:flex-row lg:items-end"
+          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_220px_auto]"
         >
-          <div className="flex-1">
-            <label htmlFor="hearing-agency" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="hearing-agency" className="block text-sm font-semibold text-muted">
               Agency
             </label>
             <select
               id="hearing-agency"
               name="agency"
               defaultValue={agencyParam}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
             >
               <option value="">All agencies</option>
               {agencies.map((agency) => (
@@ -234,8 +233,8 @@ export default async function HearingsPage({
               ))}
             </select>
           </div>
-          <div className="flex-[2]">
-            <label htmlFor="hearing-q" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="hearing-q" className="block text-sm font-semibold text-muted">
               Search titles
             </label>
             <input
@@ -244,34 +243,34 @@ export default async function HearingsPage({
               type="search"
               defaultValue={query}
               placeholder="e.g. judiciary, flood control…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-muted"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink placeholder:text-muted"
             />
           </div>
-          <div className="lg:w-52">
-            <label htmlFor="hearing-record" className="block text-xs font-semibold text-muted">
+          <div className="min-w-0">
+            <label htmlFor="hearing-record" className="block text-sm font-semibold text-muted">
               Topic record
             </label>
             <select
               id="hearing-record"
               name="record"
               defaultValue={recordOnly ? "with" : ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+              className="mt-1 w-full min-h-11 min-w-0 rounded-md border border-control bg-white px-3 py-2.5 text-base text-ink"
             >
               <option value="">All hearings</option>
               <option value="with">With a topic record</option>
             </select>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-wrap items-end gap-2">
             <button
               type="submit"
-              className="w-full rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+              className="min-h-11 w-full rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
             >
               Filter
             </button>
             {filtersActive && (
               <Link
                 href="/budget/hearings"
-                className="rounded-md border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-control px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
               >
                 Clear
               </Link>
@@ -332,7 +331,7 @@ export default async function HearingsPage({
               tabIndex={0}
               role="region"
               aria-label="House budget hearings, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
               <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">

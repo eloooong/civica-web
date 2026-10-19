@@ -29,12 +29,9 @@ export function SmoothScroll() {
       // Lenis cancels anchor clicks while it is running, which would break
       // the skip link. Turning this on routes them through lenis.scrollTo.
       anchors: true,
-      // Lenis 1.3 defaults this to true, which pins lerp to 1 and makes every
-      // programmatic scroll instant for anyone who set reduce-motion on their
-      // OS. This site does not honour that preference, so the two have to
-      // agree: leaving it on would silently reintroduce it for exactly the
-      // readers who get the rawest scrolling.
-      respectReducedMotion: false,
+      // Follow the reader's operating-system preference, including changes
+      // made while the page is open.
+      respectReducedMotion: true,
       // Exponential follow rather than a fixed-duration tween. The library
       // default is 0.1, which reads a touch abrupt on pages this long; 0.075
       // lets a single flick coast instead of stopping dead.

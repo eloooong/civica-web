@@ -18,7 +18,7 @@ export function EmptyState({
       </span>
       <h3 className="mt-4 text-base font-bold text-ink">{title}</h3>
       <p className="mt-1 max-w-sm text-sm leading-6 text-muted">{description}</p>
-      {action && <div className="mt-5">{action}</div>}
+      {action && <div className="mt-5 [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center">{action}</div>}
     </div>
   );
 }
@@ -48,14 +48,14 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+          className="mt-5 min-h-11 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-black"
         >
           Try again
         </button>
       ) : (
         <Link
           href={retryHref ?? "#main"}
-          className="mt-5 inline-block rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+          className="mt-5 inline-flex min-h-11 items-center rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-black"
         >
           Try again
         </Link>

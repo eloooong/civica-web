@@ -5,7 +5,6 @@ import { AlertTriangle, Building2, Database, FileText } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { SearchBar } from "@/components/search/SearchBar";
-import { Badge } from "@/components/ui/Badge";
 import { DataCard } from "@/components/ui/DataCard";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { popularSearches } from "@/lib/placeholder";
@@ -28,10 +27,10 @@ const tabs = [
 type TabKey = (typeof tabs)[number]["key"];
 
 const typeBadge: Record<SearchResult["type"], string> = {
-  budget: "BUDGET",
-  bill: "BILL",
-  person: "PERSON",
-  dataset: "DATASET",
+  budget: "Budget program",
+  bill: "Bill",
+  person: "Legislator",
+  dataset: "Dataset",
 };
 
 const hrefLabel: Record<SearchResult["type"], string> = {
@@ -43,7 +42,7 @@ const hrefLabel: Record<SearchResult["type"], string> = {
 
 function ResultList({ results }: { results: SearchResult[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2">
+    <ul className="divide-y divide-line border-y border-line">
       {results.map((r) => (
         <li key={r.id}>
           <DataCard
@@ -52,12 +51,6 @@ function ResultList({ results }: { results: SearchResult[] }) {
             description={r.description ?? ""}
             href={r.url}
             hrefLabel={hrefLabel[r.type]}
-            meta={
-              <>
-                <Badge tone="brand">{r.type}</Badge>
-                {r.agency && <Badge>{r.agency}</Badge>}
-              </>
-            }
           />
         </li>
       ))}
@@ -134,9 +127,8 @@ export default async function SearchPage({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Unified search · Source records"
           title="Search Civica"
-          description="Search budgets, bills, legislators, and datasets in one place, with every result linked to its source."
+          description="Find budgets, bills, legislators, and datasets. Open any result to see its source."
         />
       </div>
 
@@ -157,8 +149,8 @@ export default async function SearchPage({
                   aria-current={selected ? "page" : undefined}
                   className={
                     selected
-                      ? "inline-block rounded-t-md border border-b-white border-line bg-white px-4 py-2.5 text-sm font-semibold text-brand-800"
-                      : "inline-block rounded-t-md px-4 py-2.5 text-sm font-medium text-muted hover:bg-slate-50 hover:text-ink"
+                      ? "inline-flex min-h-11 items-center rounded-t-md border border-b-white border-line bg-white px-3 py-2.5 text-sm font-semibold text-brand-800"
+                      : "inline-flex min-h-11 items-center rounded-t-md px-3 py-2.5 text-sm font-medium text-muted hover:bg-slate-50 hover:text-ink"
                   }
                 >
                   {tab.label}
@@ -173,12 +165,10 @@ export default async function SearchPage({
         {!query ? (
           <>
             <SectionHeader
+              id="results-heading"
               title="Start exploring"
-              description="Enter a query above, or try a popular search. Every link below runs a live search."
+              description="Enter at least two characters, or try one of these searches."
             />
-            <h2 id="results-heading" className="sr-only">
-              Popular searches
-            </h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
               {[
                 { heading: "Budget", items: popularSearches.filter((p) => p.category === "Budget") },
@@ -230,12 +220,11 @@ export default async function SearchPage({
           unified && (
             <>
               <SectionHeader
+                id="results-heading"
                 title={`Results for “${query}”`}
-                description={`${limited ? "At least " : ""}${unified.total.toLocaleString("en-PH")} match${unified.total === 1 ? "" : "es"} · ${activeTab === "all" ? "All sources" : tabs.find((t) => t.key === activeTab)?.label} · title matches first on each page`}
+                action={<Link href="/search" className="inline-flex min-h-11 items-center rounded-sm text-sm font-semibold text-brand-700 hover:underline">Clear search</Link>}
+                description={`${limited ? "At least " : ""}${unified.total.toLocaleString("en-PH")} match${unified.total === 1 ? "" : "es"} · ${activeTab === "all" ? "All sources" : tabs.find((t) => t.key === activeTab)?.label}${category ? ` · ${category.results.length} on this page` : ""}`}
               />
-              <h2 id="results-heading" className="sr-only">
-                Search results
-              </h2>
 
               {unified.failed.length > 0 && (
                 <div
@@ -254,15 +243,18 @@ export default async function SearchPage({
               {unified.total === 0 ? (
                 <div className="mt-6">
                   <EmptyState
-                    title="No matches anywhere"
-                    description={`Nothing in budgets, bills, legislators, or datasets matches “${query}”. Try fewer or simpler words.`}
+                    title={only ? "No matches in this collection" : "No matches anywhere"}
+                    description={only ? `No ${SOURCE_LABELS[only].toLowerCase()} records match “${query}”. Try fewer words or search all sources.` : `Nothing in budgets, bills, legislators, or datasets matches “${query}”. Try fewer or simpler words.`}
                     action={
-                      <Link
-                        href="/search"
-                        className="inline-block rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"
-                      >
-                        Clear search
-                      </Link>
+                      <div className="flex flex-wrap justify-center gap-3">
+                        {only && <Link href={tabHref("all")} className="inline-flex min-h-11 items-center rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">Search all sources</Link>}
+                        <Link
+                          href="/search"
+                          className={`inline-flex min-h-11 items-center rounded-md px-4 py-2 text-sm font-semibold ${only ? "border border-control bg-white text-ink hover:bg-surface" : "bg-brand-700 text-white hover:bg-brand-800"}`}
+                        >
+                          Clear search
+                        </Link>
+                      </div>
                     }
                   />
                 </div>
@@ -296,10 +288,6 @@ export default async function SearchPage({
                 <div className="mt-6 space-y-8">
                   {unified.sections.map((section) => (
                     <div key={section.source}>
-                      <p className="text-sm text-muted" role="status">
-                        {section.limited ? "At least " : ""}{section.total.toLocaleString("en-PH")} match{section.total === 1 ? "" : "es"} · showing{" "}
-                        {section.results.length} on this page
-                      </p>
                       {pagination && <div className="mt-3">{pagination}</div>}
                       <div className="mt-3">
                         <ResultList results={section.results} />
@@ -312,7 +300,7 @@ export default async function SearchPage({
                             Search within a department to browse its full matching program list.
                           </p>
                           {departments.length > 0 ? (
-                            <details className="mt-3">
+                            <details open className="mt-3">
                               <summary className="min-h-11 cursor-pointer py-2 font-semibold text-brand-700">Search programs by department</summary>
                               <ul className="mt-2 grid gap-2 sm:grid-cols-2">
                                 {departments.map((department) => (
@@ -344,6 +332,14 @@ export default async function SearchPage({
                   (datasets). Results link to the full record on Civica, which attributes the
                   source endpoint.
                 </p>
+                <details open className="mt-2 text-sm leading-6">
+                  <summary className="min-h-11 w-fit cursor-pointer rounded-sm py-2.5 font-semibold text-brand-700">How search works</summary>
+                  <p className="max-w-3xl pb-2">
+                    Choose a collection above to narrow your search. Within each returned page, title matches appear first.
+                    Budget topic searches can be limited to 100 programs; the Budget collection offers a department search when that limit applies.
+                    Open a full record for source and date details. Retrieval time shows when Civica received the response, not when the publisher updated it.
+                  </p>
+                </details>
               </aside>
             </>
           )

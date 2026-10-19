@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Boxes, Building2, Percent } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { FiscalYearSelector } from "@/components/budget/FiscalYearSelector";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
@@ -22,7 +23,7 @@ import {
   BUDGET_FISCAL_YEARS,
   isBudgetFiscalYear,
 } from "@/types/budget";
-import { cn, budgetProgramPath, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
+import { budgetProgramPath, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
 
 const DEFAULT_YEAR = 2026;
 const PROGRAM_LIMIT = 100;
@@ -167,24 +168,11 @@ export default async function BudgetDepartmentPage({
       </div>
 
       {/* Fiscal-year filter (shareable, preserves program filters) */}
-      <div className="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="Fiscal year">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">FY</span>
-        {BUDGET_FISCAL_YEARS.map((y) => (
-          <Link
-            key={y}
-            href={yearHref(id, y, q, agency)}
-            aria-current={y === year ? "true" : undefined}
-            className={cn(
-              "rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors",
-              y === year
-                ? "border-brand-700 bg-brand-700 text-white"
-                : "border-line bg-white text-ink/80 hover:border-brand-200 hover:text-brand-700"
-            )}
-          >
-            {y}
-          </Link>
-        ))}
-      </div>
+      <FiscalYearSelector
+        className="mt-6"
+        year={year}
+        links={BUDGET_FISCAL_YEARS.map((y) => ({ year: y, href: yearHref(id, y, q, agency) }))}
+      />
 
       {/* Summary statistics: full-width trend card, then three even stat cards */}
       <div className="mt-6 space-y-4">
