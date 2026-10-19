@@ -39,3 +39,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local editor and assistant configuration
+/.agents/
+/.codebuddy/
+/.codex/
+/.cursor/
+/.impeccable/
+/.kilo/
+/.kimi/
+/.openclaude/
+/.opencode/
+/.qwen/
+/.sauron/
+/.vscode/
+/.zed/
+/.*rules
+/CLAUDE.md
+/GEMINI.md
+/sauron.config.yaml
+
+# Local planning and design references
+/Civica_PH_Implementation_Plan.md
+/reference/

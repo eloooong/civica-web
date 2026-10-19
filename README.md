@@ -109,6 +109,7 @@ lib/
   search/            Search aggregation and ranking
 types/               Source response types and shared record models
 public/              Brand assets and static files
+scripts/             Brand asset sources and generation script
 ```
 
 UI components use the source clients in `lib/api/` rather than fetching directly. Unified search normalizes records into a shared model, retains source ordering, and prioritizes titles that start with the query within each returned page.

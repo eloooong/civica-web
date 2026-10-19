@@ -1,13 +1,14 @@
-// One-off asset generation. Not part of the app: run from the repo root with
-// `node scripts/make-brand-assets.mjs` after dropping new brand art in the root.
+// Generate app icons and wordmarks from scripts/assets/.
+// Run from the repo root with `node scripts/make-brand-assets.mjs`.
 //
 // sharp is a transitive dependency of Next.js rather than a declared one, which
 // is why this is a standalone script and not imported by any app code.
 import { existsSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const MARK = "logo.png";
-const WORDMARK = "typologo.png";
+const MARK = fileURLToPath(new URL("./assets/logo.png", import.meta.url));
+const WORDMARK = fileURLToPath(new URL("./assets/typologo.png", import.meta.url));
 
 for (const file of [MARK, WORDMARK]) {
   if (!existsSync(file)) {
