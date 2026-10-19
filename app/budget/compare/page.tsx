@@ -96,8 +96,10 @@ export default async function ComparePage({
   const year = isBudgetFiscalYear(parsedYear) ? parsedYear : DEFAULT_YEAR;
 
   let departments: DepartmentRow[];
+  let departmentResponse: Awaited<ReturnType<typeof getDepartments>>;
   try {
-    departments = (await getDepartments()).data;
+    departmentResponse = await getDepartments();
+    departments = departmentResponse.data;
   } catch (err) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -162,14 +164,13 @@ export default async function ComparePage({
 
   // Expense classes need one request per department. Either failure degrades to
   // the trend comparison alone rather than losing the page.
-  const [classesA, classesB] = await Promise.all(
+  const [detailA, detailB] = await Promise.all(
     [rowA, rowB].map((row) =>
-      getDepartment(row.id).then(
-        (res) => res.data.expense_classes,
-        () => null
-      )
+      getDepartment(row.id).catch(() => null)
     )
   );
+  const classesA = detailA?.data.expense_classes ?? null;
+  const classesB = detailB?.data.expense_classes ?? null;
 
   const yearKey = String(year);
   const totalA = amountIn(rowA, year);
@@ -236,7 +237,7 @@ export default async function ComparePage({
 
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget explorer · Live data"
+          eyebrow="Budget explorer · Source records"
           title="Compare two departments"
           description={`Enacted General Appropriations Act budgets for ${rowA.description} and ${rowB.description}, FY2020 to FY2026. Enacted amounts, not the FY2027 proposal.`}
         />
@@ -505,6 +506,7 @@ export default async function ComparePage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[departmentResponse.retrieval, detailA?.retrieval, detailB?.retrieval]}
           dataset="General Appropriations Act (GAA), FY2020–2026"
           endpoint={`${BUDGET_API_BASE}/gaa/departments · ${BUDGET_API_BASE}/gaa/departments/${idA} · ${BUDGET_API_BASE}/gaa/departments/${idB}`}
         />

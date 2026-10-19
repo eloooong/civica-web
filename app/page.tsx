@@ -7,16 +7,19 @@ import { SectionHeader } from "@/components/ui/PageHeader";
 import { HeroBackdrop } from "@/components/home/HeroBackdrop";
 import { CountUp, type CountFormat } from "@/components/motion/count-up";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal";
-import { PLACEHOLDER_BUDGET_TOTAL, popularSearches } from "@/lib/placeholder";
+import { popularSearches } from "@/lib/placeholder";
 import { BUDGET_API_BASE, BUDGET_DOCS_URL, getNationalTotals } from "@/lib/api/budget";
 import { CONGRESS_API_BASE, CONGRESS_DOCS_URL } from "@/lib/api/congress";
 import { DATA_API_BASE, DATA_DOCS_URL } from "@/lib/api/datasets";
+import { formatRetrievalTime } from "@/lib/freshness";
+import type { SourceRetrieval } from "@/lib/api/source-cache";
 
 interface HomeStat {
-  amount: number;
+  amount: number | null;
   format: CountFormat;
   label: string;
   hint: string;
+  retrieval?: SourceRetrieval;
 }
 
 async function getBudgetStat(): Promise<HomeStat> {
@@ -28,17 +31,18 @@ async function getBudgetStat(): Promise<HomeStat> {
         amount: row.amount,
         format: "peso-compact",
         label: "FY2026 national budget",
-        hint: "General Appropriations Act · live",
+        hint: "General Appropriations Act · source response",
+        retrieval: national.retrieval,
       };
     }
   } catch {
-    // Upstream unreachable; fall through to the labeled illustrative figure.
+    // An unavailable source must not turn an illustrative amount into a headline figure.
   }
   return {
-    amount: PLACEHOLDER_BUDGET_TOTAL,
+    amount: null,
     format: "peso-compact",
     label: "FY2026 national budget",
-    hint: "General Appropriations Act · illustrative",
+    hint: "Current source figure unavailable",
   };
 }
 
@@ -138,9 +142,12 @@ export default async function HomePage() {
                   {s.label}
                 </dt>
                 <dd className="order-1 text-4xl font-extrabold tabular-nums tracking-tight text-white sm:text-5xl">
-                  <CountUp value={s.amount} format={s.format} />
+                  {s.amount === null ? <span className="text-2xl sm:text-3xl">Unavailable</span> : <CountUp value={s.amount} format={s.format} />}
                 </dd>
-                <dd className="order-3 mt-0.5 text-xs text-brand-200">{s.hint}</dd>
+                <dd className="order-3 mt-0.5 text-xs text-brand-200">
+                  {s.hint}
+                  {s.retrieval && <span className="mt-1 block">Retrieved <time dateTime={s.retrieval.retrievedAt}>{formatRetrievalTime(s.retrieval.retrievedAt)}</time></span>}
+                </dd>
               </RevealItem>
             ))}
           </RevealGroup>
@@ -209,7 +216,7 @@ export default async function HomePage() {
           <Reveal>
             <SectionHeader
               title="Popular searches"
-              description="Examples that run as live queries across all three sources."
+              description="Examples that search across all three sources."
               action={
                 <Link
                   href="/search"
@@ -259,7 +266,7 @@ export default async function HomePage() {
           <Reveal>
             <SectionHeader
               title="Sourced, not scraped"
-              description="Every record links back to the public source it came from, with a retrieval timestamp."
+              description="Every record links back to its public source. Recorded retrieval times show when Civica received a response."
             />
           </Reveal>
           <RevealGroup as="ul" className="mt-6 grid gap-4 md:grid-cols-3">
@@ -296,9 +303,10 @@ export default async function HomePage() {
           <Reveal delay={0.1} className="mt-6 max-w-3xl">
             <p className="rounded-lg border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
               Civica is an independent demonstration interface, not an official government
-              website. Figures are fetched from the public sources above and cached for up to one
-              hour. When a source is unreachable, a clearly labeled illustrative figure is shown
-              instead. Verify important numbers with the source agencies.
+              website. Source responses are cached and become eligible for refresh after one hour.
+              Failed refreshes may leave older responses visible. When no budget figure is available,
+              the headline says unavailable. Retrieval time is separate from the publisher&apos;s update
+              date. Verify important numbers with the source agencies.
             </p>
           </Reveal>
         </div>

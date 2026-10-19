@@ -266,6 +266,7 @@ export default async function HearingTimelinePage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[timeline.retrieval]}
           dataset={DATASET_LABEL}
           endpoint={`${BUDGET_API_BASE}/hearings/${videoId}/timeline`}
         />

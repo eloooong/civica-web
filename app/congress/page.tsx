@@ -55,7 +55,7 @@ export default async function CongressPage({
   const q = (sp.q ?? "").trim();
   const personQuery = (sp.person ?? "").trim();
   const congressNum = Number.parseInt(sp.congress ?? "", 10);
-  const congress = Number.isInteger(congressNum) && congressNum >= 1 && congressNum <= 99 ? congressNum : undefined;
+  const requestedCongress = Number.isInteger(congressNum) && congressNum >= 1 && congressNum <= 99 ? congressNum : undefined;
   const type = sp.type === "HB" || sp.type === "SB" ? sp.type : undefined;
   const parsedPage = Number.parseInt(sp.page ?? "", 10);
   const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
@@ -63,17 +63,22 @@ export default async function CongressPage({
 
   let stats;
   let bills;
+  let congress: number | undefined;
+  let latestCongress: number | undefined;
   let people: Awaited<ReturnType<typeof searchPeople>> | null = null;
   try {
+    stats = await getCongressStats();
+    latestCongress = [...stats.bills_by_congress].sort((a, b) => b.congress - a.congress)[0]?.congress;
+    // Direct topic searches retain their all-congress scope. New browsing
+    // visits start with the latest session published in the catalog.
+    congress = requestedCongress ?? (sp.congress === "all" || sp.congress === "" || q ? undefined : latestCongress);
     const billsPromise = q
       ? searchDocuments({ q, congress, subtype: type, limit: BILLS_PER_PAGE, offset })
       : listDocuments({ congress, type, limit: BILLS_PER_PAGE, offset });
-    const [s, b, p] = await Promise.all([
-      getCongressStats(),
+    const [b, p] = await Promise.all([
       billsPromise,
       personQuery ? searchPeople(personQuery, { limit: 8 }) : Promise.resolve(null),
     ]);
-    stats = s;
     bills = b;
     people = p;
   } catch (err) {
@@ -104,14 +109,15 @@ export default async function CongressPage({
 
   const total = bills.pagination?.total ?? bills.data.length;
   const congressOptions = [...stats.bills_by_congress].sort((a, b) => b.congress - a.congress);
-  const baseParams = { q: q || undefined, congress: sp.congress || undefined, type: sp.type || undefined };
+  const baseParams = { q: q || undefined, congress: congress !== undefined ? String(congress) : "all", type: type || undefined };
+  const hasFilters = !!(q || type || congress !== latestCongress);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Congress" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Congress explorer · Live data"
+          eyebrow="Congress explorer · Source records"
           title="Congress"
           description="Search House and Senate bills across congressional sessions, and find the legislators behind them."
         />
@@ -129,18 +135,19 @@ export default async function CongressPage({
       <section aria-labelledby="bills-heading" className="mt-10">
         <SectionHeader
           title="Browse bills"
-          description="Filter by congressional session and chamber, or search by topic. Every filter is reflected in the URL."
+          description="New visits start with the latest Congress in this catalog. Choose All congresses to include earlier sessions, or search by topic."
         />
         <h2 id="bills-heading" className="sr-only">
           Browse bills
         </h2>
         <form
+          key={JSON.stringify(baseParams)}
           method="get"
           role="search"
           aria-label="Filter bills"
-          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-[1fr_180px_160px_auto]"
+          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_240px_180px_auto]"
         >
-          <div>
+          <div className="min-w-0 sm:col-span-2 xl:col-span-1">
             <label htmlFor="bill-q" className="block text-xs font-semibold text-muted">
               Search bills
             </label>
@@ -151,20 +158,20 @@ export default async function CongressPage({
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. education, flood control, 4Ps…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="bill-congress" className="block text-xs font-semibold text-muted">
               Congress
             </label>
             <select
               id="bill-congress"
               name="congress"
-              defaultValue={sp.congress ?? ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              defaultValue={congress !== undefined ? String(congress) : "all"}
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
             >
-              <option value="">All congresses</option>
+              <option value="all">All congresses</option>
               {congressOptions.map((c) => (
                 <option key={c.congress} value={c.congress}>
                   {congressOrdinal(c.congress)} ({c.total.toLocaleString("en-PH")})
@@ -172,7 +179,7 @@ export default async function CongressPage({
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="bill-type" className="block text-xs font-semibold text-muted">
               Chamber
             </label>
@@ -180,26 +187,26 @@ export default async function CongressPage({
               id="bill-type"
               name="type"
               defaultValue={sp.type ?? ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">House + Senate</option>
               <option value="HB">House bills</option>
               <option value="SB">Senate bills</option>
             </select>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-1">
             <button
               type="submit"
-              className="w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:flex-none"
             >
               Search
             </button>
-            {(q || sp.congress || sp.type) && (
+            {hasFilters && (
               <Link
                 href="/congress"
-                className="rounded-md border border-line px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-50 sm:flex-none"
               >
-                Clear
+                Reset filters
               </Link>
             )}
           </div>
@@ -305,6 +312,7 @@ export default async function CongressPage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[bills.retrieval]}
           source={CONGRESS_SOURCE_NAME}
           docsUrl={CONGRESS_DOCS_URL}
           endpoint={`${CONGRESS_API_BASE}/documents`}

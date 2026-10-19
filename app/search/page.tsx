@@ -134,7 +134,7 @@ export default async function SearchPage({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Unified search · Live"
+          eyebrow="Unified search · Source records"
           title="Search Civica"
           description="Search budgets, bills, legislators, and datasets in one place, with every result linked to its source."
         />

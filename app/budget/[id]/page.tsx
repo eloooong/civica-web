@@ -21,7 +21,6 @@ import {
 import {
   BUDGET_FISCAL_YEARS,
   isBudgetFiscalYear,
-  type ObjectsResponse,
 } from "@/types/budget";
 import { cn, budgetProgramPath, formatCount, formatPesoCompact, formatPesoFull, formatShare } from "@/lib/utils";
 
@@ -81,7 +80,7 @@ export default async function BudgetDepartmentPage({
   let detail;
   let programs;
   let national;
-  let objects: ObjectsResponse | null = null;
+  let objects: Awaited<ReturnType<typeof getObjects>> | null = null;
   try {
     [detail, programs, national] = await Promise.all([
       getDepartment(id),
@@ -160,7 +159,7 @@ export default async function BudgetDepartmentPage({
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
           size="compact"
-          eyebrow={`Department ${department.id} · Live data`}
+          eyebrow={`Department ${department.id} · Source records`}
           title={department.description}
           description={`Enacted General Appropriations Act budgets, agencies, programs, and expense classes, FY2020–2026.`}
         />
@@ -528,7 +527,7 @@ export default async function BudgetDepartmentPage({
       )}
 
       <div className="mt-8">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/departments/${id}`} />
+        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/departments/${id}`} retrievals={[detail.retrieval, programs.retrieval, national.retrieval, objects?.retrieval]} />
       </div>
     </div>
   );

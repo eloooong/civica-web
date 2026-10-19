@@ -100,7 +100,7 @@ export default async function BudgetCyclePage({
   const sp = await searchParams;
   const subjectParam = (sp.subject ?? "").trim();
 
-  let manifest: CycleManifestResponse;
+  let manifest: Awaited<ReturnType<typeof getBudgetCycle>>;
   try {
     manifest = await getBudgetCycle();
   } catch (err) {
@@ -181,7 +181,7 @@ export default async function BudgetCyclePage({
         {manifestView(manifest)}
 
         <div className="mt-8">
-          <SourceAttribution endpoint={`${BUDGET_API_BASE}/budget-cycle`} />
+          <SourceAttribution endpoint={`${BUDGET_API_BASE}/budget-cycle`} retrievals={[manifest.retrieval]} />
         </div>
       </div>
     );
@@ -434,6 +434,7 @@ export default async function BudgetCyclePage({
       <div className="mt-6">
         <SourceAttribution
           endpoint={`${BUDGET_API_BASE}/budget-cycle/departments/${departmentId}`}
+          retrievals={[manifest.retrieval, detail.retrieval]}
         />
       </div>
     </div>

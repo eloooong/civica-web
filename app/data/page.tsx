@@ -4,6 +4,7 @@ import { Building2, Database, HardDrive, Tags } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
 import { DatasetCard } from "@/components/data/DatasetCard";
@@ -134,69 +135,72 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Government Data" }]} />
       <div className="mt-4">
           <PageHeader
-            eyebrow="Data explorer · Live data"
+            eyebrow="Data explorer · Source records"
             title="Government Data"
             description="Discover datasets published by Philippine government agencies: budgets, elections, procurement, and more."
           />
       </div>
 
-      {/* Catalog stats */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard icon={Database} label="Datasets" value={stats.total_datasets.toLocaleString("en-PH")} valueNumber={stats.total_datasets} hint="In the catalog" />
-        <StatCard icon={HardDrive} label="Files" value={stats.total_resources.toLocaleString("en-PH")} valueNumber={stats.total_resources} hint={`${formatBytes(stats.total_size_bytes)} total`} />
-        <StatCard icon={Building2} label="Publishers" value={stats.total_publishers.toLocaleString("en-PH")} valueNumber={stats.total_publishers} hint="Agencies + contributors" />
-        <StatCard icon={Tags} label="Categories" value={stats.total_categories.toLocaleString("en-PH")} valueNumber={stats.total_categories} hint="Browse by topic below" />
-      </div>
+      <OverviewDisclosure title="Catalog overview and topics">
+        {/* Catalog stats */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatCard icon={Database} label="Datasets" value={stats.total_datasets.toLocaleString("en-PH")} valueNumber={stats.total_datasets} hint="In the catalog" />
+          <StatCard icon={HardDrive} label="Files" value={stats.total_resources.toLocaleString("en-PH")} valueNumber={stats.total_resources} hint={`${formatBytes(stats.total_size_bytes)} total`} />
+          <StatCard icon={Building2} label="Publishers" value={stats.total_publishers.toLocaleString("en-PH")} valueNumber={stats.total_publishers} hint="Agencies + contributors" />
+          <StatCard icon={Tags} label="Categories" value={stats.total_categories.toLocaleString("en-PH")} valueNumber={stats.total_categories} hint="Browse by topic below" />
+        </div>
 
-      {/* Categories */}
-      <section aria-labelledby="cats-heading" className="mt-10">
-        <SectionHeader title="Categories" description="Browse the catalog by topic." />
-        <h2 id="cats-heading" className="sr-only">
-          Dataset categories
-        </h2>
-        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {sortedCategories.map((c) => {
-            const count = counts.get(c.id) ?? 0;
-            const active = categoryId === c.id;
-            return (
-              <li key={c.id}>
-                <Link
-                  href={active ? "/data" : `/data?category=${c.id}`}
-                  aria-current={active ? "true" : undefined}
-                  aria-label={`${c.name}, ${count} datasets${active ? " (active filter, select to clear)" : ""}`}
-                  className={
-                    active
-                      ? "block rounded-lg border border-brand-700 bg-brand-50 px-4 py-3.5"
-                      : "block rounded-lg border border-line bg-white px-4 py-3.5 transition-colors duration-200 ease-institutional hover:border-brand-200 hover:bg-brand-50/40"
-                  }
-                >
-                  <span className="block text-sm font-semibold text-ink">{c.name}</span>
-                  <span className="mt-0.5 block text-xs text-muted">
-                    {count} dataset{count === 1 ? "" : "s"}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+        {/* Categories */}
+        <section aria-labelledby="cats-heading" className="mt-10">
+          <SectionHeader title="Categories" description="Browse the catalog by topic." />
+          <h2 id="cats-heading" className="sr-only">
+            Dataset categories
+          </h2>
+          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {sortedCategories.map((c) => {
+              const count = counts.get(c.id) ?? 0;
+              const active = categoryId === c.id;
+              return (
+                <li key={c.id}>
+                  <Link
+                    href={active ? "/data" : `/data?category=${c.id}`}
+                    aria-current={active ? "true" : undefined}
+                    aria-label={`${c.name}, ${count} datasets${active ? " (active filter, select to clear)" : ""}`}
+                    className={
+                      active
+                        ? "block rounded-lg border border-brand-700 bg-brand-50 px-4 py-3.5"
+                        : "block rounded-lg border border-line bg-white px-4 py-3.5 transition-colors duration-200 ease-institutional hover:border-brand-200 hover:bg-brand-50/40"
+                    }
+                  >
+                    <span className="block text-sm font-semibold text-ink">{c.name}</span>
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {count} dataset{count === 1 ? "" : "s"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </OverviewDisclosure>
 
       {/* Search + filters */}
-      <section aria-labelledby="datasets-heading" className="mt-10">
+      <section aria-labelledby="datasets-heading" className="mt-6">
         <SectionHeader
           title="Browse datasets"
-          description="Search by keyword, filter by category or publisher, and sort. Every filter is reflected in the URL."
+          description="Find a dataset by keyword, category, or publisher."
         />
         <h2 id="datasets-heading" className="sr-only">
           Browse datasets
         </h2>
         <form
+          key={JSON.stringify(baseParams)}
           method="get"
           role="search"
           aria-label="Filter datasets"
-          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-[1fr_180px_200px_180px_auto]"
+          className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]"
         >
-          <div>
+          <div className="min-w-0 sm:col-span-2 xl:col-span-1">
             <label htmlFor="ds-q" className="block text-xs font-semibold text-muted">
               Search datasets
             </label>
@@ -207,10 +211,10 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               autoComplete="off"
               defaultValue={q}
               placeholder="e.g. elections, procurement, flood…"
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand-600"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand-600"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="ds-category" className="block text-xs font-semibold text-muted">
               Category
             </label>
@@ -218,7 +222,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-category"
               name="category"
               defaultValue={categoryId !== undefined ? String(categoryId) : ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All categories</option>
               {sortedCategories.map((c) => (
@@ -228,7 +232,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="ds-publisher" className="block text-xs font-semibold text-muted">
               Publisher
             </label>
@@ -236,7 +240,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-publisher"
               name="publisher"
               defaultValue={publisherId !== undefined ? String(publisherId) : ""}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
             >
               <option value="">All publishers</option>
               {sortedPublishers.map((p) => (
@@ -246,7 +250,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="ds-sort" className="block text-xs font-semibold text-muted">
               Sort by
             </label>
@@ -254,7 +258,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               id="ds-sort"
               name="sort"
               defaultValue={sp.sort ?? "latest_version_date:desc"}
-              className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink"
+              className="mt-1 min-h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-base text-ink"
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -263,17 +267,17 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
               ))}
             </select>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-wrap items-end gap-2">
             <button
               type="submit"
-              className="w-full rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:w-auto"
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:flex-none"
             >
               Apply
             </button>
             {hasFilters && (
               <Link
                 href="/data"
-                className="rounded-md border border-line px-4 py-2 text-center text-sm font-semibold text-ink hover:bg-slate-50 sm:w-auto"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-50 sm:flex-none"
               >
                 Clear
               </Link>
@@ -322,6 +326,7 @@ export default async function DataPage({ searchParams }: { searchParams: Promise
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[result.retrieval]}
           source={DATA_SOURCE_NAME}
           docsUrl={DATA_DOCS_URL}
           endpoint={`${DATA_API_BASE}/datasets`}

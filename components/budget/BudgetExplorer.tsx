@@ -64,7 +64,7 @@ export function BudgetExplorer({
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <Search
             aria-hidden="true"
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
@@ -79,7 +79,7 @@ export function BudgetExplorer({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter departments by name or code…"
-            className="w-full rounded-md border border-line bg-white py-2.5 pl-9 pr-3 text-sm text-ink placeholder:text-muted/80 focus:border-brand-600"
+            className="min-h-11 w-full rounded-md border border-line bg-white py-2.5 pl-9 pr-3 text-base text-ink placeholder:text-muted/80 focus:border-brand-600"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export function BudgetExplorer({
             id="dept-sort"
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink"
+            className="min-h-11 rounded-md border border-line bg-white px-3 py-2.5 text-base text-ink"
           >
             <option value="amount-desc">Largest budget first</option>
             <option value="amount-asc">Smallest budget first</option>

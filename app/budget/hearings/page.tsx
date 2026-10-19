@@ -65,8 +65,10 @@ export default async function HearingsPage({
   const recordOnly = params.record === "with";
 
   let hearings: HearingListRow[];
+  let hearingResponse: Awaited<ReturnType<typeof listHearings>>;
   try {
-    hearings = (await listHearings()).data;
+    hearingResponse = await listHearings();
+    hearings = hearingResponse.data;
   } catch (err) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -156,7 +158,7 @@ export default async function HearingsPage({
 
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget hearings · Live data"
+          eyebrow="Budget hearings · Source records"
           title="House budget hearings"
           description={`Every Committee on Appropriations hearing on the FY2027 proposed budget, with the topic record the Committee built from each stream: the question at issue, what was said, the figures as spoken, and where each item landed. ${formatCount(hearings.length)} hearings, ${formatCount(topicTotal)} topics.`}
         />
@@ -401,6 +403,7 @@ export default async function HearingsPage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[hearingResponse.retrieval]}
           dataset={DATASET_LABEL}
           endpoint={`${BUDGET_API_BASE}/hearings`}
         />

@@ -218,6 +218,7 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[bill.retrieval]}
           source={CONGRESS_SOURCE_NAME}
           docsUrl={CONGRESS_DOCS_URL}
           endpoint={`${CONGRESS_API_BASE}/documents/${id}`}

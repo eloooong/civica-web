@@ -79,7 +79,7 @@ export default async function DatasetDetailPage({ params }: { params: Promise<{ 
       />
 
       <div className="mt-4">
-        <PageHeader size="compact" eyebrow="Dataset record · Live data" title={dataset.name} />
+        <PageHeader size="compact" eyebrow="Dataset record · Source records" title={dataset.name} />
         <div className="mt-4 flex flex-wrap gap-1.5">
           {dataset.category && <Badge tone="brand">{dataset.category.name}</Badge>}
           {dataset.license && (
@@ -220,6 +220,7 @@ export default async function DatasetDetailPage({ params }: { params: Promise<{ 
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[dataset.retrieval, resources.retrieval]}
           source={DATA_SOURCE_NAME}
           docsUrl={DATA_DOCS_URL}
           endpoint={`${DATA_API_BASE}/datasets/${numeric}`}

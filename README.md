@@ -10,7 +10,7 @@ all three.
 - Tailwind CSS v4, Lucide icons, Bklit UI charts (visx-based) + KPI blocks
 - No database, no auth, no env vars — all data comes from public read-only APIs
 
-## Data sources (all live, all attributed in-app)
+## Public data sources (attributed in-app)
 
 | Section | Source | Base URL |
 |---|---|---|
@@ -21,8 +21,13 @@ all three.
 
 API clients live in `lib/api/` (one module per source, uniqueness enforced by a
 single base-URL constant each). UI components never fetch directly.
-Upstream responses are cached for 1 hour (`revalidate: 3600`); the datasets
-change at most a few times a year.
+API response bodies and their actual retrieval timestamps are cached together
+(`revalidate: 3600`). They become eligible for refresh on a later request after
+one hour. Failed refreshes can leave older responses visible, with their original
+timestamps. Retrieval times use Philippine time and are separate from source
+publication dates. Sources without a recorded timestamp explicitly say it is
+unavailable. The homepage shows “Unavailable” when no national budget figure
+can be retrieved; it does not substitute an illustrative amount.
 
 ## Getting started
 

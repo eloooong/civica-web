@@ -20,6 +20,7 @@ import type {
   ResourcePreview,
   SortDir,
 } from "@/types/dataset";
+import { fetchCachedResponse, type RetrievedResponse, type Sourced } from "@/lib/api/source-cache";
 
 export const DATA_API_BASE = "https://data.bettergov.ph/api/v1";
 export const DATA_PORTAL_URL = "https://data.bettergov.ph";
@@ -59,7 +60,7 @@ interface ErrorEnvelope {
 async function fetchData<T>(
   path: string,
   params?: Record<string, unknown>
-): Promise<{ data: T; pagination?: DataPagination }> {
+): Promise<Sourced<{ data: T; pagination?: DataPagination }>> {
   const url = new URL(`${DATA_API_BASE}${path}`);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -68,12 +69,9 @@ async function fetchData<T>(
   }
   const endpoint = url.toString();
 
-  let res: Response;
+  let res: RetrievedResponse;
   try {
-    res = await fetch(endpoint, {
-      next: { revalidate: DATA_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
-    });
+    res = await fetchCachedResponse(endpoint, DATA_REVALIDATE_SECONDS);
   } catch {
     throw new DataApiError(
       503,
@@ -97,7 +95,7 @@ async function fetchData<T>(
   }
 
   const body = (await res.json()) as SuccessEnvelope<T>;
-  return { data: body.data, pagination: body.pagination };
+  return { data: body.data, pagination: body.pagination, retrieval: res.retrieval };
 }
 
 /** GET /stats — platform-wide totals. */
@@ -117,10 +115,10 @@ export interface ListDatasetsOptions {
 }
 
 /** GET /datasets — search/filter with offset pagination (limit 10–100). */
-export function listDatasets(options: ListDatasetsOptions = {}): Promise<{
+export function listDatasets(options: ListDatasetsOptions = {}): Promise<Sourced<{
   data: Dataset[];
   pagination?: DataPagination;
-}> {
+}>> {
   return fetchData<Dataset[]>("/datasets", {
     search: options.search,
     category_id: options.categoryId,
@@ -133,16 +131,16 @@ export function listDatasets(options: ListDatasetsOptions = {}): Promise<{
 }
 
 /** GET /datasets/{id} — one dataset (does not embed resources). */
-export async function getDataset(id: number): Promise<Dataset> {
-  const { data } = await fetchData<Dataset>(`/datasets/${id}`);
-  return data;
+export async function getDataset(id: number): Promise<Sourced<Dataset>> {
+  const { data, retrieval } = await fetchData<Dataset>(`/datasets/${id}`);
+  return { ...data, retrieval };
 }
 
 /** GET /resources?dataset_id= — downloadable files for one dataset. */
 export async function listResources(
   datasetId: number,
   limit = 50
-): Promise<{ data: DatasetResource[]; pagination?: DataPagination }> {
+): Promise<Sourced<{ data: DatasetResource[]; pagination?: DataPagination }>> {
   return fetchData<DatasetResource[]>("/resources", { dataset_id: datasetId, limit });
 }
 

@@ -228,6 +228,7 @@ export default async function HearingTranscriptPage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[transcript.retrieval]}
           dataset={DATASET_LABEL}
           endpoint={`${BUDGET_API_BASE}/hearings/${videoId}/transcript?from=${from}`}
         />

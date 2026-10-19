@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { ErrorState } from "@/components/ui/States";
+import { OverviewDisclosure } from "@/components/ui/OverviewDisclosure";
 import { BudgetExplorer } from "@/components/budget/BudgetExplorer";
 import { NationalTrendChart, TopDepartmentsChart } from "@/components/budget/BudgetCharts";
 import { BudgetStatCard } from "@/components/blocks/budget-stat-card";
@@ -111,7 +112,7 @@ export default async function BudgetPage({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Budget" }]} />
       <div className="mt-4">
         <PageHeader
-          eyebrow="Budget explorer · Live data"
+          eyebrow="Budget explorer · Source records"
           title="Budget Explorer"
           description="Explore Philippine national budget data from the enacted General Appropriations Act (FY2020–2026), down to agency and program level."
         />
@@ -137,48 +138,50 @@ export default async function BudgetPage({
         ))}
       </div>
 
-      {/* Summary statistics. One column on phones: the three count cards carry
-          footer lists, which are unreadable at half a phone's width. */}
-      <div className="mt-6 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-        <BudgetStatCard
-          title={`National budget · FY ${year}`}
-          series={totals.map((t) => ({ year: t.year, amount: t.amount }))}
-          defaultLabel={`Enacted GAA · FY ${year}`}
-          defaultTrend={yoy}
-          selectedYear={year}
-        />
-        <StatCard
-          icon={Layers}
-          label="Departments"
-          value={String(departments.length)}
-          valueNumber={departments.length}
-          hint={`In the FY ${year} enacted budget`}
-          details={{ caption: "Largest departments", rows: largestDepartments }}
-        />
-        <StatCard
-          icon={Landmark}
-          label="Line items"
-          value={formatCount(total.line_items)}
-          valueNumber={total.line_items}
-          hint="Individual spending line items"
-          details={{ caption: "Most line items", rows: mostLineItems }}
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="7-year change"
-          value={changePct === null ? "–" : formatPctDelta(changePct)}
-          valueNumber={changePct ?? undefined}
-          valueFormat="percent"
-          hint="FY2020 → FY2026 enacted total"
-          details={{ caption: "Largest annual increases", rows: largestIncreases }}
-        />
-      </div>
+      <OverviewDisclosure title={`Budget overview · FY ${year}`}>
+        {/* Detailed statistics and charts stay available without pushing the
+            department filter several screens down on phones. */}
+        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+          <BudgetStatCard
+            title={`National budget · FY ${year}`}
+            series={totals.map((t) => ({ year: t.year, amount: t.amount }))}
+            defaultLabel={`Enacted GAA · FY ${year}`}
+            defaultTrend={yoy}
+            selectedYear={year}
+          />
+          <StatCard
+            icon={Layers}
+            label="Departments"
+            value={String(departments.length)}
+            valueNumber={departments.length}
+            hint={`In the FY ${year} enacted budget`}
+            details={{ caption: "Largest departments", rows: largestDepartments }}
+          />
+          <StatCard
+            icon={Landmark}
+            label="Line items"
+            value={formatCount(total.line_items)}
+            valueNumber={total.line_items}
+            hint="Individual spending line items"
+            details={{ caption: "Most line items", rows: mostLineItems }}
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="7-year change"
+            value={changePct === null ? "–" : formatPctDelta(changePct)}
+            valueNumber={changePct ?? undefined}
+            valueFormat="percent"
+            hint="FY2020 → FY2026 enacted total"
+            details={{ caption: "Largest annual increases", rows: largestIncreases }}
+          />
+        </div>
 
-      {/* Charts */}
-      <section aria-label="Budget charts" className="mt-8 grid items-stretch gap-4 lg:grid-cols-2">
-        <NationalTrendChart totals={totals} />
-        <TopDepartmentsChart departments={departments} year={year} />
-      </section>
+        {/* Charts */}
+        <section aria-label="Budget charts" className="mt-8 grid items-stretch gap-4 lg:grid-cols-2">
+          <NationalTrendChart totals={totals} />
+          <TopDepartmentsChart departments={departments} year={year} />
+        </section>
+      </OverviewDisclosure>
 
       {/* Explorer table */}
       <section aria-labelledby="dept-table-heading" className="mt-8">
@@ -195,7 +198,7 @@ export default async function BudgetPage({
       </section>
 
       <div className="mt-8">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/years/${year}`} />
+        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/years/${year}`} retrievals={[national.retrieval, breakdown.retrieval]} />
       </div>
     </div>
   );

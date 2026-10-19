@@ -131,7 +131,7 @@ async function searchCongressSource(
         id: `bill-${b.id}`,
         type: "bill",
         title: billDisplayTitle(b),
-        description: `${billLabel(b)} · ${congressOrdinal(b.congress)} · Filed ${formatFiledDate(b.date_filed)}`,
+        description: `${billLabel(b)} · ${congressOrdinal(b.congress)} · ${b.date_filed ? `Filed ${formatFiledDate(b.date_filed)}` : "Filing date not supplied by the source"}`,
         metadata: { congress: b.congress ?? 0, billNumber: b.bill_number ?? 0 },
         url: `/congress/bills/${b.id}`,
       })

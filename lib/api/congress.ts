@@ -17,6 +17,7 @@ import type {
   Legislator,
   Pagination,
 } from "@/types/congress";
+import { fetchCachedResponse, type RetrievedResponse, type Sourced } from "@/lib/api/source-cache";
 
 export const CONGRESS_API_BASE = "https://open-congress-api.bettergov.ph/api";
 export const CONGRESS_DOCS_URL = "https://open-congress-api.bettergov.ph/api/scalar";
@@ -55,7 +56,7 @@ interface ErrorEnvelope {
 async function fetchCongress<T>(
   path: string,
   params?: Record<string, unknown>
-): Promise<{ data: T; pagination?: Pagination }> {
+): Promise<Sourced<{ data: T; pagination?: Pagination }>> {
   const url = new URL(`${CONGRESS_API_BASE}${path}`);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -64,12 +65,9 @@ async function fetchCongress<T>(
   }
   const endpoint = url.toString();
 
-  let res: Response;
+  let res: RetrievedResponse;
   try {
-    res = await fetch(endpoint, {
-      next: { revalidate: CONGRESS_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
-    });
+    res = await fetchCachedResponse(endpoint, CONGRESS_REVALIDATE_SECONDS);
   } catch {
     throw new CongressApiError(
       503,
@@ -93,7 +91,7 @@ async function fetchCongress<T>(
   }
 
   const body = (await res.json()) as SuccessEnvelope<T>;
-  return { data: body.data, pagination: body.pagination };
+  return { data: body.data, pagination: body.pagination, retrieval: res.retrieval };
 }
 
 /** GET /stats — database-wide totals and per-congress bill counts. */
@@ -121,10 +119,10 @@ export interface ListDocumentsOptions {
 }
 
 /** GET /documents — browse/filter bills with offset pagination. */
-export function listDocuments(options: ListDocumentsOptions = {}): Promise<{
+export function listDocuments(options: ListDocumentsOptions = {}): Promise<Sourced<{
   data: BillDocument[];
   pagination?: Pagination;
-}> {
+}>> {
   return fetchCongress<BillDocument[]>("/documents", {
     congress: options.congress,
     type: options.type,
@@ -147,18 +145,18 @@ export interface SearchDocumentsOptions {
 }
 
 /** GET /search/documents — full-text bill search. */
-export function searchDocuments(options: SearchDocumentsOptions): Promise<{
+export function searchDocuments(options: SearchDocumentsOptions): Promise<Sourced<{
   data: BillDocument[];
   pagination?: Pagination;
-}> {
+}>> {
   const { q, ...rest } = options;
   return fetchCongress<BillDocument[]>("/search/documents", { q, ...rest });
 }
 
 /** GET /documents/{id} — one bill with embedded authors. */
-export async function getDocument(id: string): Promise<BillDocument> {
-  const { data } = await fetchCongress<BillDocument>(`/documents/${encodeURIComponent(id)}`);
-  return data;
+export async function getDocument(id: string): Promise<Sourced<BillDocument>> {
+  const { data, retrieval } = await fetchCongress<BillDocument>(`/documents/${encodeURIComponent(id)}`);
+  return { ...data, retrieval };
 }
 
 /** GET /documents/{id}/authors — bill authors. */
@@ -176,10 +174,10 @@ export interface ListPeopleOptions {
 }
 
 /** GET /people — browse/filter legislators. */
-export function listPeople(options: ListPeopleOptions = {}): Promise<{
+export function listPeople(options: ListPeopleOptions = {}): Promise<Sourced<{
   data: Legislator[];
   pagination?: Pagination;
-}> {
+}>> {
   return fetchCongress<Legislator[]>("/people", {
     type: options.type,
     congress: options.congress,
@@ -193,16 +191,16 @@ export function listPeople(options: ListPeopleOptions = {}): Promise<{
 export function searchPeople(
   q: string,
   options: { type?: string; congress?: number; limit?: number; offset?: number } = {}
-): Promise<{ data: Legislator[]; pagination?: Pagination }> {
+): Promise<Sourced<{ data: Legislator[]; pagination?: Pagination }>> {
   return fetchCongress<Legislator[]>("/search/people", { q, ...options });
 }
 
 /** GET /people/{id} — legislator profile with congresses served. */
-export async function getPerson(id: string): Promise<Legislator> {
-  const { data } = await fetchCongress<Legislator>(`/people/${encodeURIComponent(id)}`, {
+export async function getPerson(id: string): Promise<Sourced<Legislator>> {
+  const { data, retrieval } = await fetchCongress<Legislator>(`/people/${encodeURIComponent(id)}`, {
     include_congresses: "true",
   });
-  return data;
+  return { ...data, retrieval };
 }
 
 /** GET /people/{id}/groups — chamber memberships. */
@@ -215,6 +213,6 @@ export async function getPersonGroups(id: string): Promise<ChamberGroup[]> {
 export function getPersonDocuments(
   id: string,
   options: { congress?: number; type?: string; limit?: number; offset?: number } = {}
-): Promise<{ data: BillDocument[]; pagination?: Pagination }> {
+): Promise<Sourced<{ data: BillDocument[]; pagination?: Pagination }>> {
   return fetchCongress<BillDocument[]>(`/people/${encodeURIComponent(id)}/documents`, options);
 }

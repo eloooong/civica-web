@@ -366,7 +366,7 @@ export default async function BudgetProgramPage({
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
           size="compact"
-          eyebrow={`${agencyName} · Live data`}
+          eyebrow={`${agencyName} · Source records`}
           title={name}
           description={`How this program's enacted appropriation is administered: hierarchy, multi-year history, and object-level detail from the General Appropriations Act.`}
         />
@@ -747,6 +747,7 @@ export default async function BudgetProgramPage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[departmentDetail.retrieval, familyRow?.retrieval, fpapRow?.retrieval]}
           endpoint={[
             `${BUDGET_API_BASE}/gaa/years/${year}/departments/${id}/children`,
             `${BUDGET_API_BASE}/gaa/departments/${id}/programs`,

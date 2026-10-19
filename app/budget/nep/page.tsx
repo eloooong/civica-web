@@ -389,7 +389,7 @@ export default async function NepPage() {
       </p>
 
       <div className="mt-6">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/nep/2027`} />
+        <SourceAttribution endpoint={`${BUDGET_API_BASE}/nep/2027`} retrievals={[overview.retrieval]} />
       </div>
     </div>
   );

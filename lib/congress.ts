@@ -1,20 +1,22 @@
 import type { AuthorRef, BillDocument, Legislator } from "@/types/congress";
 
-/** Best available bill title — the API's `title` is often null. */
+/** Prefer supplied titles over long titles; record identifiers are not descriptions. */
+export function billTitle(bill: BillDocument): string | null {
+  for (const value of [bill.title, bill.congress_website_title, bill.long_title]) {
+    const title = value?.trim();
+    if (title && !/^(?:HBN?|SBN?)[\s-]*\d+$/i.test(title)) return title;
+  }
+  return null;
+}
+
 export function billDisplayTitle(bill: BillDocument): string {
-  return (
-    bill.title ??
-    bill.long_title ??
-    bill.congress_website_title ??
-    bill.name ??
-    "Untitled bill"
-  );
+  return billTitle(bill) ?? `${billLabel(bill)}: title unavailable`;
 }
 
 /** Short bill label, e.g. "HB 4664". Falls back to the API name (HBN-xxxxx). */
 export function billLabel(bill: BillDocument): string {
   if (bill.subtype && bill.bill_number !== null) return `${bill.subtype} ${bill.bill_number}`;
-  return bill.name ?? "Bill";
+  return bill.name?.trim() || "Bill";
 }
 
 /** "20th Congress" from a congress number. */

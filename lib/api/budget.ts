@@ -38,6 +38,7 @@ import {
   type ProgramsResponse,
 } from "@/types/budget";
 import { slugify } from "@/lib/utils";
+import { fetchCachedResponse, type RetrievedResponse, type Sourced } from "@/lib/api/source-cache";
 
 export const BUDGET_API_BASE = "https://budget.bettergov.ph/api/v1";
 export const BUDGET_DOCS_URL = "https://budget.bettergov.ph/docs";
@@ -62,7 +63,7 @@ export class BudgetApiError extends Error {
   }
 }
 
-async function fetchBudget<T>(path: string, params?: Record<string, string | number>): Promise<T> {
+async function fetchBudget<T>(path: string, params?: Record<string, string | number>): Promise<Sourced<T>> {
   const url = new URL(`${BUDGET_API_BASE}${path}`);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -71,12 +72,9 @@ async function fetchBudget<T>(path: string, params?: Record<string, string | num
   }
   const endpoint = url.toString();
 
-  let res: Response;
+  let res: RetrievedResponse;
   try {
-    res = await fetch(endpoint, {
-      next: { revalidate: BUDGET_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
-    });
+    res = await fetchCachedResponse(endpoint, BUDGET_REVALIDATE_SECONDS);
   } catch {
     throw new BudgetApiError(
       503,
@@ -99,16 +97,16 @@ async function fetchBudget<T>(path: string, params?: Record<string, string | num
     throw new BudgetApiError(res.status, slug, message, endpoint);
   }
 
-  return (await res.json()) as T;
+  return { ...((await res.json()) as T), retrieval: res.retrieval };
 }
 
 /** GET /gaa — national totals per fiscal year (2020–2026). */
-export function getNationalTotals(): Promise<GaaNationalResponse> {
+export function getNationalTotals(): Promise<Sourced<GaaNationalResponse>> {
   return fetchBudget<GaaNationalResponse>("/gaa");
 }
 
 /** GET /gaa/years/{year} — national total + every department's share for one year. */
-export function getYearBreakdown(year: number): Promise<GaaYearResponse> {
+export function getYearBreakdown(year: number): Promise<Sourced<GaaYearResponse>> {
   if (!isBudgetFiscalYear(year)) {
     throw new BudgetApiError(
       400,
@@ -121,17 +119,17 @@ export function getYearBreakdown(year: number): Promise<GaaYearResponse> {
 }
 
 /** GET /gaa/departments — all departments with per-year figures. */
-export function getDepartments(): Promise<GaaDepartmentsResponse> {
+export function getDepartments(): Promise<Sourced<GaaDepartmentsResponse>> {
   return fetchBudget<GaaDepartmentsResponse>("/gaa/departments");
 }
 
 /** GET /gaa/departments/{id} — department detail (yearly totals, agencies, expense classes). */
-export function getDepartment(id: string): Promise<GaaDepartmentResponse> {
+export function getDepartment(id: string): Promise<Sourced<GaaDepartmentResponse>> {
   return fetchBudget<GaaDepartmentResponse>(`/gaa/departments/${encodeURIComponent(id)}`);
 }
 
 /** GET /gaa/departments/{id}/expense-classes — PS / MOOE / FinEx / CO per year. */
-export function getExpenseClasses(id: string): Promise<ExpenseClassesResponse> {
+export function getExpenseClasses(id: string): Promise<Sourced<ExpenseClassesResponse>> {
   return fetchBudget<ExpenseClassesResponse>(`/gaa/departments/${encodeURIComponent(id)}/expense-classes`);
 }
 
@@ -144,7 +142,7 @@ export interface GetProgramsOptions {
 }
 
 /** GET /gaa/departments/{id}/programs — P/A/P families ranked by appropriation. */
-export function getPrograms(id: string, options: GetProgramsOptions = {}): Promise<ProgramsResponse> {
+export function getPrograms(id: string, options: GetProgramsOptions = {}): Promise<Sourced<ProgramsResponse>> {
   const params: Record<string, string | number> = {};
   if (options.year !== undefined) {
     if (!isBudgetFiscalYear(options.year)) {
@@ -172,7 +170,7 @@ export interface SearchProgramsOptions {
 }
 
 /** GET /gaa/search — program-name search across all departments. */
-export function searchPrograms(options: SearchProgramsOptions): Promise<ProgramsResponse> {
+export function searchPrograms(options: SearchProgramsOptions): Promise<Sourced<ProgramsResponse>> {
   const params: Record<string, string | number> = { q: options.q };
   if (options.year !== undefined) params.year = options.year;
   if (options.departmentId) params.department_id = options.departmentId;
@@ -193,7 +191,7 @@ export function getChildren(
   year: number,
   departmentId: string,
   options: GetChildrenOptions
-): Promise<ChildrenResponse> {
+): Promise<Sourced<ChildrenResponse>> {
   const params: Record<string, string | number> = {
     level: options.level,
     limit: options.limit ?? 100,
@@ -221,7 +219,7 @@ export interface GetObjectsOptions {
 export function getObjects(
   departmentId: string,
   options: GetObjectsOptions = {}
-): Promise<ObjectsResponse> {
+): Promise<Sourced<ObjectsResponse>> {
   const params: Record<string, string | number> = {};
   if (options.year !== undefined) params.year = options.year;
   if (options.agencyId) params.agency_id = options.agencyId;
@@ -243,14 +241,14 @@ export function getObjects(
 export function searchHearings(
   q: string,
   options: { agency?: string; limit?: number } = {}
-): Promise<HearingsSearchResponse> {
+): Promise<Sourced<HearingsSearchResponse>> {
   const params: Record<string, string | number> = { q, limit: options.limit ?? 5 };
   if (options.agency) params.agency = options.agency;
   return fetchBudget<HearingsSearchResponse>("/hearings/search", params);
 }
 
 /** GET /hearings/{video_id}/topics/{index} — full deliberation record. */
-export function getHearingTopic(videoId: string, index: number): Promise<HearingTopicResponse> {
+export function getHearingTopic(videoId: string, index: number): Promise<Sourced<HearingTopicResponse>> {
   return fetchBudget<HearingTopicResponse>(
     `/hearings/${encodeURIComponent(videoId)}/topics/${index}`
   );
@@ -264,12 +262,12 @@ export function getHearingTopic(videoId: string, index: number): Promise<Hearing
  * season in one request and filters it here. The season is small (40 rows as
  * of the FY2027 hearings), so one cached request covers the whole index.
  */
-export function listHearings(limit = 500): Promise<HearingsListResponse> {
+export function listHearings(limit = 500): Promise<Sourced<HearingsListResponse>> {
   return fetchBudget<HearingsListResponse>("/hearings", { limit });
 }
 
 /** GET /hearings/{video_id} — hearing metadata plus its topic index. */
-export function getHearing(videoId: string): Promise<HearingDetailResponse> {
+export function getHearing(videoId: string): Promise<Sourced<HearingDetailResponse>> {
   return fetchBudget<HearingDetailResponse>(`/hearings/${encodeURIComponent(videoId)}`);
 }
 
@@ -278,7 +276,7 @@ export function getHearing(videoId: string): Promise<HearingDetailResponse> {
  * hearing in a single request. `thread=0` omits the moment-by-moment lines,
  * which the transcript endpoint serves on demand instead.
  */
-export function getHearingTopics(videoId: string): Promise<HearingTopicsResponse> {
+export function getHearingTopics(videoId: string): Promise<Sourced<HearingTopicsResponse>> {
   return fetchBudget<HearingTopicsResponse>(
     `/hearings/${encodeURIComponent(videoId)}/topics`,
     { thread: 0 }
@@ -290,7 +288,7 @@ export function getHearingTopics(videoId: string): Promise<HearingTopicsResponse
  * Roughly 250 KB for a seven hour hearing, so callers put it on its own route
  * rather than on the hearing detail page.
  */
-export function getHearingTimeline(videoId: string): Promise<HearingTimelineResponse> {
+export function getHearingTimeline(videoId: string): Promise<Sourced<HearingTimelineResponse>> {
   return fetchBudget<HearingTimelineResponse>(
     `/hearings/${encodeURIComponent(videoId)}/timeline`
   );
@@ -305,7 +303,7 @@ export function getHearingTranscript(
   videoId: string,
   fromSeconds: number,
   toSeconds?: number
-): Promise<HearingTranscriptResponse> {
+): Promise<Sourced<HearingTranscriptResponse>> {
   const params: Record<string, string | number> = { from: Math.max(0, Math.floor(fromSeconds)) };
   if (toSeconds !== undefined) params.to = Math.floor(toSeconds);
   return fetchBudget<HearingTranscriptResponse>(
@@ -315,7 +313,7 @@ export function getHearingTranscript(
 }
 
 /** GET /nep/2027 — FY2027 proposal at national level, with FY2026 baseline. */
-export function getNepOverview(): Promise<NepOverviewResponse> {
+export function getNepOverview(): Promise<Sourced<NepOverviewResponse>> {
   return fetchBudget<NepOverviewResponse>("/nep/2027");
 }
 
@@ -323,19 +321,19 @@ export function getNepOverview(): Promise<NepOverviewResponse> {
 export function getNepRollups(
   dimension: NepDimension,
   options: { limit?: number } = {}
-): Promise<NepRollupsResponse> {
+): Promise<Sourced<NepRollupsResponse>> {
   const params: Record<string, string | number> = {};
   if (options.limit !== undefined) params.limit = options.limit;
   return fetchBudget<NepRollupsResponse>(`/nep/2027/rollups/${dimension}`, params);
 }
 
 /** GET /budget-cycle — coverage manifest: subjects, years, stages. */
-export function getBudgetCycle(): Promise<CycleManifestResponse> {
+export function getBudgetCycle(): Promise<Sourced<CycleManifestResponse>> {
   return fetchBudget<CycleManifestResponse>("/budget-cycle");
 }
 
 /** GET /budget-cycle/departments/{id} — programs and facts for one subject. */
-export function getBudgetCycleDepartment(id: string): Promise<CycleDepartmentResponse> {
+export function getBudgetCycleDepartment(id: string): Promise<Sourced<CycleDepartmentResponse>> {
   return fetchBudget<CycleDepartmentResponse>(
     `/budget-cycle/departments/${encodeURIComponent(id)}`
   );
@@ -359,7 +357,7 @@ export async function findFpapBySlug(
   agencyId: string,
   slug: string,
   year: number
-): Promise<HierarchyRow | null> {
+): Promise<Sourced<HierarchyRow> | null> {
   let cursor: string | undefined;
   for (let page = 0; page < SCAN_MAX_PAGES; page++) {
     const res = await getChildren(year, departmentId, {
@@ -369,7 +367,7 @@ export async function findFpapBySlug(
       cursor,
     });
     const hit = res.data.find((row) => slugify(row.description) === slug);
-    if (hit) return hit;
+    if (hit) return { ...hit, retrieval: res.retrieval };
     if (!res.next_cursor) return null;
     cursor = res.next_cursor;
   }
@@ -382,7 +380,7 @@ export async function findFamilyBySlug(
   agencyId: string,
   slug: string,
   year: number
-): Promise<ProgramRow | null> {
+): Promise<Sourced<ProgramRow> | null> {
   let cursor: string | undefined;
   for (let page = 0; page < SCAN_MAX_PAGES; page++) {
     const res = await getPrograms(departmentId, {
@@ -392,7 +390,7 @@ export async function findFamilyBySlug(
       cursor,
     });
     const hit = res.data.find((row) => slugify(row.name) === slug);
-    if (hit) return hit;
+    if (hit) return { ...hit, retrieval: res.retrieval };
     if (!res.next_cursor) return null;
     cursor = res.next_cursor;
   }

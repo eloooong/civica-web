@@ -99,7 +99,7 @@ export default async function PersonDetailPage({
       />
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-        <PageHeader size="compact" eyebrow="Legislator profile · Live data" title={name} />
+        <PageHeader size="compact" eyebrow="Legislator profile · Source records" title={name} />
         {latest && <Badge tone="brand">{latest.position} · {latest.congress_ordinal} Congress</Badge>}
       </div>
 
@@ -219,6 +219,7 @@ export default async function PersonDetailPage({
 
       <div className="mt-4">
         <SourceAttribution
+          retrievals={[person.retrieval, authored.retrieval]}
           source={CONGRESS_SOURCE_NAME}
           docsUrl={CONGRESS_DOCS_URL}
           endpoint={`${CONGRESS_API_BASE}/people/${id}`}

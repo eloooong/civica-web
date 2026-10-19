@@ -80,11 +80,13 @@ export default async function HearingPage({
 
   let hearing;
   let topics: HearingTopicDetail[];
+  let detail;
+  let topicRecords;
   try {
     // Two requests: the metadata plus topic index, and the full topic records
     // in one call with the moment-by-moment thread omitted. The thread is
     // served on demand by the transcript route instead.
-    const [detail, topicRecords] = await Promise.all([
+    [detail, topicRecords] = await Promise.all([
       getHearing(videoId),
       getHearingTopics(videoId),
     ]);
@@ -333,6 +335,7 @@ export default async function HearingPage({
 
       <div className="mt-8">
         <SourceAttribution
+          retrievals={[detail.retrieval, topicRecords.retrieval]}
           dataset={DATASET_LABEL}
           endpoint={`${BUDGET_API_BASE}/hearings/${videoId} · ${BUDGET_API_BASE}/hearings/${videoId}/topics`}
         />
