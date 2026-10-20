@@ -8,6 +8,7 @@ import { SiteShell } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { RouteTransition } from "@/components/motion/route-transition";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   },
   description:
     "Explore Philippine budgets, legislation, and government datasets in one accessible place.",
-  metadataBase: new URL("https://civica.ph"),
+  metadataBase: SITE_URL,
   openGraph: {
     title: "Civica",
     description: "Philippine government data, made easier to understand.",

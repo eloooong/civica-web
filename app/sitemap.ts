@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Static sitemap. Detail pages (budget departments, individual hearings, bills,
@@ -7,7 +8,6 @@ import type { MetadataRoute } from "next";
  * the explorer pages listed here.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://civica.ph";
   const now = new Date();
   const routes = [
     "/",
@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/data/contractors",
   ];
   return routes.map((route) => ({
-    url: `${base}${route}`,
+    url: new URL(route, SITE_URL).href,
     lastModified: now,
     changeFrequency: route === "/" ? "weekly" : "daily",
     priority: route === "/" ? 1 : 0.8,

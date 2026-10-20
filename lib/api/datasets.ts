@@ -21,6 +21,7 @@ import type {
   SortDir,
 } from "@/types/dataset";
 import { fetchCachedResponse, type RetrievedResponse, type Sourced } from "@/lib/api/source-cache";
+import { SOURCE_USER_AGENT } from "@/lib/site";
 
 export const DATA_API_BASE = "https://data.bettergov.ph/api/v1";
 export const DATA_PORTAL_URL = "https://data.bettergov.ph";
@@ -227,7 +228,7 @@ export async function getResourcePreview(resource: DatasetResource): Promise<Res
     const res = await fetch(resource.download_url, {
       headers: {
         Range: `bytes=0-${PREVIEW_FETCH_BYTES - 1}`,
-        "User-Agent": "Civica-PH/1.0 (+https://civica.ph)",
+        "User-Agent": SOURCE_USER_AGENT,
       },
       signal: AbortSignal.timeout(8000),
       next: { revalidate: DATA_REVALIDATE_SECONDS },

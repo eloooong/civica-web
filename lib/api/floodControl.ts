@@ -10,6 +10,7 @@
  * must never fetch the file directly. Responses are cached for 1 hour.
  */
 import { cache } from "react";
+import { SOURCE_USER_AGENT } from "@/lib/site";
 import { DATA_DOCS_URL, DATA_REVALIDATE_SECONDS, DATA_SOURCE_NAME } from "@/lib/api/datasets";
 import type {
   ContractorFilters,
@@ -103,7 +104,7 @@ export const getFloodContracts = cache(async (): Promise<FloodContract[]> => {
   try {
     res = await fetch(endpoint, {
       next: { revalidate: DATA_REVALIDATE_SECONDS },
-      headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
+      headers: { "User-Agent": SOURCE_USER_AGENT },
       signal: AbortSignal.timeout(90_000),
     });
   } catch {

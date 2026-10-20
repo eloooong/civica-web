@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
+import { SOURCE_USER_AGENT } from "@/lib/site";
 
 export interface SourceRetrieval {
   endpoint: string;
@@ -23,7 +24,7 @@ const readSnapshot = cache(async (endpoint: string, cacheSeconds: number) => {
     async () => {
       const response = await fetch(endpoint, {
         cache: "no-store",
-        headers: { "User-Agent": "Civica-PH/1.0 (+https://civica.ph)" },
+        headers: { "User-Agent": SOURCE_USER_AGENT },
       });
       if (!response.ok) {
         throw new UncachedHttpResponse(response, {

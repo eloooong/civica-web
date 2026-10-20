@@ -141,7 +141,7 @@ npm run build
 npm start
 ```
 
-No application environment variables are required by the current implementation. The host needs network access to the public data sources.
+No application environment variables are required on Vercel. Metadata, the sitemap, and robots use Vercel's production domain automatically. For a custom domain or another host, optionally set `SITE_URL` to the full public origin, including `https://`. Local development defaults to `http://localhost:3000`. The host needs network access to the public data sources.
 
 ## Acknowledgments and licensing
 
