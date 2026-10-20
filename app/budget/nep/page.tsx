@@ -1,9 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Landmark, Percent } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
-import { StatCard } from "@/components/ui/StatCard";
+import { NepOverview } from "@/components/budget/NepOverview";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
 import { BUDGET_API_BASE, BudgetApiError, getNepOverview } from "@/lib/api/budget";
@@ -248,7 +247,7 @@ export default async function NepPage() {
   }
 
   const { meta, data } = overview;
-  const { national, departments, expense_classes, regions, top_funds, top_programs, top_movers_up, top_movers_down } = data;
+  const { departments, expense_classes, regions, top_funds, top_programs, top_movers_up, top_movers_down } = data;
   const generatedOn = new Date(meta.generated_at).toLocaleDateString("en-PH", {
     year: "numeric",
     month: "long",
@@ -271,22 +270,9 @@ export default async function NepPage() {
         </span>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-2">
-        <StatCard
-          icon={Landmark}
-          label={`Proposed total · FY ${meta.fiscal_year}`}
-          value={formatPesoCompact(national.amount)}
-          hint="Subject to congressional enactment"
-        />
-        <StatCard
-          icon={Percent}
-          label="Change vs FY 2026"
-          value={formatPctDelta(national.pct)}
-          hint={`${formatPesoDelta(national.delta)} against ${formatPesoCompact(national.base_amount)} enacted`}
-        />
-      </div>
+      <NepOverview meta={meta} data={data} />
 
-      <p className="mt-3 text-sm text-muted">{departments.length} departments · {regions.length} regional groups in this proposal</p>
+      <p className="mt-4 text-sm text-muted">{departments.length} allocation groups · {regions.length} regional groups in this proposal</p>
       <nav aria-label="Proposal sections" className="mt-5 flex flex-wrap gap-2">
         {[['expense-classes-heading', 'Expense classes'], ['regions-heading', 'Regions'], ['nep-departments-heading', 'Departments'], ['movers-heading', 'Biggest movers'], ['top-programs-heading', 'Programs and funds']].map(([id, label]) => (
           <Link key={id} href={`#${id}`} className="inline-flex min-h-11 items-center rounded-md border border-control px-3 text-sm font-semibold text-brand-700 hover:bg-surface">{label}</Link>
@@ -312,7 +298,7 @@ export default async function NepPage() {
       <section aria-labelledby="nep-departments-heading" className="mt-8">
         <SectionHeader id="nep-departments-heading"
           title="By department"
-          description="Every department in the proposal, ranked by proposed amount. Select a department to open its enacted-budget explorer."
+          description={`Departments and other allocation groups, ranked by proposed amount. Department links open the FY${meta.baseline_year} enacted-budget explorer.`}
         />
         <DepartmentTable rows={departments} baselineYear={meta.baseline_year} />
       </section>
@@ -320,7 +306,7 @@ export default async function NepPage() {
       <section aria-labelledby="movers-heading" className="mt-8">
         <SectionHeader id="movers-heading"
           title="Biggest movers"
-          description="Departments whose proposed amounts changed most against FY 2026."
+          description={`Allocation groups with the largest peso changes against FY${meta.baseline_year}. These include automatic appropriations and special purpose funds.`}
         />
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <MoversList title="Largest increases" rows={top_movers_up} tone="up" baselineYear={meta.baseline_year} />
