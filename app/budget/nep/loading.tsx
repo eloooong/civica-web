@@ -30,10 +30,12 @@ export default function NepLoading() {
       </div>
       <div className="space-y-3">
         <Skeleton className="h-7 w-56" />
+        <Skeleton className="h-11 w-full" />
         <TableSkeleton rows={4} cols={5} />
       </div>
       <div className="space-y-3">
         <Skeleton className="h-7 w-56" />
+        <Skeleton className="h-11 w-full" />
         <TableSkeleton rows={8} cols={5} />
       </div>
     </LoadingShell>

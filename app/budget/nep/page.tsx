@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageHeader, SectionHeader } from "@/components/ui/PageHeader";
 import { NepOverview } from "@/components/budget/NepOverview";
+import { NepAllocationTable } from "@/components/budget/NepAllocationTable";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
 import { BUDGET_API_BASE, BudgetApiError, getNepOverview } from "@/lib/api/budget";
-import type { NepDepartmentRow, NepRollupRow } from "@/types/budget";
-import { cn, formatCount, formatPesoCompact, formatPesoDelta, formatPesoFull, formatPctDelta } from "@/lib/utils";
+import type { NepDepartmentRow } from "@/types/budget";
+import { cn, formatCount, formatPesoCompact, formatPesoDelta, formatPctDelta } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "FY2027 Proposed Budget",
@@ -19,157 +20,6 @@ const DEPARTMENT_ID = /^\d{2}$/;
 
 function changeCell(delta: number, pct: number): string {
   return `${formatPesoDelta(delta)} (${formatPctDelta(pct)})`;
-}
-
-function RollupTable({ caption, rows }: { caption: string; rows: NepRollupRow[] }) {
-  const total = rows.reduce((sum, row) => sum + row.amount, 0);
-  return (
-    <>
-    <div
-      tabIndex={0}
-      role="region"
-      aria-label={`${caption}, scrollable table`}
-      className="mt-4 hidden min-w-0 max-w-full overflow-x-auto rounded-lg border border-line bg-white sm:block relative"
-    >
-      <table className="w-full min-w-[560px] border-collapse text-left text-sm">
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-            <th scope="col" className="px-4 py-3 font-semibold">Category</th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">FY 2027 proposed</th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">FY 2026 enacted</th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">Change</th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">Share</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.code} className="border-b border-line last:border-0 hover:bg-surface/60">
-              <td className="px-4 py-3.5">
-                <span className="block font-semibold text-ink">{row.description ?? row.code}</span>
-                <span className="block font-mono text-xs text-muted">
-                  {row.code}
-                  {row.extra ? ` · ${row.extra}` : ""}
-                </span>
-              </td>
-              <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink tabular-nums">
-                {formatPesoFull(row.amount)}
-              </td>
-              <td className="whitespace-nowrap px-4 py-3.5 text-right text-muted tabular-nums">
-                {formatPesoFull(row.base_amount)}
-              </td>
-              <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink tabular-nums">
-                {changeCell(row.delta, row.pct)}
-              </td>
-              <td className="whitespace-nowrap px-4 py-3.5 text-right text-muted tabular-nums">
-                {total > 0 ? `${((row.amount / total) * 100).toFixed(1)}%` : "–"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-    <ul className="mt-4 space-y-3 sm:hidden" aria-label={caption}>
-      {rows.map((row) => (
-        <li key={row.code} className="rounded-lg border border-line bg-white p-4">
-          <h3 className="text-base font-semibold leading-6 text-ink">{row.description ?? row.code}</h3>
-          {row.extra && <p className="mt-1 text-sm text-muted">{row.extra}</p>}
-          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-            <div><dt className="text-muted">FY2027 proposed</dt><dd aria-label={formatPesoFull(row.amount)} title={formatPesoFull(row.amount)} className="mt-1 font-semibold tabular-nums text-ink">{formatPesoCompact(row.amount)}</dd></div>
-            <div><dt className="text-muted">FY2026 enacted</dt><dd aria-label={formatPesoFull(row.base_amount)} title={formatPesoFull(row.base_amount)} className="mt-1 font-semibold tabular-nums text-ink">{formatPesoCompact(row.base_amount)}</dd></div>
-            <div className="col-span-2"><dt className="text-muted">Proposed change</dt><dd className="mt-1 font-semibold tabular-nums text-ink">{changeCell(row.delta, row.pct)}</dd></div>
-            <div className="col-span-2"><dt className="text-muted">Share of this breakdown</dt><dd className="mt-1 tabular-nums text-ink">{total > 0 ? `${((row.amount / total) * 100).toFixed(1)}%` : "Unavailable"}</dd></div>
-          </dl>
-        </li>
-      ))}
-    </ul>
-    </>
-  );
-}
-
-function DepartmentTable({ rows, baselineYear }: { rows: NepDepartmentRow[]; baselineYear: number }) {
-  return (
-    <>
-      <div
-        tabIndex={0}
-        role="region"
-        aria-label="FY2027 proposed budget by department with change against FY2026, scrollable table"
-        className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
-      >
-        <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
-          <caption className="sr-only">
-            FY2027 proposed budget by department with change against FY2026
-          </caption>
-          <thead>
-            <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-              <th scope="col" className="px-4 py-3 font-semibold">Department</th>
-              <th scope="col" className="px-4 py-3 text-right font-semibold">FY 2027 proposed</th>
-              <th scope="col" className="px-4 py-3 text-right font-semibold">FY 2026 enacted</th>
-              <th scope="col" className="px-4 py-3 text-right font-semibold">Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-b border-line last:border-0 hover:bg-surface/60">
-                <td className="px-4 py-3.5">
-                  {DEPARTMENT_ID.test(row.id) ? (
-                    <Link
-                      href={`/budget/${row.id}?year=${baselineYear}`}
-                      aria-label={`${row.description}: FY ${baselineYear} enacted budget`}
-                      className="block font-semibold text-ink hover:text-brand-700 hover:underline"
-                    >
-                      {row.description}
-                    </Link>
-                  ) : (
-                    <span className="block font-semibold text-ink">{row.description}</span>
-                  )}
-                  <span className="block text-xs text-muted">
-                    {formatCount(row.programs)} programs
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink tabular-nums">
-                  {formatPesoFull(row.amount)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-right text-muted tabular-nums">
-                  {formatPesoFull(row.base_amount)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold text-ink tabular-nums">
-                  {changeCell(row.delta, row.pct)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <ul className="mt-4 space-y-3 sm:hidden">
-        {rows.map((row) => (
-          <li key={row.id} className="rounded-lg border border-line bg-white p-4">
-            {DEPARTMENT_ID.test(row.id) ? (
-              <Link
-                href={`/budget/${row.id}?year=${baselineYear}`}
-                      aria-label={`${row.description}: FY ${baselineYear} enacted budget`}
-                className="block text-sm font-semibold text-ink hover:text-brand-700 hover:underline"
-              >
-                {row.description}
-              </Link>
-            ) : (
-              <p className="text-sm font-semibold text-ink">{row.description}</p>
-            )}
-            <p className="mt-0.5 text-xs text-muted">
-              {formatCount(row.programs)} programs
-            </p>
-            <p className="mt-2 text-sm font-bold tabular-nums text-ink">
-              {formatPesoFull(row.amount)}{" "}
-              <span className="font-normal text-muted">· {changeCell(row.delta, row.pct)}</span>
-            </p>
-            <p className="mt-1 text-xs tabular-nums text-muted">
-              FY2026 enacted {formatPesoFull(row.base_amount)}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
 }
 
 function MoversList({
@@ -284,7 +134,15 @@ export default async function NepPage() {
           title="By expense class"
           description="Personnel, maintenance, capital outlays, and financial expenditures in the proposal."
         />
-        <RollupTable caption="FY2027 proposal by expense class against FY2026 enacted" rows={expense_classes} />
+        <NepAllocationTable
+          kind="expense classes"
+          fiscalYear={meta.fiscal_year}
+          baselineYear={meta.baseline_year}
+          rows={expense_classes.map((row) => ({
+            id: row.code, name: row.description ?? row.code, detail: row.extra ?? undefined,
+            amount: row.amount, base_amount: row.base_amount, delta: row.delta, pct: row.pct,
+          }))}
+        />
       </section>
 
       <section aria-labelledby="regions-heading" className="mt-8">
@@ -292,15 +150,32 @@ export default async function NepPage() {
           title="By region"
           description="Where the proposal would be spent. Regional tagging comes from the NEP source file."
         />
-        <RollupTable caption="FY2027 proposal by region against FY2026 enacted" rows={regions} />
+        <NepAllocationTable
+          kind="regions"
+          fiscalYear={meta.fiscal_year}
+          baselineYear={meta.baseline_year}
+          rows={regions.map((row) => ({
+            id: row.code, name: row.description ?? row.code, detail: row.extra ?? undefined,
+            amount: row.amount, base_amount: row.base_amount, delta: row.delta, pct: row.pct,
+          }))}
+        />
       </section>
 
       <section aria-labelledby="nep-departments-heading" className="mt-8">
         <SectionHeader id="nep-departments-heading"
           title="By department"
-          description={`Departments and other allocation groups, ranked by proposed amount. Department links open the FY${meta.baseline_year} enacted-budget explorer.`}
+          description={`Search departments and other allocation groups, or sort by amount and change. Department links open the FY${meta.baseline_year} enacted-budget explorer.`}
         />
-        <DepartmentTable rows={departments} baselineYear={meta.baseline_year} />
+        <NepAllocationTable
+          kind="departments"
+          fiscalYear={meta.fiscal_year}
+          baselineYear={meta.baseline_year}
+          rows={departments.map((row) => ({
+            id: row.id, name: row.description, detail: `${formatCount(row.programs)} programs`,
+            href: DEPARTMENT_ID.test(row.id) ? `/budget/${row.id}?year=${meta.baseline_year}` : undefined,
+            amount: row.amount, base_amount: row.base_amount, delta: row.delta, pct: row.pct,
+          }))}
+        />
       </section>
 
       <section aria-labelledby="movers-heading" className="mt-8">

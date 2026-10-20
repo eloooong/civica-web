@@ -40,7 +40,7 @@ The application uses public, read-only data sources. Local setup requires no dat
 | **Unified search** | Search budget programs, bills, legislators, and datasets, with collection filters and pagination. |
 | **Budget explorer** | Browse enacted allocations for FY2020–2026 by department, agency, and program. |
 | **Department comparison** | Compare two departments for the same fiscal year, with charts and expense breakdowns. |
-| **Proposed budget** | Explore the FY2027 National Expenditure Program against the FY2026 enacted budget. |
+| **Proposed budget** | Compare FY2027 proposals with FY2026 enacted amounts. Search and sort department, region, and expense-class breakdowns, with compact or exact peso values. |
 | **Budget execution** | Follow available workbook records from proposal through enactment, obligations, and disbursements. |
 | **Budget hearings** | Browse House hearing records, topics, timelines, and transcripts with timestamped video links. |
 | **Congress** | Find bills and legislators, including source-provided authorship, dates, and document links. |
