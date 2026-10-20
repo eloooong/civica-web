@@ -409,7 +409,7 @@ export default async function FloodControlPage({
                   <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
                     <th scope="col" className="px-4 py-3 font-semibold">Contractor</th>
                     <th scope="col" className="px-4 py-3 font-semibold">Project</th>
-                    <th scope="col" className="px-4 py-3 font-semibold">Contract</th>
+                    <th scope="col" className="px-4 py-3 font-semibold">Project dates</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Approved budget</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Component amount</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Funding year</th>
@@ -433,11 +433,8 @@ export default async function FloodControlPage({
                           {c.province} · {c.region}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 align-top font-mono text-xs text-muted">
-                        {c.contractId}
-                        <span className="mt-0.5 block">
-                          {c.startDate} to {c.completionDate || "not recorded"}
-                        </span>
+                      <td className="whitespace-nowrap px-4 py-3.5 align-top text-xs text-muted">
+                        {c.startDate} to {c.completionDate || "not recorded"}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right tabular-nums text-muted">
                         {formatPesoFull(Math.round(c.abc))}
@@ -464,12 +461,9 @@ export default async function FloodControlPage({
                     {c.province} · {c.region}
                   </p>
                   <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    <dt className="text-muted">Contract</dt>
-                    <dd className="text-right font-mono text-ink">
-                      {c.contractId}
-                      <span className="mt-0.5 block text-[11px] not-italic text-muted">
-                        {c.startDate} to {c.completionDate || "not recorded"}
-                      </span>
+                    <dt className="text-muted">Project dates</dt>
+                    <dd className="text-right text-ink">
+                      {c.startDate} to {c.completionDate || "not recorded"}
                     </dd>
                     <dt className="text-muted">Approved budget</dt>
                     <dd className="text-right tabular-nums text-ink">{formatPesoFull(Math.round(c.abc))}</dd>
