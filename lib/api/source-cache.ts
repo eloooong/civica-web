@@ -2,6 +2,8 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { SOURCE_USER_AGENT } from "@/lib/site";
 
+export const SOURCE_REQUEST_TIMEOUT_MS = 15_000;
+
 export interface SourceRetrieval {
   endpoint: string;
   retrievedAt: string;
@@ -25,6 +27,7 @@ const readSnapshot = cache(async (endpoint: string, cacheSeconds: number) => {
       const response = await fetch(endpoint, {
         cache: "no-store",
         headers: { "User-Agent": SOURCE_USER_AGENT },
+        signal: AbortSignal.timeout(SOURCE_REQUEST_TIMEOUT_MS),
       });
       if (!response.ok) {
         throw new UncachedHttpResponse(response, {
@@ -34,13 +37,14 @@ const readSnapshot = cache(async (endpoint: string, cacheSeconds: number) => {
         });
       }
       const body = await response.text();
+      if (response.status !== 204 && response.status !== 205) JSON.parse(body);
       return {
         body,
         status: response.status,
         retrieval: { endpoint, retrievedAt: new Date().toISOString(), cacheSeconds },
       };
     },
-    ["civica-source-response-v1", endpoint, String(cacheSeconds)],
+    ["civica-source-response-v2", endpoint, String(cacheSeconds)],
     { revalidate: cacheSeconds }
   )();
 });

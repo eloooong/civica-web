@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "check:production": "node scripts/check-production.mjs"
   },
   "dependencies": {
     "@number-flow/react": "^0.6.2",

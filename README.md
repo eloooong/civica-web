@@ -74,6 +74,8 @@ Open [localhost:3000](http://localhost:3000).
 | `npm run dev` | Start the local development server. |
 | `npm run lint` | Run ESLint. |
 | `npm run typecheck` | Check TypeScript without emitting files. |
+| `npm test` | Run request-failure and production-monitor regression tests. |
+| `npm run check:production -- https://your-domain.example` | Check application health and core data pages. |
 | `npm run build` | Create the production build. |
 | `npm start` | Serve the production build. |
 
@@ -96,6 +98,7 @@ Some source contract IDs use scientific notation and some source text has encodi
 - A failed refresh may leave an older cached response visible with its original timestamp.
 - Recorded retrieval times display in Philippine time and are distinct from a publisher's update date. Missing timestamps are labeled unavailable.
 - Missing national budget figures display as **Unavailable**, without a fabricated fallback amount.
+- Shared JSON source requests time out after 15 seconds, including response-body reads. Malformed JSON and failed requests are not stored as successful snapshots. Flood snapshot downloads retain their 30-second limit; text previews retain their 8-second limit.
 - Search handles source failures independently so an unavailable collection does not prevent other collections from returning results.
 
 ## Architecture
@@ -134,6 +137,7 @@ Before submitting a change, run:
 ```bash
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
@@ -147,6 +151,14 @@ npm start
 ```
 
 No application environment variables are required on Vercel. Metadata, the sitemap, and robots use Vercel's production domain automatically. For a custom domain or another host, optionally set `SITE_URL` to the full public origin, including `https://`. Local development defaults to `http://localhost:3000`. The host needs network access to the public data sources.
+
+### Automated checks and production monitoring
+
+The CI workflow runs installation, lint, route-type generation, TypeScript checks, regression tests, and a production build on pushes and pull requests to `main`. It uses Node.js 24, read-only repository permissions, and pinned GitHub Actions revisions. These checks report results; direct pushes and Vercel deployments remain independent of CI.
+
+The Production health workflow checks the live site after Vercel reports a successful deployment on `main`, every six hours, and on manual runs from the Actions page. It verifies application liveness, the homepage, budget explorer, FY2027 proposal, hearings, Congress, dataset catalog, and flood-control pages. Checks fail on HTTP errors, missing source attribution, incomplete pages, or rendered error states even when the response is HTTP 200. Results appear in GitHub Actions; notification delivery follows your GitHub notification settings.
+
+The workflow defaults to the current Vercel production domain. Set the repository Actions variable `PRODUCTION_URL` when changing that domain. For local or manual checks, supply the origin on the command line or through the `PRODUCTION_URL` environment variable. `/api/health` is an uncached liveness endpoint; it does not query upstream data sources. Page checks exercise the application's cached data journeys and do not certify that every upstream record is current.
 
 ## Acknowledgments and licensing
 
