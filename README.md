@@ -49,6 +49,8 @@ The application uses public, read-only data sources. Local setup requires no dat
 
 The interface includes responsive layouts, shareable filter URLs, keyboard navigation, chart text alternatives, and visible focus states. Overview and source sections start expanded. Motion respects the system's reduced-motion preference, and the hero animation pauses when out of view or when the browser tab is hidden.
 
+FY2027 proposal breakdowns offer CSV downloads of the current search results in the selected sort order. Exports retain exact peso amounts, fiscal years, proposal status, and the source response's retrieval time. Shares retain the complete breakdown's denominator. Shared source panels provide copyable citations, with a manual-copy field when clipboard access is unavailable.
+
 ## Getting started
 
 ### Requirements

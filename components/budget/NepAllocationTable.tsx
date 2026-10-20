@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { formatPesoCompact, formatPesoFull, formatPctDelta } from "@/lib/utils";
+import { toCsv } from "@/lib/csv";
+import type { SourceRetrieval } from "@/lib/api/source-cache";
 
 export interface NepAllocationRow {
   id: string;
@@ -35,11 +37,15 @@ export function NepAllocationTable({
   kind,
   fiscalYear,
   baselineYear,
+  source,
+  retrieval,
 }: {
   rows: NepAllocationRow[];
   kind: "departments" | "regions" | "expense classes";
   fiscalYear: number;
   baselineYear: number;
+  source: string;
+  retrieval: SourceRetrieval;
 }) {
   const id = useId();
   const viewport = useRef<HTMLDivElement>(null);
@@ -47,6 +53,7 @@ export function NepAllocationTable({
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOrder>("amount-desc");
   const [exact, setExact] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState("");
   const term = query.trim().toLowerCase();
   const visibleRows = rows.filter((row) =>
     `${row.name} ${row.id} ${row.detail ?? ""}`.toLowerCase().includes(term)
@@ -66,6 +73,33 @@ export function NepAllocationTable({
   const caption = `FY${fiscalYear} proposed budget by ${kind} against FY${baselineYear} enacted`;
   const countLabel = kind === "departments" ? "allocation groups" : kind;
   const nameLabel = kind === "departments" ? "Allocation group" : "Category";
+
+  function downloadCsv() {
+    try {
+      const csv = toCsv([
+        ["code", "name", "detail", "proposed_fiscal_year", "enacted_fiscal_year", "proposed_php", "enacted_php", "change_php", "change_percent",
+          ...(showShare ? ["share_percent", "complete_breakdown_total_php"] : []),
+          "currency", "proposal_status", "search_filter", "sort_order", "source", "source_endpoint", "retrieved_at_utc"],
+        ...visibleRows.map((row) => [row.id, row.name, row.detail, fiscalYear, baselineYear, row.amount, row.base_amount, row.delta, row.base_amount > 0 ? row.pct : null,
+          ...(showShare ? [total > 0 ? row.amount / total * 100 : null, total] : []),
+          "PHP", "Proposed, not enacted", query.trim(), sort, source, retrieval.endpoint, retrieval.retrievedAt]),
+      ]);
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `civica-nep-fy${fiscalYear}-${kind.replaceAll(" ", "-")}${term ? "-filtered" : ""}.csv`;
+      document.body.appendChild(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      setDownloadStatus(`CSV download started with ${visibleRows.length} ${visibleRows.length === 1 ? "row" : "rows"}.`);
+    } catch {
+      setDownloadStatus("Could not start the CSV download. Please try again.");
+    }
+  }
 
   function resetScroll() {
     if (viewport.current) viewport.current.scrollTop = 0;
@@ -115,7 +149,7 @@ export function NepAllocationTable({
               type="search"
               autoComplete="off"
               value={query}
-              onChange={(event) => { setQuery(event.target.value); resetScroll(); }}
+              onChange={(event) => { setQuery(event.target.value); setDownloadStatus(""); resetScroll(); }}
               placeholder="Name or code"
               className="min-h-11 w-full rounded-md border border-control bg-white py-2 pl-9 pr-3 text-base text-ink placeholder:text-muted"
             />
@@ -123,7 +157,7 @@ export function NepAllocationTable({
         </div>
         <div className="sm:w-60">
           <label htmlFor={`${id}-sort`} className="mb-1.5 block text-xs font-semibold text-muted">Sort {kind}</label>
-          <select id={`${id}-sort`} value={sort} onChange={(event) => { setSort(event.target.value as SortOrder); resetScroll(); }} className="min-h-11 w-full rounded-md border border-control bg-white px-3 py-2 text-base text-ink">
+          <select id={`${id}-sort`} value={sort} onChange={(event) => { setSort(event.target.value as SortOrder); setDownloadStatus(""); resetScroll(); }} className="min-h-11 w-full rounded-md border border-control bg-white px-3 py-2 text-base text-ink">
             <option value="amount-desc">Largest proposal first</option>
             <option value="amount-asc">Smallest proposal first</option>
             <option value="baseline-desc">Largest enacted first</option>
@@ -136,7 +170,12 @@ export function NepAllocationTable({
           <input type="checkbox" checked={exact} onChange={(event) => setExact(event.target.checked)} aria-label={`Show exact amounts for ${kind}`} className="h-4 w-4 accent-brand-700" />
           Exact amounts
         </label>
+        <button type="button" onClick={downloadCsv} disabled={visibleRows.length === 0} aria-label={`Download shown ${kind} as CSV`} aria-describedby={`${id}-export-help`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-control bg-white px-3 text-sm font-semibold text-brand-700 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50">
+          <Download aria-hidden="true" className="h-4 w-4" /> Download CSV
+        </button>
       </div>
+      <p id={`${id}-export-help`} className="mt-1 text-xs leading-5 text-muted">CSV includes the shown rows in this sort order, exact peso values, source, and retrieval time.</p>
+      <p role="status" className="text-xs leading-5 text-muted">{downloadStatus}</p>
       <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-xs leading-5 text-muted">
         <p role="status">Showing {visibleRows.length} of {rows.length} {countLabel}</p>
         <p id={`${id}-units`}>{exact ? "All amounts in Philippine pesos." : "Philippine pesos. T = trillion; B = billion; M = million."}</p>

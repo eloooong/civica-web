@@ -1,6 +1,8 @@
 import { ExternalLink } from "lucide-react";
 import type { SourceRetrieval } from "@/lib/api/source-cache";
 import { formatRetrievalTime, isRetrievalStale } from "@/lib/freshness";
+import { buildSourceCitation } from "@/lib/citation";
+import { CopyCitation } from "@/components/ui/CopyCitation";
 
 /**
  * Source transparency block. Render under every government-data section so
@@ -81,6 +83,7 @@ export function SourceAttribution({
           </a>
         </p>
       </details>
+      <CopyCitation citation={buildSourceCitation({ source, dataset, endpoint, docsUrl, requests })} />
     </aside>
   );
 }

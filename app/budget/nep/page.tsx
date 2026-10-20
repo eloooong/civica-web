@@ -6,7 +6,7 @@ import { NepOverview } from "@/components/budget/NepOverview";
 import { NepAllocationTable } from "@/components/budget/NepAllocationTable";
 import { ErrorState } from "@/components/ui/States";
 import { SourceAttribution } from "@/components/budget/SourceAttribution";
-import { BUDGET_API_BASE, BudgetApiError, getNepOverview } from "@/lib/api/budget";
+import { BUDGET_API_BASE, BUDGET_SOURCE_NAME, BudgetApiError, getNepOverview } from "@/lib/api/budget";
 import type { NepDepartmentRow } from "@/types/budget";
 import { cn, formatCount, formatPesoCompact, formatPesoDelta, formatPctDelta } from "@/lib/utils";
 
@@ -136,6 +136,8 @@ export default async function NepPage() {
         />
         <NepAllocationTable
           kind="expense classes"
+          source={BUDGET_SOURCE_NAME}
+          retrieval={overview.retrieval}
           fiscalYear={meta.fiscal_year}
           baselineYear={meta.baseline_year}
           rows={expense_classes.map((row) => ({
@@ -152,6 +154,8 @@ export default async function NepPage() {
         />
         <NepAllocationTable
           kind="regions"
+          source={BUDGET_SOURCE_NAME}
+          retrieval={overview.retrieval}
           fiscalYear={meta.fiscal_year}
           baselineYear={meta.baseline_year}
           rows={regions.map((row) => ({
@@ -168,6 +172,8 @@ export default async function NepPage() {
         />
         <NepAllocationTable
           kind="departments"
+          source={BUDGET_SOURCE_NAME}
+          retrieval={overview.retrieval}
           fiscalYear={meta.fiscal_year}
           baselineYear={meta.baseline_year}
           rows={departments.map((row) => ({
