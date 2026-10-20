@@ -197,9 +197,9 @@ export default async function HearingTimelinePage({
           tabIndex={0}
           role="region"
           aria-label="Sections of this hearing, scrollable table"
-          className="mt-4 overflow-x-auto rounded-lg border border-line"
+          className="data-table-scroll mt-4 overflow-x-auto rounded-lg border border-line"
         >
-          <table className="w-full min-w-[420px] border-collapse bg-white text-left text-sm">
+          <table className="data-table w-full min-w-[420px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               Sections of this hearing in order, with time and kind
             </caption>

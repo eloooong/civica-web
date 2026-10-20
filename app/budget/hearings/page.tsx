@@ -331,9 +331,9 @@ export default async function HearingsPage({
               tabIndex={0}
               role="region"
               aria-label="House budget hearings, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+              className="data-table-scroll mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
+              <table className="data-table w-full min-w-[620px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   House Committee on Appropriations budget hearings for the FY2027 proposed budget
                 </caption>

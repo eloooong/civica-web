@@ -179,6 +179,55 @@ input, textarea {
   background-color: #94a3b8;
 }
 
+/* Shared table rhythm: readable labels, stable headers, and clear row tracking. */
+.data-table-scroll {
+  max-height: min(70vh, 42rem);
+  overflow: auto;
+  border-radius: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f8fafc;
+  scroll-padding-top: 4.5rem;
+}
+
+.data-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  line-height: 1.5;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid var(--color-line);
+  background: #f1f5f9;
+  padding: 0.875rem 1rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.data-table tbody > tr > :is(td, th) {
+  border-bottom: 1px solid var(--color-line);
+  padding: 1rem;
+  vertical-align: top;
+}
+
+.data-table tbody > tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.data-table tbody > tr:hover,
+.data-table tbody > tr:focus-within {
+  background: var(--color-brand-50);
+}
+
+.data-table tbody > tr:last-child > :is(td, th) {
+  border-bottom: 0;
+}
+
 /* Skip-to-content link: hidden until focused */
 .skip-link {
   position: absolute;

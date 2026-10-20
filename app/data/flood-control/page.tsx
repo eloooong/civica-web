@@ -399,48 +399,45 @@ export default async function FloodControlPage({
               tabIndex={0}
               role="region"
               aria-label="Flood control contracts with contractor, approved budget, and awarded amount, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+              className="data-table-scroll mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[960px] border-collapse bg-white text-left text-sm [&_td]:align-top [&_th]:align-top">
+              <table className="data-table w-full min-w-[840px] table-fixed bg-white text-left text-sm">
                 <caption className="sr-only">
                   Flood control contracts with contractor, approved budget, and awarded amount
                 </caption>
+                <colgroup><col className="w-[40%]" /><col className="w-[27%]" /><col className="w-[23%]" /><col className="w-[10%]" /></colgroup>
                 <thead>
                   <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
-                    <th scope="col" className="px-4 py-3 font-semibold">Contractor</th>
                     <th scope="col" className="px-4 py-3 font-semibold">Project</th>
-                    <th scope="col" className="px-4 py-3 font-semibold">Project dates</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Approved budget</th>
+                    <th scope="col" className="px-4 py-3 font-semibold">Contractor</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Component amount</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Funding year</th>
+                    <th scope="col" className="px-4 py-3 text-right font-semibold">Funding<span className="block">year</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.items.map((c) => (
                     <tr key={`${c.contractId}-${c.projectComponentId}`} className="border-b border-line last:border-0 hover:bg-surface/60">
+                      <th scope="row" className="break-words px-4 py-3.5 text-left font-normal">
+                        <span className="block font-semibold leading-6 text-ink">{c.projectDescription}</span>
+                        <span className="mt-2 block text-xs leading-5 text-muted">
+                          {c.municipality ? `${c.municipality} · ` : ""}{c.province} · {c.region}
+                        </span>
+                        <span className="mt-2 block text-xs leading-5 text-muted">
+                          Project dates: {c.startDate} to {c.completionDate || "not recorded"}
+                        </span>
+                      </th>
                       <td className="px-4 py-3.5 align-top">
                         <Link
                           href={pageHref({ contractor: c.contractor }, 1)}
-                          className="font-semibold text-ink hover:text-brand-700 hover:underline"
+                          className="block break-words text-sm font-medium leading-6 text-ink underline decoration-line underline-offset-4 hover:text-brand-700 hover:decoration-brand-700"
                         >
                           {c.contractor || "Not recorded"}
                         </Link>
                       </td>
-                      <td className="max-w-[360px] px-4 py-3.5 align-top">
-                        <span className="block leading-5 text-ink">{c.projectDescription}</span>
-                        <span className="mt-0.5 block text-xs text-muted">
-                          {c.municipality ? `${c.municipality} · ` : ""}
-                          {c.province} · {c.region}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 align-top text-xs text-muted">
-                        {c.startDate} to {c.completionDate || "not recorded"}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right tabular-nums text-muted">
-                        {formatPesoFull(Math.round(c.abc))}
-                      </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold tabular-nums text-ink">
                         {formatPesoFull(Math.round(c.contractCost))}
+                        <span className="mt-3 block text-xs font-normal text-muted">Approved budget</span>
+                        <span className="mt-0.5 block text-sm font-normal text-muted">{formatPesoFull(Math.round(c.abc))}</span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right tabular-nums text-muted">
                         {c.fundingYear > 0 ? c.fundingYear : "–"}
@@ -454,13 +451,13 @@ export default async function FloodControlPage({
             <ul className="mt-4 space-y-3 sm:hidden">
               {result.items.map((c) => (
                 <li key={`${c.contractId}-${c.projectComponentId}`} className="rounded-lg border border-line bg-white p-4">
-                  <p className="text-sm font-semibold text-ink">{c.contractor || "Contractor not recorded"}</p>
-                  <p className="mt-1 text-sm leading-5 text-ink/80">{c.projectDescription}</p>
+                  <h3 className="text-sm font-semibold leading-6 text-ink">{c.projectDescription}</h3>
                   <p className="mt-1 text-xs text-muted">
                     {c.municipality ? `${c.municipality} · ` : ""}
                     {c.province} · {c.region}
                   </p>
-                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <Link href={pageHref({ contractor: c.contractor }, 1)} className="mt-3 block text-sm leading-6 text-brand-700 underline underline-offset-4">{c.contractor || "Contractor not recorded"}</Link>
+                  <dl className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] gap-x-4 gap-y-3 border-t border-line pt-4 text-sm">
                     <dt className="text-muted">Project dates</dt>
                     <dd className="text-right text-ink">
                       {c.startDate} to {c.completionDate || "not recorded"}

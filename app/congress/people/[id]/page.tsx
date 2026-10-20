@@ -143,9 +143,9 @@ export default async function PersonDetailPage({
             tabIndex={0}
             role="region"
             aria-label={`Congresses served by ${name}, scrollable table`}
-            className="mt-4 overflow-x-auto rounded-lg border border-line"
+            className="data-table-scroll mt-4 overflow-x-auto rounded-lg border border-line"
           >
-            <table className="w-full min-w-[480px] border-collapse bg-white text-left text-sm">
+            <table className="data-table w-full min-w-[480px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">Congresses served by {name}</caption>
               <thead>
                 <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">

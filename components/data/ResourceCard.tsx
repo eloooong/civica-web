@@ -71,9 +71,9 @@ export function ResourceCard({
             tabIndex={0}
             role="region"
             aria-label={`First rows of ${resource.name}, scrollable table`}
-            className="mt-2 overflow-x-auto rounded-md border border-line"
+            className="data-table-scroll mt-2 overflow-x-auto rounded-md border border-line"
           >
-            <table className="w-full border-collapse bg-white text-left text-xs">
+            <table className="data-table w-full border-collapse bg-white text-left text-xs">
               <caption className="sr-only">First rows of {resource.name}</caption>
               <thead>
                 <tr className="border-b border-line bg-surface">

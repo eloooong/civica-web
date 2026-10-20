@@ -363,9 +363,9 @@ export default async function ComparePage({
               tabIndex={0}
               role="region"
               aria-label={`Expense classes for ${rowA.description} and ${rowB.description} in FY ${year}, scrollable table`}
-              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+              className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[620px] border-collapse bg-white text-left text-sm">
+              <table className="data-table w-full min-w-[620px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   Expense classes for {rowA.description} and {rowB.description} in FY {year}
                 </caption>

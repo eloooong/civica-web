@@ -496,9 +496,9 @@ export default async function BudgetProgramPage({
             tabIndex={0}
             role="region"
             aria-label={`${name} appropriation history, FY2020 to FY2026, scrollable table`}
-            className="mt-4 overflow-x-auto rounded-lg border border-line"
+            className="data-table-scroll mt-4 overflow-x-auto rounded-lg border border-line"
           >
-            <table className="w-full min-w-[320px] border-collapse bg-white text-left text-sm">
+            <table className="data-table w-full min-w-[320px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
                 {name} appropriation history, FY2020 to FY2026
               </caption>
@@ -565,9 +565,9 @@ export default async function BudgetProgramPage({
             tabIndex={0}
             role="region"
             aria-label={`Spending categories for ${name} in FY ${year}, scrollable table`}
-            className="mt-4 overflow-x-auto rounded-lg border border-line"
+            className="data-table-scroll mt-4 overflow-x-auto rounded-lg border border-line"
           >
-            <table className="w-full min-w-[340px] border-collapse bg-white text-left text-sm">
+            <table className="data-table w-full min-w-[340px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">Spending categories for {name} in FY {year}</caption>
               <thead>
                 <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">

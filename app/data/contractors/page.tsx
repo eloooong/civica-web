@@ -279,34 +279,34 @@ export default async function ContractorsPage({
               tabIndex={0}
               role="region"
               aria-label="Contractors by awarded flood control contract value, scrollable table"
-              className="mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+              className="data-table-scroll mt-3 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[880px] border-collapse bg-white text-left text-sm [&_td]:align-top [&_th]:align-top">
+              <table className="data-table w-full min-w-[880px] table-fixed bg-white text-left text-sm">
                 <caption className="sr-only">
                   Contractors by awarded flood control contract value
                 </caption>
+                <colgroup><col className="w-[36%]" /><col className="w-[10%]" /><col className="w-[18%]" /><col className="w-[18%]" /><col className="w-[18%]" /></colgroup>
                 <thead>
                   <tr className="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
                     <th scope="col" className="px-4 py-3 font-semibold">Company</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Contracts</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Awarded amount</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Approved budget</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Regions</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Years active</th>
-                    <th scope="col" className="px-4 py-3 font-semibold"><span className="sr-only">Links</span></th>
+                    <th scope="col" className="px-4 py-3 text-right font-semibold">Coverage</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.items.map((c) => (
                     <tr key={c.contractor} className="border-b border-line last:border-0 hover:bg-surface/60">
-                      <td className="max-w-[320px] px-4 py-3.5">
+                      <th scope="row" className="break-words px-4 py-3.5 text-left font-normal">
                         <Link
                           href={contractsHref(c.contractor)}
-                          className="font-semibold text-ink hover:text-brand-700 hover:underline"
+                          className="block font-semibold leading-6 text-ink hover:text-brand-700"
                         >
                           {c.contractor}
+                          <span className="mt-2 block text-xs font-medium text-brand-700 underline underline-offset-4">View contracts</span>
                         </Link>
-                      </td>
+                      </th>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right font-semibold tabular-nums text-ink">
                         {formatCount(c.contracts)}
                       </td>
@@ -317,18 +317,8 @@ export default async function ContractorsPage({
                         {formatPesoFull(Math.round(c.totalAbc))}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right tabular-nums text-muted">
-                        {formatCount(c.regions)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right tabular-nums text-muted">
-                        {yearsLabel(c.firstYear, c.lastYear)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3.5">
-                        <Link
-                          href={contractsHref(c.contractor)}
-                          className="text-sm font-semibold text-brand-700 hover:underline"
-                        >
-                          View contracts
-                        </Link>
+                        <span className="block">{formatCount(c.regions)} {c.regions === 1 ? "region" : "regions"}</span>
+                        <span className="mt-2 block text-xs">{yearsLabel(c.firstYear, c.lastYear)}</span>
                       </td>
                     </tr>
                   ))}
@@ -345,7 +335,7 @@ export default async function ContractorsPage({
                   >
                     {c.contractor}
                   </Link>
-                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <dl className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] gap-x-4 gap-y-3 border-t border-line pt-4 text-sm">
                     <dt className="text-muted">Contracts</dt>
                     <dd className="text-right font-semibold tabular-nums text-ink">
                       {formatCount(c.contracts)}

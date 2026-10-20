@@ -225,9 +225,9 @@ export default async function BudgetDepartmentPage({
           tabIndex={0}
           role="region"
           aria-label={`${department.description} agencies with FY ${year} enacted amounts, scrollable table`}
-          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+          className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
         >
-          <table className="w-full min-w-[560px] border-collapse bg-white text-left text-sm">
+          <table className="data-table w-full min-w-[560px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               {department.description} agencies with FY {year} enacted amounts
             </caption>
@@ -363,9 +363,9 @@ export default async function BudgetDepartmentPage({
               tabIndex={0}
               role="region"
               aria-label={`Programs of ${department.description} in FY ${year}${q ? ` matching ${q}` : ""}, scrollable table`}
-              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+              className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
             >
-              <table className="w-full min-w-[640px] border-collapse bg-white text-left text-sm">
+              <table className="data-table w-full min-w-[640px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   Programs of {department.description} in FY {year}
                   {q ? ` matching “${q}”` : ""}
@@ -464,9 +464,9 @@ export default async function BudgetDepartmentPage({
             tabIndex={0}
             role="region"
             aria-label={`Largest line items of ${department.description} in FY ${year}, scrollable table`}
-            className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
+            className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block"
           >
-            <table className="w-full min-w-[560px] border-collapse bg-white text-left text-sm">
+            <table className="data-table w-full min-w-[560px] border-collapse bg-white text-left text-sm">
               <caption className="sr-only">
                 Largest line items of {department.description} in FY {year}
               </caption>

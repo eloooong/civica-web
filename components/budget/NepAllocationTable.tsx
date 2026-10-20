@@ -189,8 +189,8 @@ export function NepAllocationTable({
         </div>
       ) : (
         <>
-          <div ref={viewport} role="region" tabIndex={0} aria-label={`${caption}, scrollable table`} aria-describedby={`${id}-units`} className="rail-scroll relative mt-3 hidden max-h-[36rem] max-w-full overflow-auto rounded-lg border border-line bg-white sm:block">
-            <table className="w-full min-w-[680px] border-separate border-spacing-0 text-left text-sm">
+          <div ref={viewport} role="region" tabIndex={0} aria-label={`${caption}, scrollable table`} aria-describedby={`${id}-units`} className="data-table-scroll rail-scroll relative mt-3 hidden max-h-[36rem] max-w-full overflow-auto rounded-lg border border-line bg-white sm:block">
+            <table className="data-table w-full min-w-[680px] border-separate border-spacing-0 text-left text-sm">
               <caption className="sr-only">{caption}{showShare ? ". Shares use the complete breakdown, including rows hidden by search." : ""}</caption>
               <thead className="sticky top-0 z-10 bg-surface text-xs text-muted">
                 <tr>

@@ -334,9 +334,9 @@ export default async function BudgetCyclePage({
               tabIndex={0}
               role="region"
               aria-label={`${subjectName} programs by budget stage in FY ${year}, scrollable table`}
-              className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+              className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
             >
-              <table className="w-full min-w-[860px] border-collapse bg-white text-left text-sm">
+              <table className="data-table w-full min-w-[860px] border-collapse bg-white text-left text-sm">
                 <caption className="sr-only">
                   {subjectName} programs by budget stage in FY {year}
                 </caption>
@@ -505,9 +505,9 @@ function manifestView(manifest: CycleManifestResponse, query: string) {
           tabIndex={0}
           role="region"
           aria-label="Subjects covered by the budget cycle workbook and their year coverage, scrollable table"
-          className="mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
+          className="data-table-scroll mt-4 hidden overflow-x-auto rounded-lg border border-line sm:block relative min-w-0 max-w-full"
         >
-          <table className="w-full min-w-[680px] border-collapse bg-white text-left text-sm">
+          <table className="data-table w-full min-w-[680px] border-collapse bg-white text-left text-sm">
             <caption className="sr-only">
               Subjects covered by the budget cycle workbook and their year coverage
             </caption>
