@@ -45,7 +45,7 @@ The application uses public, read-only data sources. Local setup requires no dat
 | **Budget hearings** | Browse House hearing records, topics, timelines, and transcripts with timestamped video links. |
 | **Congress** | Find bills and legislators, including source-provided authorship, dates, and document links. |
 | **Government data** | Filter datasets by category and publisher, inspect resources, and preview supported files. |
-| **Flood control and contractors** | Filter project contracts and contractor summaries when the upstream data file is available. |
+| **Flood control and contractors** | Explore a dated BetterGov.PH project snapshot, with distinct contract counts and contractor summaries. |
 
 The interface includes responsive layouts, shareable filter URLs, keyboard navigation, chart text alternatives, and visible focus states. Overview and source sections start expanded. Motion respects the system's reduced-motion preference, and the hero animation pauses when out of view or when the browser tab is hidden.
 
@@ -83,7 +83,10 @@ Open [localhost:3000](http://localhost:3000).
 | [Open Congress](https://open-congress-api.bettergov.ph/api/scalar) | Bills, legislators, and related legislative records | `https://open-congress-api.bettergov.ph/api` |
 | [Open Data Portal](https://data.bettergov.ph/docs) | Dataset catalog, publishers, categories, and resources | `https://data.bettergov.ph/api/v1` |
 
-Flood control and contractor views share a separate public JSON feed configured in [`lib/api/floodControl.ts`](lib/api/floodControl.ts). Those views depend on that file remaining available.
+Flood control and contractor views use BetterGov.PH's [published project snapshot](https://github.com/bettergovph/open-data-visualization/blob/fe11cde6cdd04f3f6c7d292c0943f3127986fadb/data/parquet/flood_control_projects.parquet), last changed on December 15, 2025. The original catalog's JSON link is unavailable. The replacement is pinned to a publisher revision, read with Hyparquet on the server, and cached with its actual retrieval time. Snapshot coverage is distinct from the current state of a project.
+
+Rows represent project components. Contract and contractor summaries count distinct contract IDs, sum recorded component amounts, and count each contract's approved budget once. The snapshot's analytical flags are not presented as findings about contractors.
+Some source contract IDs use scientific notation and some source text has encoding artifacts. Values are preserved as published; counts use the recorded IDs.
 
 ### Freshness and provenance
 

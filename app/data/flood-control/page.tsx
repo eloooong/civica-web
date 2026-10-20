@@ -9,13 +9,14 @@ import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
 import { SourceAttribution } from "@/components/ui/SourceAttribution";
 import {
-  FLOOD_CONTROL_JSON_URL,
+  FLOOD_CONTROL_DATA_URL,
   FLOOD_DATASET_NAME,
   FLOOD_DATASET_PAGE,
   FLOOD_DOCS_URL,
   FLOOD_SOURCE_NAME,
   FloodApiError,
   getFloodRegions,
+  getFloodRetrieval,
   getFloodSummary,
   getFloodYears,
   queryFloodContracts,
@@ -26,13 +27,13 @@ import type { FloodContractSort } from "@/types/floodControl";
 export const metadata: Metadata = {
   title: "Flood Control Contracts",
   description:
-    "Who builds Philippine flood control projects: every contract, contractor, approved budget, and award amount from the DPWH flood control dashboard.",
+    "Explore contractors, approved budgets, and project component amounts in BetterGov.PH's published flood control snapshot.",
 };
 
 const RESULTS_PER_PAGE = 25;
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: "cost", label: "Highest contract amount" },
+  { value: "cost", label: "Highest component amount" },
   { value: "abc", label: "Highest approved budget" },
   { value: "contractor", label: "Contractor (A to Z)" },
   { value: "year", label: "Newest funding year" },
@@ -105,8 +106,9 @@ export default async function FloodControlPage({
   let regions;
   let years;
   let result;
+  let retrieval;
   try {
-    [summary, regions, years, result] = await Promise.all([
+    [summary, regions, years, result, retrieval] = await Promise.all([
       getFloodSummary(),
       getFloodRegions(),
       getFloodYears(),
@@ -119,23 +121,24 @@ export default async function FloodControlPage({
         page,
         pageSize: RESULTS_PER_PAGE,
       }),
+      getFloodRetrieval(),
     ]);
   } catch (err) {
     return shell(
       "Flood control contracts",
-      "Every flood control contract recorded in the DPWH flood control dashboard, with the company that built it.",
+      "Contractors and project components in BetterGov.PH's published flood control snapshot.",
       <>
       <ErrorState
         title="Unable to load flood control contracts"
         description={
           err instanceof FloodApiError
-            ? err.isNotFound ? "The published data file could not be found. You can inspect its catalog record below or try again." : `${err.message} (Source: Open Data Portal.)`
+            ? err.isNotFound ? "The published snapshot could not be found. You can inspect the source below or try again." : `${err.message} (Source: BetterGov.PH Transparency Dashboard.)`
             : "The flood control data file may be temporarily unavailable. Please try again."
         }
         retryHref={pageHref(sp, page)}
       />
       <div className="mt-4 flex flex-wrap justify-center gap-3">
-        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View source catalog record</Link>
+        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View published source</Link>
         <Link href="/data" className="inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline">Browse other datasets</Link>
       </div>
       </>
@@ -166,7 +169,7 @@ export default async function FloodControlPage({
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <PageHeader
           title="Flood control contracts"
-          description="Who builds Philippine flood control projects: the contractor, the approved budget, and the awarded amount for every contract in the DPWH flood control dashboard."
+          description="Who builds Philippine flood control projects: contractors, approved budgets, and recorded component amounts in BetterGov.PH's published snapshot."
         />
         <div className="flex flex-wrap gap-3">
           <Link
@@ -179,10 +182,16 @@ export default async function FloodControlPage({
             href={FLOOD_DATASET_PAGE}
             className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
           >
-            Dataset details
+            Published source
           </Link>
         </div>
       </div>
+
+      <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
+        Publisher snapshot dated <time dateTime="2025-12-15">December 15, 2025</time>.
+        One contract can contain several project components. Contract counts and approved budget totals count each contract once; awarded amounts sum its recorded components.
+        Contract IDs are retained as published, including source IDs written in scientific notation.
+      </p>
 
       <OverviewDisclosure title="Dataset overview">
         <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4">
@@ -190,7 +199,7 @@ export default async function FloodControlPage({
             icon={FileText}
             label="Contracts"
             value={formatCount(summary.contracts)}
-            hint="Project components with a contract"
+            hint={`Distinct IDs across ${formatCount(summary.components)} components`}
           />
           <StatCard
             icon={Building2}
@@ -202,7 +211,7 @@ export default async function FloodControlPage({
             icon={Coins}
             label="Awarded amount"
             value={formatPesoCompact(summary.totalCost)}
-            hint="Sum of contract costs"
+            hint="Sum of recorded component amounts"
           />
           <StatCard
             icon={MapPinned}
@@ -215,7 +224,7 @@ export default async function FloodControlPage({
 
       <section aria-labelledby="contracts-heading" className="mt-8">
         <SectionHeader id="contracts-heading"
-          title="Contracts"
+          title="Project components"
           description="Search by project, contractor, or location, then filter by funding year and region. Every filter is reflected in the URL."
         />
 
@@ -382,7 +391,7 @@ export default async function FloodControlPage({
         ) : (
           <>
             <p className="mt-4 text-sm text-muted" role="status">
-              {formatCount(result.total)} contract{result.total === 1 ? "" : "s"} · showing page{" "}
+              {formatCount(result.total)} project component{result.total === 1 ? "" : "s"} · showing page{" "}
               {result.page} of {result.totalPages}
             </p>
 
@@ -402,7 +411,7 @@ export default async function FloodControlPage({
                     <th scope="col" className="px-4 py-3 font-semibold">Project</th>
                     <th scope="col" className="px-4 py-3 font-semibold">Contract</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Approved budget</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Contract amount</th>
+                    <th scope="col" className="px-4 py-3 text-right font-semibold">Component amount</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Funding year</th>
                   </tr>
                 </thead>
@@ -464,7 +473,7 @@ export default async function FloodControlPage({
                     </dd>
                     <dt className="text-muted">Approved budget</dt>
                     <dd className="text-right tabular-nums text-ink">{formatPesoFull(Math.round(c.abc))}</dd>
-                    <dt className="text-muted">Contract amount</dt>
+                    <dt className="text-muted">Component amount</dt>
                     <dd className="text-right font-semibold tabular-nums text-ink">
                       {formatPesoFull(Math.round(c.contractCost))}
                     </dd>
@@ -490,18 +499,18 @@ export default async function FloodControlPage({
       </section>
 
       <p className="mt-6 max-w-3xl rounded-lg border border-line bg-white p-4 text-sm leading-6 text-muted">
-        Approved budget (ABC) is the ceiling set for the bidding; the contract amount is what the
-        winning company was awarded. Both figures, along with contractor names, come from the DPWH
-        flood control dashboard. They record awarded contracts, not budget appropriations, and are
-        reported per project component.
+        Approved budget (ABC) is the contract-wide ceiling for bidding. Component amounts are
+        recorded separately within a contract, so several rows can share the same contract ID and
+        approved budget. Counts and totals cover this published snapshot only.
       </p>
 
       <div className="mt-6">
         <SourceAttribution
           source={FLOOD_SOURCE_NAME}
           docsUrl={FLOOD_DOCS_URL}
-          endpoint={FLOOD_CONTROL_JSON_URL}
+          endpoint={FLOOD_CONTROL_DATA_URL}
           dataset={FLOOD_DATASET_NAME}
+          retrievals={[retrieval]}
         />
       </div>
     </div>

@@ -184,7 +184,7 @@ export default async function BudgetCyclePage({
         {manifestView(manifest, query)}
 
         <div className="mt-8">
-          <SourceAttribution endpoint={`${BUDGET_API_BASE}/budget-cycle`} retrievals={[manifest.retrieval]} />
+          <SourceAttribution dataset="Budget cycle workbook: proposal, enactment, obligations, and disbursements" endpoint={`${BUDGET_API_BASE}/budget-cycle`} retrievals={[manifest.retrieval]} />
         </div>
       </div>
     );
@@ -422,6 +422,7 @@ export default async function BudgetCyclePage({
 
       <div className="mt-6">
         <SourceAttribution
+          dataset="Budget cycle workbook: proposal, enactment, obligations, and disbursements"
           endpoint={`${BUDGET_API_BASE}/budget-cycle/departments/${departmentId}`}
           retrievals={[manifest.retrieval, detail.retrieval]}
         />

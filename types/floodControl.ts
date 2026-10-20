@@ -1,7 +1,6 @@
 /**
- * Flood control contracts (DPWH flood control dashboard, mirrored by the
- * Open Data Portal). The source file is an ArcGIS feature set: one JSON
- * document with a field schema plus feature attributes.
+ * Flood control project components and contracts from BetterGov.PH's
+ * published snapshot, preserving the original source attributes.
  */
 export interface FloodContract {
   contractId: string;
@@ -50,6 +49,7 @@ export interface FloodContractPage {
 
 export interface FloodSummary {
   contracts: number;
+  components: number;
   contractors: number;
   totalCost: number;
   totalAbc: number;
@@ -87,39 +87,4 @@ export interface ContractorPage {
   page: number;
   pageSize: number;
   totalPages: number;
-}
-
-/** Raw ArcGIS feature attributes as they appear in the source JSON. */
-export interface FloodRawAttributes {
-  InfraYear?: number | null;
-  Region?: string | null;
-  Province?: string | null;
-  Municipality?: string | null;
-  ImplementingOffice?: string | null;
-  ProjectID?: string | null;
-  ProjectDescription?: string | null;
-  ProjectComponentID?: string | null;
-  ProjectComponentDescription?: string | null;
-  TypeofWork?: string | null;
-  Longitude?: number | null;
-  Latitude?: number | null;
-  ContractID?: string | null;
-  ABC?: number | null;
-  ContractCost?: number | null;
-  CompletionDateOriginal?: number | null;
-  CompletionYear?: number | null;
-  Contractor?: string | null;
-  FundingYear?: string | number | null;
-  LegislativeDistrict?: string | null;
-  DistrictEngineeringOffice?: string | null;
-  StartDate?: string | null;
-  CompletionDateActual?: string | null;
-}
-
-export interface FloodRawFeature {
-  attributes?: FloodRawAttributes | null;
-}
-
-export interface FloodFeatureSet {
-  features?: FloodRawFeature[] | null;
 }

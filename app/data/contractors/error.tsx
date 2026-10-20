@@ -35,7 +35,7 @@ export default function ContractorsError({
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading contractor data"
-          description="An unexpected error occurred. The Open Data Portal may be temporarily unavailable."
+          description="An unexpected error occurred while loading the published project snapshot. Please try again."
           onRetry={reset}
         />
       </div>

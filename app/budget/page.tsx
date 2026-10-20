@@ -181,7 +181,7 @@ export default async function BudgetPage({
       </section>
 
       <div className="mt-8">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/years/${year}`} retrievals={[national.retrieval, breakdown.retrieval]} />
+        <SourceAttribution dataset="General Appropriations Act (GAA), FY2020–2026" endpoint={`${BUDGET_API_BASE}/gaa/years/${year}`} retrievals={[national.retrieval, breakdown.retrieval]} />
       </div>
     </div>
   );

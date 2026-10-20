@@ -735,6 +735,7 @@ export default async function BudgetProgramPage({
 
       <div className="mt-8">
         <SourceAttribution
+          dataset="General Appropriations Act (GAA), FY2020–2026"
           retrievals={[departmentDetail.retrieval, familyRow?.retrieval, fpapRow?.retrieval]}
           endpoint={[
             `${BUDGET_API_BASE}/gaa/years/${year}/departments/${id}/children`,

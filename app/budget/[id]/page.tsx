@@ -515,7 +515,7 @@ export default async function BudgetDepartmentPage({
       )}
 
       <div className="mt-8">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/gaa/departments/${id}`} retrievals={[detail.retrieval, programs.retrieval, national.retrieval, objects?.retrieval]} />
+        <SourceAttribution dataset="General Appropriations Act (GAA), FY2020–2026" endpoint={`${BUDGET_API_BASE}/gaa/departments/${id}`} retrievals={[detail.retrieval, programs.retrieval, national.retrieval, objects?.retrieval]} />
       </div>
     </div>
   );

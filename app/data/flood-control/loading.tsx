@@ -9,7 +9,7 @@ import {
 
 export default function FloodControlLoading() {
   return (
-    <LoadingShell label="Loading flood control contracts from the Open Data Portal">
+    <LoadingShell label="Loading BetterGov.PH's published flood control snapshot">
       <CrumbSkeleton />
       <HeaderSkeleton />
       <div className="flex flex-wrap gap-3" aria-hidden="true">

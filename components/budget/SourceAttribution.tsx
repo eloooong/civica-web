@@ -2,17 +2,14 @@ import { SourceAttribution as UiSourceAttribution } from "@/components/ui/Source
 import { BUDGET_DOCS_URL, BUDGET_SOURCE_NAME } from "@/lib/api/budget";
 import type { SourceRetrieval } from "@/lib/api/source-cache";
 
-/**
- * Budget-flavored source block. Preserves the Phase 2 call signature so
- * existing budget pages keep working unchanged.
- */
+/** Each page identifies its dataset instead of inheriting an enacted-budget label. */
 export function SourceAttribution({
   endpoint,
-  dataset = "General Appropriations Act (GAA), FY2020–2026",
+  dataset,
   retrievals,
 }: {
   endpoint: string;
-  dataset?: string;
+  dataset: string;
   retrievals?: readonly (SourceRetrieval | null | undefined)[];
 }) {
   return (

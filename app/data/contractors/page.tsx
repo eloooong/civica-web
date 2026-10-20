@@ -9,13 +9,14 @@ import { EmptyState, ErrorState } from "@/components/ui/States";
 import { Pagination } from "@/components/ui/Pagination";
 import { SourceAttribution } from "@/components/ui/SourceAttribution";
 import {
-  FLOOD_CONTROL_JSON_URL,
+  FLOOD_CONTROL_DATA_URL,
   FLOOD_DATASET_NAME,
   FLOOD_DATASET_PAGE,
   FLOOD_DOCS_URL,
   FLOOD_SOURCE_NAME,
   FloodApiError,
   getFloodSummary,
+  getFloodRetrieval,
   queryContractors,
 } from "@/lib/api/floodControl";
 import { formatCount, formatPesoCompact, formatPesoFull } from "@/lib/utils";
@@ -99,10 +100,12 @@ export default async function ContractorsPage({
 
   let summary;
   let result;
+  let retrieval;
   try {
-    [summary, result] = await Promise.all([
+    [summary, result, retrieval] = await Promise.all([
       getFloodSummary(),
       queryContractors({ q: q || undefined, sort, page, pageSize: RESULTS_PER_PAGE }),
+      getFloodRetrieval(),
     ]);
   } catch (err) {
     return shell(
@@ -113,13 +116,13 @@ export default async function ContractorsPage({
         title="Unable to load contractor data"
         description={
           err instanceof FloodApiError
-            ? err.isNotFound ? "The published data file could not be found. You can inspect its catalog record below or try again." : `${err.message} (Source: Open Data Portal.)`
+            ? err.isNotFound ? "The published snapshot could not be found. You can inspect the source below or try again." : `${err.message} (Source: BetterGov.PH Transparency Dashboard.)`
             : "The flood control data file may be temporarily unavailable. Please try again."
         }
         retryHref={pageHref(sp, page)}
       />
       <div className="mt-4 flex flex-wrap justify-center gap-3">
-        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View source catalog record</Link>
+        <Link href={FLOOD_DATASET_PAGE} className="inline-flex min-h-11 items-center rounded-md border border-control px-4 text-sm font-semibold text-brand-700 hover:bg-surface">View published source</Link>
         <Link href="/data" className="inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline">Browse other datasets</Link>
       </div>
       </>
@@ -154,10 +157,16 @@ export default async function ContractorsPage({
             href={FLOOD_DATASET_PAGE}
             className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-brand-200 hover:text-brand-700"
           >
-            Dataset details
+            Published source
           </Link>
         </div>
       </div>
+
+      <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
+        Publisher snapshot dated <time dateTime="2025-12-15">December 15, 2025</time>.
+        Companies are grouped by the names recorded in that snapshot. Contract counts and approved budgets count each contract once; awarded amounts sum its recorded project components.
+        Contract IDs are retained as published, including source IDs written in scientific notation.
+      </p>
 
       <OverviewDisclosure title="Dataset overview">
         <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-3">
@@ -171,13 +180,13 @@ export default async function ContractorsPage({
             icon={FileText}
             label="Contracts covered"
             value={formatCount(summary.contracts)}
-            hint="All flood control project components"
+            hint={`Across ${formatCount(summary.components)} project components`}
           />
           <StatCard
             icon={Coins}
             label="Awarded amount"
             value={formatPesoCompact(summary.totalCost)}
-            hint="Sum of contract costs across all companies"
+            hint="Sum of recorded component amounts"
           />
         </div>
       </OverviewDisclosure>
@@ -373,7 +382,7 @@ export default async function ContractorsPage({
       </section>
 
       <p className="mt-6 max-w-3xl rounded-lg border border-line bg-white p-4 text-sm leading-6 text-muted">
-        Company names appear exactly as recorded in the DPWH flood control dashboard. Variants such
+        Company names appear exactly as recorded in the published snapshot. Variants such
         as a name with or without a corporate suffix count as separate entries, and joint ventures
         appear as a single name. Amounts cover flood control contracts only, so they are not a
         company&apos;s total government business.
@@ -383,8 +392,9 @@ export default async function ContractorsPage({
         <SourceAttribution
           source={FLOOD_SOURCE_NAME}
           docsUrl={FLOOD_DOCS_URL}
-          endpoint={FLOOD_CONTROL_JSON_URL}
+          endpoint={FLOOD_CONTROL_DATA_URL}
           dataset={FLOOD_DATASET_NAME}
+          retrievals={[retrieval]}
         />
       </div>
     </div>

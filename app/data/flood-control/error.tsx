@@ -29,13 +29,13 @@ export default function FloodControlError({
         <PageHeader
           eyebrow="Government data · Contracts"
           title="Flood control contracts"
-          description="Who builds Philippine flood control projects, from the DPWH flood control dashboard."
+          description="Contractors and project components in BetterGov.PH's published flood control snapshot."
         />
       </div>
       <div className="mt-6">
         <ErrorState
           title="Something went wrong loading contract data"
-          description="An unexpected error occurred. The Open Data Portal may be temporarily unavailable."
+          description="An unexpected error occurred while loading the published project snapshot. Please try again."
           onRetry={reset}
         />
       </div>

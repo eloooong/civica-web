@@ -9,7 +9,7 @@ import {
 
 export default function ContractorsLoading() {
   return (
-    <LoadingShell label="Loading contractor data from the Open Data Portal">
+    <LoadingShell label="Loading contractor data from BetterGov.PH's published snapshot">
       <CrumbSkeleton />
       <HeaderSkeleton />
       <div className="flex flex-wrap gap-3" aria-hidden="true">

@@ -385,7 +385,7 @@ export default async function NepPage() {
       </p>
 
       <div className="mt-6">
-        <SourceAttribution endpoint={`${BUDGET_API_BASE}/nep/2027`} retrievals={[overview.retrieval]} />
+        <SourceAttribution dataset={`National Expenditure Program (NEP), FY${meta.fiscal_year}`} endpoint={`${BUDGET_API_BASE}/nep/2027`} retrievals={[overview.retrieval]} />
       </div>
     </div>
   );
