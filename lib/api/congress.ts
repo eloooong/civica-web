@@ -80,12 +80,17 @@ async function fetchCongress<T>(
   if (!res.ok) {
     let code = "query_failed";
     let message = `Congress API request failed (HTTP ${res.status}).`;
+    const errorBody = await res.text();
     try {
-      const body = (await res.json()) as ErrorEnvelope;
+      const body = JSON.parse(errorBody) as ErrorEnvelope;
       if (body.error?.code) code = body.error.code;
       if (body.error?.message) message = body.error.message;
     } catch {
       // Keep the default message when the error body is not JSON.
+    }
+    if (res.status === 503 && /\bUSAGE_EXCEEDED\b/.test(errorBody)) {
+      code = "upstream_usage_exceeded";
+      message = "Open Congress is suspended by its hosting provider because its usage limit was exceeded. Congressional records will be available here when the provider restores service.";
     }
     throw new CongressApiError(res.status, code, message, endpoint);
   }

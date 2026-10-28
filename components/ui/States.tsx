@@ -28,15 +28,18 @@ export function ErrorState({
   description = "The source may be temporarily unavailable. Please try again.",
   onRetry,
   retryHref,
+  sourceOutage,
 }: {
   title?: string;
   description?: string;
   onRetry?: () => void;
   retryHref?: string;
+  sourceOutage?: "open-congress-usage-exceeded";
 }) {
   return (
     <div
       role="alert"
+      data-source-outage={sourceOutage}
       className="flex flex-col items-center rounded-lg border border-red-200 bg-accent-50 px-6 py-12 text-center"
     >
       <span className="flex h-11 w-11 items-center justify-center rounded-full border border-red-200 bg-white text-accent-600">
