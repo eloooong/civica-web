@@ -86,6 +86,7 @@ export default async function CongressPage({
     bills = b;
     people = p;
   } catch (err) {
+    const usageExceeded = err instanceof CongressApiError && err.code === "upstream_usage_exceeded";
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Congress" }]} />
@@ -98,13 +99,22 @@ export default async function CongressPage({
         </div>
         <div className="mt-6">
           <ErrorState
-            title="Unable to load congressional data"
+            title={usageExceeded ? "Congressional records source is unavailable" : "Unable to load congressional data"}
+            sourceOutage={usageExceeded ? "open-congress-usage-exceeded" : undefined}
             description={
               err instanceof CongressApiError
                 ? `${err.message} (Source: Open Congress records.)`
                 : "The congressional records source may be temporarily unavailable. Please try again."
             }
             retryHref={retryParams.size ? `/congress?${retryParams}` : "/congress"}
+          />
+        </div>
+        <div className="mt-8">
+          <SourceAttribution
+            source={CONGRESS_SOURCE_NAME}
+            docsUrl={CONGRESS_DOCS_URL}
+            endpoint={err instanceof CongressApiError ? err.endpoint : CONGRESS_API_BASE}
+            dataset="Philippine legislative documents (source unavailable; no records retrieved)"
           />
         </div>
       </div>
